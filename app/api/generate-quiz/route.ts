@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-
+console.log("Generate Quiz...")
 export async function POST(req: NextRequest) {
   const { topic } = await req.json();
-
+    console.log("Topic ", topic)
   if (!topic) {
     return NextResponse.json({ error: "No topic provided." }, { status: 400 });
   }
@@ -49,8 +49,10 @@ export async function POST(req: NextRequest) {
     } catch {
       quiz = data.choices?.[0]?.message?.content || [];
     }
+    console.log("Quiz ", quiz)
     return NextResponse.json({ quiz });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to fetch from OpenRouter." }, { status: 500 });
+  } catch (err) {
+    const error = err as Error;
+    return NextResponse.json({ error: error.message || "Failed to fetch from OpenRouter." }, { status: 500 });
   }
 } 

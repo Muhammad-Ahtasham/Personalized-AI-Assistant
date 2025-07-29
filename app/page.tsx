@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 
 interface QuizQuestion {
   question: string;
@@ -8,6 +9,7 @@ interface QuizQuestion {
 }
 
 export default function HomePage() {
+  const { user } = useUser();
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<string | null>(null);
@@ -16,6 +18,9 @@ export default function HomePage() {
   const [quizLoading, setQuizLoading] = useState(false);
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [quizFeedback, setQuizFeedback] = useState<string[]>([]);
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [explanations, setExplanations] = useState<(string | null)[]>([]);
+  const [explanationLoading, setExplanationLoading] = useState<number | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +30,8 @@ export default function HomePage() {
     setQuiz(null);
     setUserAnswers([]);
     setQuizFeedback([]);
+    setSaveMsg(null);
+    setExplanations([]);
     try {
       const res = await fetch("/api/generate-plan", {
         method: "POST",
@@ -34,8 +41,17 @@ export default function HomePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate plan");
       setPlan(data.plan);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      if (user) {
+        const saveRes = await fetch("/api/save-learning-plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic, content: data.plan, clerkId: user.id }),
+        });
+        if (saveRes.ok) setSaveMsg("Learning plan saved to your dashboard!");
+      }
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -46,6 +62,8 @@ export default function HomePage() {
     setQuiz(null);
     setUserAnswers([]);
     setQuizFeedback([]);
+    setSaveMsg(null);
+    setExplanations([]);
     try {
       const res = await fetch("/api/generate-quiz", {
         method: "POST",
@@ -55,15 +73,15 @@ export default function HomePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate quiz");
       if (typeof data.quiz === "string") {
-        // Try to parse if it's a string
         setQuiz(JSON.parse(data.quiz));
       } else {
         setQuiz(data.quiz);
       }
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as Error;
       setQuiz(null);
       setQuizFeedback([]);
-      setError(err.message || "Failed to generate quiz");
+      setError(error.message || "Failed to generate quiz");
     } finally {
       setQuizLoading(false);
     }
@@ -75,13 +93,56 @@ export default function HomePage() {
     setUserAnswers(newAnswers);
   };
 
-  const handleSubmitQuiz = () => {
+  const handleSubmitQuiz = async () => {
     if (!quiz) return;
     const feedback = quiz.map((q, i) => {
       if (userAnswers[i] === undefined) return "No answer selected.";
       return userAnswers[i] === q.answer ? "✅ Correct!" : `❌ Incorrect. Correct answer: ${q.answer}`;
     });
     setQuizFeedback(feedback);
+    setExplanations(Array(quiz.length).fill(null));
+    if (user) {
+      const score = quiz.reduce((acc, q, i) => acc + (userAnswers[i] === q.answer ? 1 : 0), 0);
+      const saveRes = await fetch("/api/save-quiz-result", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic,
+          questions: quiz,
+          answers: userAnswers,
+          score,
+          clerkId: user.id,
+        }),
+      });
+      if (saveRes.ok) setSaveMsg("Quiz result saved to your dashboard!");
+    }
+  };
+
+  const handleGetExplanation = async (qIdx: number) => {
+    if (!quiz) return;
+    setExplanationLoading(qIdx);
+    try {
+      const res = await fetch("/api/explain-answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: quiz[qIdx].question,
+          answer: quiz[qIdx].answer,
+          userAnswer: userAnswers[qIdx],
+          topic,
+        }),
+      });
+      const data = await res.json();
+      const newExplanations = [...explanations];
+      newExplanations[qIdx] = data.explanation || "No explanation available.";
+      setExplanations(newExplanations);
+    } catch (err) {
+      const newExplanations = [...explanations];
+      newExplanations[qIdx] = "Failed to fetch explanation.";
+      setExplanations(newExplanations);
+    } finally {
+      setExplanationLoading(null);
+    }
   };
 
   return (
@@ -109,6 +170,11 @@ export default function HomePage() {
       {error && (
         <div className="mt-6 p-3 bg-red-100 border-l-4 border-red-400 text-red-800 rounded">
           {error}
+        </div>
+      )}
+      {saveMsg && (
+        <div className="mt-6 p-3 bg-green-100 border-l-4 border-green-400 text-green-800 rounded">
+          {saveMsg}
         </div>
       )}
       {plan && (
@@ -146,7 +212,26 @@ export default function HomePage() {
                   ))}
                 </div>
                 {quizFeedback[i] && (
-                  <div className="mt-2 font-semibold text-sm text-purple-700">{quizFeedback[i]}</div>
+                  <div className="mt-2 font-semibold text-sm text-purple-700">
+                    {quizFeedback[i]}
+                    {quizFeedback[i].startsWith("❌") && (
+                      <>
+                        <button
+                          type="button"
+                          className="ml-4 px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 text-xs"
+                          onClick={() => handleGetExplanation(i)}
+                          disabled={!!explanations[i] || explanationLoading === i}
+                        >
+                          {explanationLoading === i ? "Loading..." : explanations[i] ? "Explanation Shown" : "Get Explanation"}
+                        </button>
+                        {explanations[i] && (
+                          <div className="mt-2 p-2 bg-blue-50 border-l-4 border-blue-400 text-blue-900 rounded text-sm">
+                            {explanations[i]}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             ))}

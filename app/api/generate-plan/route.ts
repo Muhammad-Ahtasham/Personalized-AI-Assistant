@@ -44,7 +44,8 @@ export async function POST(req: NextRequest) {
     const data = await openRouterRes.json();
     const plan = data.choices?.[0]?.message?.content || "No plan generated.";
     return NextResponse.json({ plan });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to fetch from OpenRouter." }, { status: 500 });
+  } catch (err) {
+    const error = err as Error;
+    return NextResponse.json({ error: error.message || "Failed to fetch from OpenRouter." }, { status: 500 });
   }
 } 

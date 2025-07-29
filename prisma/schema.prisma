@@ -1,0 +1,38 @@
+// This Prisma schema uses Neon/Postgres
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  clerkId      String        @unique
+  learningPlans LearningPlan[]
+  quizResults   QuizResult[]
+  createdAt    DateTime      @default(now())
+}
+
+model LearningPlan {
+  id        String   @id @default(cuid())
+  topic     String
+  content   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+}
+
+model QuizResult {
+  id         String   @id @default(cuid())
+  topic      String
+  questions  Json
+  answers    Json
+  score      Int
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  createdAt  DateTime @default(now())
+}
