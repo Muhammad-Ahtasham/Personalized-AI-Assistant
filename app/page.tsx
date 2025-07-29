@@ -136,7 +136,7 @@ export default function HomePage() {
       const newExplanations = [...explanations];
       newExplanations[qIdx] = data.explanation || "No explanation available.";
       setExplanations(newExplanations);
-    } catch (err) {
+    } catch {
       const newExplanations = [...explanations];
       newExplanations[qIdx] = "Failed to fetch explanation.";
       setExplanations(newExplanations);

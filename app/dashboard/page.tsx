@@ -12,10 +12,16 @@ interface LearningPlan {
 interface QuizResult {
   id: string;
   topic: string;
-  questions: any;
-  answers: any;
+  questions: QuizQuestion[];
+  answers: string[];
   score: number;
   createdAt: string;
+}
+
+interface QuizQuestion {
+  question: string;
+  choices: string[];
+  answer: string;
 }
 
 export default function DashboardPage() {
