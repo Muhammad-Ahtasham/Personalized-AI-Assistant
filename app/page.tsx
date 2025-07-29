@@ -1,17 +1,30 @@
 "use client";
 import React, { useState } from "react";
 
+interface QuizQuestion {
+  question: string;
+  choices: string[];
+  answer: string;
+}
+
 export default function HomePage() {
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [quiz, setQuiz] = useState<QuizQuestion[] | null>(null);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [userAnswers, setUserAnswers] = useState<string[]>([]);
+  const [quizFeedback, setQuizFeedback] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setPlan(null);
     setError(null);
+    setQuiz(null);
+    setUserAnswers([]);
+    setQuizFeedback([]);
     try {
       const res = await fetch("/api/generate-plan", {
         method: "POST",
@@ -26,6 +39,49 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGenerateQuiz = async () => {
+    setQuizLoading(true);
+    setQuiz(null);
+    setUserAnswers([]);
+    setQuizFeedback([]);
+    try {
+      const res = await fetch("/api/generate-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate quiz");
+      if (typeof data.quiz === "string") {
+        // Try to parse if it's a string
+        setQuiz(JSON.parse(data.quiz));
+      } else {
+        setQuiz(data.quiz);
+      }
+    } catch (err: any) {
+      setQuiz(null);
+      setQuizFeedback([]);
+      setError(err.message || "Failed to generate quiz");
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+
+  const handleAnswer = (qIdx: number, choice: string) => {
+    const newAnswers = [...userAnswers];
+    newAnswers[qIdx] = choice;
+    setUserAnswers(newAnswers);
+  };
+
+  const handleSubmitQuiz = () => {
+    if (!quiz) return;
+    const feedback = quiz.map((q, i) => {
+      if (userAnswers[i] === undefined) return "No answer selected.";
+      return userAnswers[i] === q.answer ? "✅ Correct!" : `❌ Incorrect. Correct answer: ${q.answer}`;
+    });
+    setQuizFeedback(feedback);
   };
 
   return (
@@ -57,7 +113,52 @@ export default function HomePage() {
       )}
       {plan && (
         <div className="mt-8 p-4 bg-purple-50 border-l-4 border-purple-400 text-purple-900 rounded">
-          {plan}
+          <div className="mb-4 whitespace-pre-line">{plan}</div>
+          <button
+            onClick={handleGenerateQuiz}
+            className="mt-2 bg-yellow-400 text-purple-900 font-semibold py-2 px-4 rounded-lg hover:bg-yellow-500 transition"
+            disabled={quizLoading}
+          >
+            {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
+          </button>
+        </div>
+      )}
+      {quiz && quiz.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4 text-purple-700">Quiz</h2>
+          <form onSubmit={e => { e.preventDefault(); handleSubmitQuiz(); }}>
+            {quiz.map((q, i) => (
+              <div key={i} className="mb-6 p-4 bg-gray-50 rounded-lg border border-purple-100">
+                <div className="font-medium mb-2">{i + 1}. {q.question}</div>
+                <div className="flex flex-col gap-2">
+                  {q.choices.map((choice, j) => (
+                    <label key={j} className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name={`q${i}`}
+                        value={choice}
+                        checked={userAnswers[i] === choice}
+                        onChange={() => handleAnswer(i, choice)}
+                        disabled={quizFeedback.length > 0}
+                      />
+                      {choice}
+                    </label>
+                  ))}
+                </div>
+                {quizFeedback[i] && (
+                  <div className="mt-2 font-semibold text-sm text-purple-700">{quizFeedback[i]}</div>
+                )}
+              </div>
+            ))}
+            {quizFeedback.length === 0 && (
+              <button
+                type="submit"
+                className="bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-purple-700 transition"
+              >
+                Submit Quiz
+              </button>
+            )}
+          </form>
         </div>
       )}
     </div>
