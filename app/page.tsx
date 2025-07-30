@@ -39,7 +39,10 @@ export default function HomePage() {
         body: JSON.stringify({ topic }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to generate plan");
+      if (!res.ok) {
+        console.log(data, " Here is data")
+        throw new Error(data.error || "Failed to generate plan");
+      }
       setPlan(data.plan);
       if (user) {
         const saveRes = await fetch("/api/save-learning-plan", {

@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
+// import { redirect } from "next/dist/server/api-utils";
+import { useRouter } from "next/navigation";
 
 interface LearningPlan {
   id: string;
@@ -23,15 +25,21 @@ interface QuizQuestion {
   choices: string[];
   answer: string;
 }
-
+// Chaning
 export default function DashboardPage() {
-  const { user } = useUser();
+  const { isSignedIn, user } = useUser();
   const [plans, setPlans] = useState<LearningPlan[]>([]);
   const [quizzes, setQuizzes] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
+    console.log("isSignedIn", isSignedIn);
+    console.log("user", user);
+    if (!isSignedIn){
+      router.push("/sign-in");
+    }
     if (!user) return;
     const fetchHistory = async () => {
       setLoading(true);

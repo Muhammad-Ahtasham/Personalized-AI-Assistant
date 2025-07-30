@@ -32,11 +32,11 @@ export default function Navbar() {
       {/* Auth Buttons */}
       <div className="flex items-center gap-3">
         <SignedOut>
-          <SignInButton mode="modal">
+          <Link href="/sign-in">
             <button className="px-4 py-1.5 bg-yellow-300 text-purple-800 font-semibold rounded-lg shadow hover:bg-yellow-400 transition">
               Sign In
             </button>
-          </SignInButton>
+          </Link>
           <Link href="/sign-up">
             <button className="px-4 py-1.5 border border-yellow-300 text-yellow-300 font-medium rounded-lg hover:bg-yellow-300 hover:text-purple-800 transition">
               Sign Up
