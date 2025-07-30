@@ -1,4 +1,6 @@
 "use client";
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 // import { redirect } from "next/dist/server/api-utils";
