@@ -30,6 +30,7 @@ explanations
  
 ### 🔥 4. Core Features 
 🔹 User Features 
+
 ●  Sign Up / Sign In with Clerk 
  
 ●  Topic Input: Users enter topics they want to learn 
