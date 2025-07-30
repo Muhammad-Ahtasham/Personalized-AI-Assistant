@@ -1,9 +1,13 @@
 "use client";
-import { useSignUp } from "@clerk/nextjs";
+import { useSignUp, useUser } from "@clerk/nextjs";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import FaceRecognition from "../../components/FaceRecognition";
 
 export default function SignUpPage() {
   const { signUp, isLoaded } = useSignUp();
+  const { isSignedIn } = useUser();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -13,6 +17,16 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showVerification, setShowVerification] = useState(false);
+  const [showFaceRegistration, setShowFaceRegistration] = useState(false);
+  const [faceEmbedding, setFaceEmbedding] = useState<number[] | null>(null);
+  const [registrationStep, setRegistrationStep] = useState<"form" | "face" | "verification">("form");
+
+  console.log("User from Sign-up Page --> ", isSignedIn);
+  
+  if (isSignedIn) {
+    router.push("/dashboard");
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,13 +46,44 @@ export default function SignUpPage() {
       });
 
       await signUp.prepareEmailAddressVerification();
-      setShowVerification(true);
-      setSuccess("Verification code sent to your email!");
+      
+      if (showFaceRegistration) {
+        setRegistrationStep("face");
+      } else {
+        setShowVerification(true);
+        setSuccess("Verification code sent to your email!");
+      }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleFaceDetected = async (embedding: number[]) => {
+    setFaceEmbedding(embedding);
+    
+    try {
+      // Register face embedding
+      const response = await fetch("/api/face-register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ faceEmbedding: embedding }),
+      });
+
+      if (response.ok) {
+        setSuccess("Face registered successfully! Please verify your email.");
+        setRegistrationStep("verification");
+        setShowVerification(true);
+      } else {
+        const data = await response.json();
+        setError(data.error || "Failed to register face");
+      }
+    } catch (error) {
+      setError("Failed to register face. Please try again.");
     }
   };
 
@@ -117,7 +162,8 @@ export default function SignUpPage() {
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
-          {showVerification ? "Verify Your Email" : "Create Your Account"}
+          {registrationStep === "verification" ? "Verify Your Email" : 
+           registrationStep === "face" ? "Register Your Face" : "Create Your Account"}
         </h1>
         
         {error && (
@@ -132,7 +178,7 @@ export default function SignUpPage() {
           </div>
         )}
 
-        {!showVerification ? (
+        {registrationStep === "form" && (
           <>
             {/* Social Login Buttons */}
             <div className="space-y-3 mb-6">
@@ -236,6 +282,20 @@ export default function SignUpPage() {
                 </p>
               </div>
 
+              {/* Face Recognition Toggle */}
+              <div className="flex items-center space-x-2">
+                <input
+                  id="faceRegistration"
+                  type="checkbox"
+                  checked={showFaceRegistration}
+                  onChange={(e) => setShowFaceRegistration(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="faceRegistration" className="text-sm text-gray-700">
+                  Enable face recognition for faster login
+                </label>
+              </div>
+
               <button
                 type="submit"
                 disabled={isLoading}
@@ -245,7 +305,30 @@ export default function SignUpPage() {
               </button>
             </form>
           </>
-        ) : (
+        )}
+
+        {registrationStep === "face" && (
+          <div className="space-y-4">
+            <FaceRecognition
+              onFaceDetected={handleFaceDetected}
+              onError={setError}
+              mode="register"
+              isActive={true}
+            />
+            
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setRegistrationStep("form")}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                ← Back to sign up
+              </button>
+            </div>
+          </div>
+        )}
+
+        {registrationStep === "verification" && (
           <>
             <div className="mb-6 text-center">
               <p className="text-sm text-gray-600 mb-4">
@@ -288,7 +371,7 @@ export default function SignUpPage() {
               <div className="text-center">
                 <button
                   type="button"
-                  onClick={() => setShowVerification(false)}
+                  onClick={() => setRegistrationStep("form")}
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   ← Back to sign up
@@ -300,14 +383,14 @@ export default function SignUpPage() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            {!showVerification ? (
+            {registrationStep === "form" ? (
               <>
                 Already have an account?{" "}
                 <a href="/sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
                   Sign in
                 </a>
               </>
-            ) : (
+            ) : registrationStep === "verification" ? (
               <>
                 Didn&apos;t receive the code?{" "}
                 <button
@@ -317,7 +400,7 @@ export default function SignUpPage() {
                   Resend code
                 </button>
               </>
-            )}
+            ) : null}
           </p>
         </div>
       </div>
