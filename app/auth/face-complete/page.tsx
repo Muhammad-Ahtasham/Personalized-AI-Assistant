@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSignIn, useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function FaceCompletePage() {
+function FaceCompleteContent() {
   const { signIn, isLoaded } = useSignIn();
   const { isSignedIn, user } = useUser();
   const router = useRouter();
@@ -69,13 +69,13 @@ export default function FaceCompletePage() {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Authentication Error</h1>
-          <p className="text-gray-600 mb-4">{error}</p>
+      <div className="flex justify-center items-center min-h-screen bg-background">
+        <div className="bg-card p-8 rounded-lg shadow-lg w-full max-w-md text-center border border-border">
+          <h1 className="text-2xl font-bold text-destructive mb-4">Authentication Error</h1>
+          <p className="text-muted-foreground mb-4">{error}</p>
           <button
             onClick={() => router.push("/sign-in")}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
           >
             Back to Sign In
           </button>
@@ -85,12 +85,28 @@ export default function FaceCompletePage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Completing Authentication</h1>
-        <p className="text-gray-600">{status}</p>
+    <div className="flex justify-center items-center min-h-screen bg-background">
+      <div className="bg-card p-8 rounded-lg shadow-lg w-full max-w-md text-center border border-border">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Completing Authentication</h1>
+        <p className="text-muted-foreground">{status}</p>
       </div>
     </div>
+  );
+}
+
+export default function FaceCompletePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen bg-background">
+        <div className="bg-card p-8 rounded-lg shadow-lg w-full max-w-md text-center border border-border">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Loading...</h1>
+          <p className="text-muted-foreground">Preparing authentication...</p>
+        </div>
+      </div>
+    }>
+      <FaceCompleteContent />
+    </Suspense>
   );
 } 
