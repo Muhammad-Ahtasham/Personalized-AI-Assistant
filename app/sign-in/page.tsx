@@ -53,6 +53,10 @@ export default function SignInPage() {
 
   const handleFaceDetected = async (embedding: number[]) => {
     try {
+      console.log("Face detected, attempting login...");
+      console.log("Email:", email);
+      console.log("Embedding length:", embedding.length);
+      
       const response = await fetch("/api/face-login", {
         method: "POST",
         headers: {
@@ -64,17 +68,38 @@ export default function SignInPage() {
         }),
       });
 
+      const responseData = await response.json();
+      console.log("Face login response:", responseData);
+
       if (response.ok) {
-        const data = await response.json();
-        // For face login, we need to handle the authentication differently
-        // Since we can't directly sign in with Clerk using face recognition,
-        // we'll redirect to a special endpoint that handles the authentication
-        window.location.href = `/api/auth/face-login?userId=${data.userId}`;
+        console.log("Face login successful, creating session...", responseData);
+        
+        // Create face authentication session
+        const authResponse = await fetch("/api/auth/face-login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            userId: responseData.userId,
+            email: responseData.userEmail
+          }),
+        });
+
+        if (authResponse.ok) {
+          console.log("Face authentication successful, redirecting to dashboard...");
+          // Redirect to dashboard
+          window.location.href = "/dashboard";
+        } else {
+          console.log("Face authentication failed");
+          setError("Authentication failed. Please try again.");
+        }
       } else {
-        const data = await response.json();
-        setError(data.error || "Face not recognized. Please try again.");
+        console.log("Face login failed:", responseData);
+        setError(responseData.error || "Face not recognized. Please try again.");
       }
     } catch (error) {
+      console.error("Face authentication error:", error);
       setError("Face authentication failed. Please try again.");
     }
   };
@@ -264,6 +289,25 @@ export default function SignInPage() {
               mode="login"
               isActive={true}
             />
+            
+            {/* Debug button */}
+            <div className="mt-4 text-center">
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch('/api/test-face-login');
+                    const data = await response.json();
+                    console.log('Test data:', data);
+                    alert(`Users: ${data.totalUsers}, With face: ${data.usersWithFaceEmbedding}`);
+                  } catch (error) {
+                    console.error('Test error:', error);
+                  }
+                }}
+                className="text-xs text-gray-500 underline"
+              >
+                Debug: Check Users
+              </button>
+            </div>
             
             <div className="text-center">
               <button

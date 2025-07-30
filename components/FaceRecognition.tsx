@@ -22,15 +22,19 @@ export default function FaceRecognition({ onFaceDetected, onError, mode, isActiv
     const loadModels = async () => {
       try {
         setIsLoading(true);
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-          faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-          faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-        ]);
+        
+        // Use CDN models for better reliability
+        const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+        
+        // Load models one by one to handle errors better
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+        
         setIsLoading(false);
       } catch (error) {
         console.error('Error loading face-api models:', error);
-        onError('Failed to load face recognition models');
+        onError('Failed to load face recognition models. Please refresh the page and try again.');
         setIsLoading(false);
       }
     };

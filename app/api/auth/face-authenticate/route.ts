@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 const prisma = new PrismaClient();
 
@@ -20,28 +21,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found or no face registered" }, { status: 404 });
     }
 
-    // Create a session that will work with our custom auth system
-    const sessionToken = `face_auth_${Date.now()}_${userId}`;
-    console.log("Creating face auth session:", sessionToken);
+    // For now, we'll use a simpler approach - redirect to sign in with the user's email
+    // This will allow Clerk to handle the authentication flow
+    console.log("Face authentication successful for user:", userId);
     
-    // Set the session cookie
-    const response = NextResponse.json({ 
+    return NextResponse.json({ 
       success: true, 
-      sessionToken,
       userId,
-      email 
+      email,
+      redirectUrl: `/sign-in?email=${encodeURIComponent(email)}&faceAuth=true`
     });
-    
-    // Set the face auth session cookie
-    response.cookies.set('face_auth_session', sessionToken, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60, // 24 hours
-    });
-    
-    console.log("Face authentication successful");
-    return response;
   } catch (error) {
     console.error("Error during face authentication:", error);
     return NextResponse.json({ error: "Authentication failed" }, { status: 500 });

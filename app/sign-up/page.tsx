@@ -65,25 +65,29 @@ export default function SignUpPage() {
     setFaceEmbedding(embedding);
     
     try {
-      // Register face embedding
+      // Store face embedding temporarily
       const response = await fetch("/api/face-register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ faceEmbedding: embedding }),
+        body: JSON.stringify({ 
+          faceEmbedding: embedding,
+          email: email,
+          action: "store"
+        }),
       });
 
       if (response.ok) {
-        setSuccess("Face registered successfully! Please verify your email.");
+        setSuccess("Face captured successfully! Please verify your email.");
         setRegistrationStep("verification");
         setShowVerification(true);
       } else {
         const data = await response.json();
-        setError(data.error || "Failed to register face");
+        setError(data.error || "Failed to capture face");
       }
     } catch (error) {
-      setError("Failed to register face. Please try again.");
+      setError("Failed to capture face. Please try again.");
     }
   };
 
@@ -102,6 +106,28 @@ export default function SignUpPage() {
       });
 
       if (result.status === "complete") {
+        // If face registration was enabled, register the face now
+        if (showFaceRegistration && faceEmbedding) {
+          try {
+            const response = await fetch("/api/face-register", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ 
+                faceEmbedding: faceEmbedding,
+                action: "register"
+              }),
+            });
+
+            if (!response.ok) {
+              console.warn("Face registration failed, but account was created successfully");
+            }
+          } catch (error) {
+            console.warn("Face registration failed, but account was created successfully", error);
+          }
+        }
+
         setSuccess("Account created successfully! Redirecting to dashboard...");
         // Redirect to dashboard after successful verification
         setTimeout(() => {

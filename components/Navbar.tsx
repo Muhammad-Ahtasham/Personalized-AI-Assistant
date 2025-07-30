@@ -1,10 +1,15 @@
 "use client";
 
 import Link from 'next/link';
-import { UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { UserButton, SignInButton, SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import { Home, LayoutDashboard, NotebookText, User } from "lucide-react";
+import { useAuth } from '../hooks/useAuth';
+import CustomUserButton from './CustomUserButton';
 
 export default function Navbar() {
+  const { isSignedIn, user } = useUser();
+  const { isAuthenticated, isFaceAuthenticated } = useAuth();
+
   return (
     <nav className="bg-gradient-to-r from-indigo-700 via-purple-600 to-pink-500 shadow-xl px-6 py-3 flex items-center justify-between">
       
@@ -14,7 +19,8 @@ export default function Navbar() {
       </div>
 
       {/* Nav Links */}
-      <div className="hidden sm:flex gap-6">
+      <div className="flex gap-6">
+      {/* <div className="hidden sm:flex gap-6"> */}
         <Link href="/" className="flex items-center gap-1 text-white hover:text-yellow-300 transition font-medium">
           <Home size={18}/> Home
         </Link>
@@ -31,22 +37,28 @@ export default function Navbar() {
 
       {/* Auth Buttons */}
       <div className="flex items-center gap-3">
-        <SignedOut>
-          <Link href="/sign-in">
-            <button className="px-4 py-1.5 bg-yellow-300 text-purple-800 font-semibold rounded-lg shadow hover:bg-yellow-400 transition">
-              Sign In
-            </button>
-          </Link>
-          <Link href="/sign-up">
-            <button className="px-4 py-1.5 border border-yellow-300 text-yellow-300 font-medium rounded-lg hover:bg-yellow-300 hover:text-purple-800 transition">
-              Sign Up
-            </button>
-          </Link>
-        </SignedOut>
-
-        <SignedIn>
-          <UserButton afterSignOutUrl="/" />
-        </SignedIn>
+        {!isAuthenticated ? (
+          <>
+            <Link href="/sign-in">
+              <button className="px-4 py-1.5 bg-yellow-300 text-purple-800 font-semibold rounded-lg shadow hover:bg-yellow-400 transition">
+                Sign In
+              </button>
+            </Link>
+            <Link href="/sign-up">
+              <button className="px-4 py-1.5 border border-yellow-300 text-yellow-300 font-medium rounded-lg hover:bg-yellow-300 hover:text-purple-800 transition">
+                Sign Up
+              </button>
+            </Link>
+          </>
+        ) : (
+          <div className="flex items-center gap-3">
+            {isSignedIn ? (
+              <UserButton afterSignOutUrl="/" />
+            ) : (
+              <CustomUserButton />
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );

@@ -5,19 +5,19 @@ const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, email } = await request.json();
+    const { token, userId, email } = await request.json();
 
-    if (!userId || !email) {
-      return NextResponse.json({ error: "Missing user data" }, { status: 400 });
+    if (!token || !userId || !email) {
+      return NextResponse.json({ error: "Missing required parameters" }, { status: 400 });
     }
 
-    // Verify the user exists and has face embedding
+    // Verify the user exists
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
 
-    if (!user || !user.faceEmbedding) {
-      return NextResponse.json({ error: "User not found or no face registered" }, { status: 404 });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Create a session that will work with our custom auth system
@@ -40,10 +40,18 @@ export async function POST(request: NextRequest) {
       maxAge: 24 * 60 * 60, // 24 hours
     });
     
-    console.log("Face authentication successful");
+    // Clear the temporary cookie
+    response.cookies.set('temp_face_auth', '', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0, // Expire immediately
+    });
+    
+    console.log("Face auth session created successfully");
     return response;
   } catch (error) {
-    console.error("Error during face authentication:", error);
-    return NextResponse.json({ error: "Authentication failed" }, { status: 500 });
+    console.error("Error creating face session:", error);
+    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
   }
 } 
