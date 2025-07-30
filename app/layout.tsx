@@ -12,9 +12,9 @@ export default function RootLayout({
     <html lang="en">
       <ClerkProvider>
         <body>
-          <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+          <div className="flex flex-col min-h-screen bg-background">
             <Navbar />
-            <main className="flex-1 p-6">{children}</main>
+            <main className="flex-1">{children}</main>
             <Footer />
           </div>
         </body>

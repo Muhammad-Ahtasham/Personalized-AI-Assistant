@@ -149,106 +149,122 @@ export default function HomePage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-16 p-8 bg-white rounded-xl shadow-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center text-purple-700">Personalized Study Assistant</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label htmlFor="topic" className="font-medium text-gray-700">What do you want to learn?</label>
-        <input
-          id="topic"
-          type="text"
-          value={topic}
-          onChange={e => setTopic(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          placeholder="e.g. Linear Algebra, React, World War II..."
-          required
-        />
-        <button
-          type="submit"
-          className="bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition"
-          disabled={loading}
-        >
-          {loading ? "Generating..." : "Generate Learning Plan"}
-        </button>
-      </form>
-      {error && (
-        <div className="mt-6 p-3 bg-red-100 border-l-4 border-red-400 text-red-800 rounded">
-          {error}
-        </div>
-      )}
-      {saveMsg && (
-        <div className="mt-6 p-3 bg-green-100 border-l-4 border-green-400 text-green-800 rounded">
-          {saveMsg}
-        </div>
-      )}
-      {plan && (
-        <div className="mt-8 p-4 bg-purple-50 border-l-4 border-purple-400 text-purple-900 rounded">
-          <div className="mb-4 whitespace-pre-line">{plan}</div>
-          <button
-            onClick={handleGenerateQuiz}
-            className="mt-2 bg-yellow-400 text-purple-900 font-semibold py-2 px-4 rounded-lg hover:bg-yellow-500 transition"
-            disabled={quizLoading}
-          >
-            {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
-          </button>
-        </div>
-      )}
-      {quiz && quiz.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4 text-purple-700">Quiz</h2>
-          <form onSubmit={e => { e.preventDefault(); handleSubmitQuiz(); }}>
-            {quiz.map((q, i) => (
-              <div key={i} className="mb-6 p-4 bg-gray-50 rounded-lg border border-purple-100">
-                <div className="font-medium mb-2">{i + 1}. {q.question}</div>
-                <div className="flex flex-col gap-2">
-                  {q.choices.map((choice, j) => (
-                    <label key={j} className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name={`q${i}`}
-                        value={choice}
-                        checked={userAnswers[i] === choice}
-                        onChange={() => handleAnswer(i, choice)}
-                        disabled={quizFeedback.length > 0}
-                      />
-                      {choice}
-                    </label>
-                  ))}
-                </div>
-                {quizFeedback[i] && (
-                  <div className="mt-2 font-semibold text-sm text-purple-700">
-                    {quizFeedback[i]}
-                    {quizFeedback[i].startsWith("❌") && (
-                      <>
-                        <button
-                          type="button"
-                          className="ml-4 px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 text-xs"
-                          onClick={() => handleGetExplanation(i)}
-                          disabled={!!explanations[i] || explanationLoading === i}
-                        >
-                          {explanationLoading === i ? "Loading..." : explanations[i] ? "Explanation Shown" : "Get Explanation"}
-                        </button>
-                        {explanations[i] && (
-                          <div className="mt-2 p-2 bg-blue-50 border-l-4 border-blue-400 text-blue-900 rounded text-sm">
-                            {explanations[i]}
-                          </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="max-w-4xl mx-auto p-8">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold mb-8 text-center text-primary">Personalized Study Assistant</h1>
+          
+          <form onSubmit={handleSubmit} className="space-y-6 mb-8">
+            <div className="space-y-2">
+              <label htmlFor="topic" className="text-lg font-medium text-foreground">
+                What do you want to learn?
+              </label>
+              <input
+                id="topic"
+                type="text"
+                value={topic}
+                onChange={e => setTopic(e.target.value)}
+                className="w-full p-4 bg-background text-foreground border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
+                placeholder="e.g. Linear Algebra, React, World War II..."
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-primary text-primary-foreground font-semibold py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? "Generating..." : "Generate Learning Plan"}
+            </button>
+          </form>
+
+          {error && (
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
+              {error}
+            </div>
+          )}
+          
+          {saveMsg && (
+            <div className="mb-6 p-4 bg-green-100 border border-green-200 text-green-800 rounded-lg">
+              {saveMsg}
+            </div>
+          )}
+
+          {plan && (
+            <div className="mb-8 p-6 bg-card text-card-foreground border border-border rounded-lg shadow-sm">
+              <div className="mb-6 whitespace-pre-line text-foreground leading-relaxed">{plan}</div>
+              <button
+                onClick={handleGenerateQuiz}
+                className="bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-lg hover:bg-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={quizLoading}
+              >
+                {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
+              </button>
+            </div>
+          )}
+
+          {quiz && quiz.length > 0 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-primary">Quiz</h2>
+              <form onSubmit={e => { e.preventDefault(); handleSubmitQuiz(); }}>
+                {quiz.map((q, i) => (
+                  <div key={i} className="mb-6 p-6 bg-card text-card-foreground border border-border rounded-lg shadow-sm">
+                    <div className="font-semibold mb-4 text-lg">{i + 1}. {q.question}</div>
+                    <div className="space-y-3">
+                      {q.choices.map((choice, j) => (
+                        <label key={j} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 cursor-pointer transition-colors">
+                          <input
+                            type="radio"
+                            name={`q${i}`}
+                            value={choice}
+                            checked={userAnswers[i] === choice}
+                            onChange={() => handleAnswer(i, choice)}
+                            disabled={quizFeedback.length > 0}
+                            className="text-primary focus:ring-primary"
+                          />
+                          <span className="text-foreground">{choice}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {quizFeedback[i] && (
+                      <div className="mt-4 p-4 bg-muted/50 border border-border rounded-lg">
+                        <div className="font-semibold text-sm text-foreground mb-2">
+                          {quizFeedback[i]}
+                        </div>
+                        {quizFeedback[i].startsWith("❌") && (
+                          <>
+                            <button
+                              type="button"
+                              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm disabled:opacity-50"
+                              onClick={() => handleGetExplanation(i)}
+                              disabled={!!explanations[i] || explanationLoading === i}
+                            >
+                              {explanationLoading === i ? "Loading..." : explanations[i] ? "Explanation Shown" : "Get Explanation"}
+                            </button>
+                            {explanations[i] && (
+                              <div className="mt-3 p-3 bg-accent/20 border border-accent/30 text-accent-foreground rounded-md text-sm">
+                                {explanations[i]}
+                              </div>
+                            )}
+                          </>
                         )}
-                      </>
+                      </div>
                     )}
                   </div>
+                ))}
+                {quizFeedback.length === 0 && (
+                  <button
+                    type="submit"
+                    className="w-full bg-primary text-primary-foreground font-semibold py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Submit Quiz
+                  </button>
                 )}
-              </div>
-            ))}
-            {quizFeedback.length === 0 && (
-              <button
-                type="submit"
-                className="bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-purple-700 transition"
-              >
-                Submit Quiz
-              </button>
-            )}
-          </form>
+              </form>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

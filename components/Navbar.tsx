@@ -11,54 +11,57 @@ export default function Navbar() {
   const { isAuthenticated, isFaceAuthenticated } = useAuth();
 
   return (
-    <nav className="bg-gradient-to-r from-indigo-700 via-purple-600 to-pink-500 shadow-xl px-6 py-3 flex items-center justify-between">
-      
-      {/* Logo */}
-      <div className="flex items-center gap-2">
-        <span className="text-white font-extrabold text-2xl tracking-tight">📚 StudyMate</span>
-      </div>
+    <nav className="bg-card border-b border-border shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <span className="text-primary font-bold text-xl tracking-tight">📚 StudyMate</span>
+          </div>
 
-      {/* Nav Links */}
-      <div className="flex gap-6">
-      {/* <div className="hidden sm:flex gap-6"> */}
-        <Link href="/" className="flex items-center gap-1 text-white hover:text-yellow-300 transition font-medium">
-          <Home size={18}/> Home
-        </Link>
-        <Link href="/dashboard" className="flex items-center gap-1 text-white hover:text-yellow-300 transition font-medium">
-          <LayoutDashboard size={18}/> Dashboard
-        </Link>
-        <Link href="/notes" className="flex items-center gap-1 text-white hover:text-yellow-300 transition font-medium">
-          <NotebookText size={18}/> Notes
-        </Link>
-        <Link href="/profile" className="flex items-center gap-1 text-white hover:text-yellow-300 transition font-medium">
-          <User size={18}/> Profile
-        </Link>
-      </div>
+          {/* Nav Links */}
+          <div className="hidden md:flex gap-6">
+            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+              <Home size={18}/> Home
+            </Link>
+            <Link href="/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+              <LayoutDashboard size={18}/> Dashboard
+            </Link>
+            <Link href="/notes" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+              <NotebookText size={18}/> Notes
+            </Link>
+            <Link href="/profile" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+              <User size={18}/> Profile
+            </Link>
+          </div>
 
-      {/* Auth Buttons */}
-      <div className="flex items-center gap-3">
-        {!isAuthenticated ? (
-          <>
-            <Link href="/sign-in">
-              <button className="px-4 py-1.5 bg-yellow-300 text-purple-800 font-semibold rounded-lg shadow hover:bg-yellow-400 transition">
-                Sign In
-              </button>
-            </Link>
-            <Link href="/sign-up">
-              <button className="px-4 py-1.5 border border-yellow-300 text-yellow-300 font-medium rounded-lg hover:bg-yellow-300 hover:text-purple-800 transition">
-                Sign Up
-              </button>
-            </Link>
-          </>
-        ) : (
+          {/* Auth Buttons */}
           <div className="flex items-center gap-3">
-            {isSignedIn ? (
-              <UserButton afterSignOutUrl="/" />
+            {!isAuthenticated ? (
+              <>
+                <Link href="/sign-in">
+                  <button className="px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                    Sign In
+                  </button>
+                </Link>
+                <Link href="/sign-up">
+                  <button className="px-4 py-2 border border-border text-foreground font-medium rounded-lg hover:bg-muted transition-colors">
+                    Sign Up
+                  </button>
+                </Link>
+              </>
             ) : (
-              <CustomUserButton />
+              <div className="flex items-center gap-3">
+                {isSignedIn ? (
+                  <UserButton afterSignOutUrl="/" />
+                ) : (
+                  <CustomUserButton />
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );
