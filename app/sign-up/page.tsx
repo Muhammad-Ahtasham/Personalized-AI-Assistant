@@ -80,7 +80,7 @@ export default function SignUpPage() {
       }
       await signUp.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: "/sign-up",
+        redirectUrl: "/dashboard",
         redirectUrlComplete: "/dashboard",
       });
     } catch (err: unknown) {

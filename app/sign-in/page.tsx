@@ -1,19 +1,23 @@
 "use client";
-import { useSignIn } from "@clerk/nextjs";
+import { useSignIn, useUser } from "@clerk/nextjs";
 import { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
 import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const { signIn, isLoaded } = useSignIn();
+  const { isSignedIn, user } = useUser();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const { isSignedIn, user } = useUser();
-  const router = useRouter();
+
   console.log("User from Sign-in Page --> ", user);
-  if(isSignedIn) router.push("/dashboard");
+  
+  if (isSignedIn) {
+    router.push("/dashboard");
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
