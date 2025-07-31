@@ -42,14 +42,41 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await openRouterRes.json();
+    const aiResponse = data.choices?.[0]?.message?.content || "";
+    console.log("AI Response:", aiResponse);
+    
     // Try to parse the quiz from the AI's response
     let quiz = null;
     try {
-      quiz = JSON.parse(data.choices?.[0]?.message?.content || "[]");
-    } catch {
-      quiz = data.choices?.[0]?.message?.content || [];
+      // First try to parse as JSON
+      quiz = JSON.parse(aiResponse);
+      console.log("Successfully parsed quiz as JSON");
+    } catch (parseError) {
+      console.log("Failed to parse as JSON, treating as string");
+      // If parsing fails, try to extract JSON from the response
+      const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        try {
+          quiz = JSON.parse(jsonMatch[1]);
+          console.log("Successfully extracted and parsed JSON from markdown");
+        } catch (extractError) {
+          console.log("Failed to extract JSON from markdown");
+          quiz = [];
+        }
+      } else {
+        console.log("No JSON found in response");
+        quiz = [];
+      }
     }
-    console.log("Quiz ", quiz)
+    
+    console.log("Final quiz:", quiz);
+    
+    // Ensure quiz is an array
+    if (!Array.isArray(quiz)) {
+      console.log("Quiz is not an array, setting to empty array");
+      quiz = [];
+    }
+    
     return NextResponse.json({ quiz });
   } catch (err) {
     const error = err as Error;

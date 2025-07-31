@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.28.0",
+    "@heroicons/react": "^2.2.0",
     "@netlify/plugin-nextjs": "^5.11.6",
     "@prisma/client": "^6.13.0",
     "@types/bcryptjs": "^2.4.6",

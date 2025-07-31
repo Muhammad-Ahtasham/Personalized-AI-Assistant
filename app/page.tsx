@@ -1,7 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-
+import { useSearchParams } from "next/navigation";
+import LearningPlanDisplay from "@/components/LearningPlanDisplay";
+import QuizDisplay from "@/components/QuizDisplay";
 
 interface QuizQuestion {
   question: string;
@@ -11,28 +13,35 @@ interface QuizQuestion {
 
 export default function HomePage() {
   const { user } = useUser();
+  const searchParams = useSearchParams();
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  
+  // Quiz generation states
   const [quiz, setQuiz] = useState<QuizQuestion[] | null>(null);
   const [quizLoading, setQuizLoading] = useState(false);
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [quizFeedback, setQuizFeedback] = useState<string[]>([]);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [explanations, setExplanations] = useState<(string | null)[]>([]);
   const [explanationLoading, setExplanationLoading] = useState<number | null>(null);
+
+  // Handle URL parameters for topic
+  useEffect(() => {
+    const topicParam = searchParams.get('topic');
+    if (topicParam) {
+      setTopic(topicParam);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setPlan(null);
     setError(null);
-    setQuiz(null);
-    setUserAnswers([]);
-    setQuizFeedback([]);
     setSaveMsg(null);
-    setExplanations([]);
     try {
       const res = await fetch("/api/generate-plan", {
         method: "POST",
@@ -62,12 +71,19 @@ export default function HomePage() {
   };
 
   const handleGenerateQuiz = async () => {
+    if (!topic.trim()) {
+      setError("Please enter a topic for the quiz");
+      return;
+    }
+    
     setQuizLoading(true);
     setQuiz(null);
     setUserAnswers([]);
     setQuizFeedback([]);
     setSaveMsg(null);
     setExplanations([]);
+    setError(null);
+    
     try {
       const res = await fetch("/api/generate-quiz", {
         method: "POST",
@@ -76,10 +92,18 @@ export default function HomePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate quiz");
-      if (typeof data.quiz === "string") {
-        setQuiz(JSON.parse(data.quiz));
-      } else {
+      
+      console.log("Quiz data received:", data);
+      console.log("Quiz type:", typeof data.quiz);
+      console.log("Quiz value:", data.quiz);
+      
+      if (Array.isArray(data.quiz) && data.quiz.length > 0) {
+        console.log("Setting quiz with", data.quiz.length, "questions");
         setQuiz(data.quiz);
+      } else {
+        console.log("Invalid quiz format or empty quiz");
+        setQuiz(null);
+        setError("Failed to generate quiz. Please try again.");
       }
     } catch (err) {
       const error = err as Error;
@@ -105,6 +129,7 @@ export default function HomePage() {
     });
     setQuizFeedback(feedback);
     setExplanations(Array(quiz.length).fill(null));
+    
     if (user) {
       const score = quiz.reduce((acc, q, i) => acc + (userAnswers[i] === q.answer ? 1 : 0), 0);
       const saveRes = await fetch("/api/save-quiz-result", {
@@ -186,10 +211,10 @@ export default function HomePage() {
           
 
           
-          <form onSubmit={handleSubmit} className="space-y-6 mb-8">
+          <div className="space-y-6 mb-8">
             <div className="space-y-2">
               <label htmlFor="topic" className="text-lg font-medium text-foreground">
-                What do you want to learn?
+                What do you want to learn or test?
               </label>
               <input
                 id="topic"
@@ -201,14 +226,23 @@ export default function HomePage() {
                 required
               />
             </div>
-            <button
-              type="submit"
-              className="w-full bg-primary text-primary-foreground font-semibold py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading}
-            >
-              {loading ? "Generating..." : "Generate Learning Plan"}
-            </button>
-          </form>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleSubmit}
+                className="flex-1 bg-primary text-primary-foreground font-semibold py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || !topic.trim()}
+              >
+                {loading ? "Generating..." : "Generate Learning Plan"}
+              </button>
+              <button
+                onClick={handleGenerateQuiz}
+                className="flex-1 bg-accent text-accent-foreground font-semibold py-4 px-6 rounded-lg hover:bg-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={quizLoading || !topic.trim()}
+              >
+                {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
+              </button>
+            </div>
+          </div>
 
           {error && (
             <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
@@ -223,78 +257,24 @@ export default function HomePage() {
           )}
 
           {plan && (
-            <div className="mb-8 p-6 bg-card text-card-foreground border border-border rounded-lg shadow-sm">
-              <div className="mb-6 whitespace-pre-line text-foreground leading-relaxed">{plan}</div>
-              <button
-                onClick={handleGenerateQuiz}
-                className="bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-lg hover:bg-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={quizLoading}
-              >
-                {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
-              </button>
-            </div>
+            <LearningPlanDisplay 
+              plan={plan}
+            />
           )}
 
           {quiz && quiz.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-primary">Quiz</h2>
-              <form onSubmit={e => { e.preventDefault(); handleSubmitQuiz(); }}>
-                {quiz.map((q, i) => (
-                  <div key={i} className="mb-6 p-6 bg-card text-card-foreground border border-border rounded-lg shadow-sm">
-                    <div className="font-semibold mb-4 text-lg">{i + 1}. {q.question}</div>
-                    <div className="space-y-3">
-                      {q.choices.map((choice, j) => (
-                        <label key={j} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 cursor-pointer transition-colors">
-                          <input
-                            type="radio"
-                            name={`q${i}`}
-                            value={choice}
-                            checked={userAnswers[i] === choice}
-                            onChange={() => handleAnswer(i, choice)}
-                            disabled={quizFeedback.length > 0}
-                            className="text-primary focus:ring-primary"
-                          />
-                          <span className="text-foreground">{choice}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {quizFeedback[i] && (
-                      <div className="mt-4 p-4 bg-muted/50 border border-border rounded-lg">
-                        <div className="font-semibold text-sm text-foreground mb-2">
-                          {quizFeedback[i]}
-                        </div>
-                        {quizFeedback[i].startsWith("❌") && (
-                          <>
-                            <button
-                              type="button"
-                              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm disabled:opacity-50"
-                              onClick={() => handleGetExplanation(i)}
-                              disabled={!!explanations[i] || explanationLoading === i}
-                            >
-                              {explanationLoading === i ? "Loading..." : explanations[i] ? "Explanation Shown" : "Get Explanation"}
-                            </button>
-                            {explanations[i] && (
-                              <div className="mt-3 p-3 bg-accent/20 border border-accent/30 text-accent-foreground rounded-md text-sm">
-                                {explanations[i]}
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {quizFeedback.length === 0 && (
-                  <button
-                    type="submit"
-                    className="w-full bg-primary text-primary-foreground font-semibold py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Submit Quiz
-                  </button>
-                )}
-              </form>
-            </div>
+            <QuizDisplay
+              quiz={quiz}
+              userAnswers={userAnswers}
+              quizFeedback={quizFeedback}
+              explanations={explanations}
+              explanationLoading={explanationLoading}
+              onAnswer={handleAnswer}
+              onSubmitQuiz={handleSubmitQuiz}
+              onGetExplanation={handleGetExplanation}
+            />
           )}
+
         </div>
       </div>
     </div>

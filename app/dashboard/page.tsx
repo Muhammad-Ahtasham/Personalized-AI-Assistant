@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
+
 interface LearningPlan {
   id: string;
   topic: string;
@@ -33,6 +34,9 @@ export default function DashboardPage() {
   const [quizzes, setQuizzes] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+
+  
   const router = useRouter();
 
   useEffect(() => {
@@ -91,13 +95,23 @@ export default function DashboardPage() {
   }, [user, isSignedIn, router]);
 
   return (
-    <div className="max-w-3xl mx-auto mt-12 p-6 bg-white rounded-xl shadow-lg">
-      <h1 className="text-3xl font-bold mb-8 text-purple-700 text-center">
-        Your Dashboard
-      </h1>
+    <div className="max-w-4xl mx-auto mt-12 p-6 bg-white rounded-xl shadow-lg">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold text-purple-700">
+          Your Dashboard
+        </h1>
+        <a
+          href="/"
+          className="text-purple-600 hover:text-purple-800 font-medium transition-colors"
+        >
+          ← Back to Home
+        </a>
+      </div>
       
       {loading && <div className="mb-4">Loading...</div>}
       {error && <div className="mb-4 text-red-600">{error}</div>}
+      
+
       <div className="mb-10">
         <h2 className="text-xl font-semibold mb-3 text-purple-600">Learning Plans</h2>
         {plans.length === 0 ? (

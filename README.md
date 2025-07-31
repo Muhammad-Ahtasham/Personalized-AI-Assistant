@@ -21,6 +21,7 @@ Technology  Purpose
 Next.js 15  Frontend + backend (server actions, API routes, routing, UI 
 rendering) 
 Tailwind CSS  Modern UI styling with utility-first approach 
+Heroicons  Beautiful, consistent icons for enhanced UI 
 Clerk  Authentication and user account management 
 Neon  PostgreSQL database for storing user data, quizzes 
 DeepSeek (via 
@@ -35,13 +36,25 @@ explanations
  
 ●  Topic Input: Users enter topics they want to learn 
  
-●  AI-Generated Learning Plan: DeepSeek generates a structured plan 
+●  AI-Generated Learning Plan: DeepSeek generates a structured plan with beautiful card-based UI
  
-●  Interactive Quizzes: Personalized questions with feedback 
+●  Interactive Quizzes: Personalized questions with feedback and visual score tracking
  
 ●  Concept Explanations: Dynamic explanations when users struggle 
  
-●  Progress Tracking: Save learning history and progress with Neon 
+●  Progress Tracking: Save learning history and progress with Neon
+
+🔹 UI/UX Features
+
+●  Beautiful Card-Based Layout: Learning plans displayed in organized, expandable sections
+ 
+●  Accordion Sections: Collapsible content for better organization
+ 
+●  Visual Feedback: Color-coded sections, icons, and progress indicators
+ 
+●  Responsive Design: Works seamlessly on desktop and mobile devices
+ 
+●  Modern Animations: Smooth transitions and hover effects 
  
 🔹 Admin/Backend Features 
 ●  Store user data securely in Neon (PostgreSQL) 
