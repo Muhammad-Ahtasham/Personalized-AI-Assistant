@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
 import LearningPlanDisplay from "@/components/LearningPlanDisplay";
@@ -11,7 +11,7 @@ interface QuizQuestion {
   answer: string;
 }
 
-export default function HomePage() {
+function HomePageContent() {
   const { user } = useUser();
   const searchParams = useSearchParams();
   const [topic, setTopic] = useState("");
@@ -278,5 +278,13 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomePageContent />
+    </Suspense>
   );
 }
