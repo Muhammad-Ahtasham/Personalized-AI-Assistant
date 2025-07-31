@@ -1,6 +1,6 @@
 "use client";
 import { useSignIn, useUser } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
@@ -14,9 +14,20 @@ export default function SignInPage() {
 
   console.log("User from Sign-in Page --> ", user);
   
+  // Handle navigation when user is signed in
+  useEffect(() => {
+    if (isSignedIn) {
+      router.push("/dashboard");
+    }
+  }, [isSignedIn, router]);
+
+  // Don't render the form if user is signed in
   if (isSignedIn) {
-    router.push("/dashboard");
-    return null;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
