@@ -7,12 +7,28 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up",
 ]);
 
-export default clerkMiddleware((auth, req) => {
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard",
+  "/notes",
+  "/profile"
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+
+  if (isProtectedRoute(req)) {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.redirect(new URL("/sign-in", req.url));
+    }
+  }
   // Check for face authentication session
   const faceAuthCookie = req.cookies.get('face_auth_session');
+  req.cookies.delete('face_auth_session');
   
   if (faceAuthCookie) {
     console.log("Face auth session found in middleware:", faceAuthCookie.value);
+    
+    // if user is logged in userId will be valid
     
     // Extract user ID from session token
     const sessionParts = faceAuthCookie.value.split('_');

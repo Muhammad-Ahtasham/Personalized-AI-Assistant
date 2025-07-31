@@ -11,11 +11,23 @@ datasource db {
 
 model User {
   id           String        @id @default(cuid())
-  clerkId      String        @unique
-  faceEmbedding String?      // Store face embedding as JSON string
+  clerkId      String?       @unique
+  email        String        @unique
+  password     String?
+  firstName    String?
+  lastName     String?
+  faceEmbeddings FaceEmbedding[]
   learningPlans LearningPlan[]
   quizResults   QuizResult[]
   createdAt    DateTime      @default(now())
+}
+
+model FaceEmbedding {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  embedding Json     // Store face embedding as JSON
+  createdAt DateTime @default(now())
 }
 
 model LearningPlan {

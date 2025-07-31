@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 
+
 interface QuizQuestion {
   question: string;
   choices: string[];
@@ -153,6 +154,37 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto p-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold mb-8 text-center text-primary">Personalized Study Assistant</h1>
+          
+          {!user && (
+            <div className="mb-8 p-6 bg-card text-card-foreground border border-border rounded-lg shadow-sm">
+              <h2 className="text-xl font-semibold mb-4 text-center">Welcome! Please sign in to continue</h2>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="/sign-in"
+                  className="bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors text-center"
+                >
+                  Sign In with Email
+                </a>
+                <a
+                  href="/face-sign-in"
+                  className="bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-lg hover:bg-accent/80 transition-colors text-center"
+                >
+                  Sign In with Face
+                </a>
+              </div>
+              <div className="mt-4 text-center text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <a href="/sign-up" className="text-primary hover:underline">Sign up with email</a>
+                {" "}or{" "}
+                <a href="/face-sign-up" className="text-primary hover:underline">sign up with face</a>
+              </div>
+              <div className="mt-2 text-center text-xs text-muted-foreground">
+                <a href="/test-face-api" className="text-primary hover:underline">Test Face API</a>
+              </div>
+            </div>
+          )}
+          
+
           
           <form onSubmit={handleSubmit} className="space-y-6 mb-8">
             <div className="space-y-2">

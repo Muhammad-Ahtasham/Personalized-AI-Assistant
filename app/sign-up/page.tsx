@@ -2,7 +2,6 @@
 import { useSignUp, useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import FaceRecognition from "../../components/FaceRecognition";
 
 export default function SignUpPage() {
   const { signUp, isLoaded } = useSignUp();
@@ -17,9 +16,6 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showVerification, setShowVerification] = useState(false);
-  const [showFaceRegistration, setShowFaceRegistration] = useState(false);
-  const [faceEmbedding, setFaceEmbedding] = useState<number[] | null>(null);
-  const [registrationStep, setRegistrationStep] = useState<"form" | "face" | "verification">("form");
 
   console.log("User from Sign-up Page --> ", isSignedIn);
   
@@ -47,47 +43,13 @@ export default function SignUpPage() {
 
       await signUp.prepareEmailAddressVerification();
       
-      if (showFaceRegistration) {
-        setRegistrationStep("face");
-      } else {
-        setShowVerification(true);
-        setSuccess("Verification code sent to your email!");
-      }
+      setShowVerification(true);
+      setSuccess("Verification code sent to your email!");
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleFaceDetected = async (embedding: number[]) => {
-    setFaceEmbedding(embedding);
-    
-    try {
-      // Store face embedding temporarily
-      const response = await fetch("/api/face-register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          faceEmbedding: embedding,
-          email: email,
-          action: "store"
-        }),
-      });
-
-      if (response.ok) {
-        setSuccess("Face captured successfully! Please verify your email.");
-        setRegistrationStep("verification");
-        setShowVerification(true);
-      } else {
-        const data = await response.json();
-        setError(data.error || "Failed to capture face");
-      }
-    } catch (error) {
-      setError("Failed to capture face. Please try again.");
     }
   };
 
@@ -106,29 +68,22 @@ export default function SignUpPage() {
       });
 
       if (result.status === "complete") {
-        // If face registration was enabled, register the face now
-        if (showFaceRegistration && faceEmbedding) {
-          try {
-            const response = await fetch("/api/face-register", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ 
-                faceEmbedding: faceEmbedding,
-                action: "register"
-              }),
-            });
-
-            if (!response.ok) {
-              console.warn("Face registration failed, but account was created successfully");
-            }
-          } catch (error) {
-            console.warn("Face registration failed, but account was created successfully", error);
-          }
-        }
-
         setSuccess("Account created successfully! Redirecting to dashboard...");
+        // Sync user to database if needed
+        try {
+          const syncResponse = await fetch("/api/auth/sync-user-to-database", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          
+          if (!syncResponse.ok) {
+            console.error("Failed to sync user to database");
+          }
+        } catch (syncError) {
+          console.error("Failed to sync user to database:", syncError);
+        }
         // Redirect to dashboard after successful verification
         setTimeout(() => {
           window.location.href = "/dashboard";
@@ -188,8 +143,7 @@ export default function SignUpPage() {
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
-          {registrationStep === "verification" ? "Verify Your Email" : 
-           registrationStep === "face" ? "Register Your Face" : "Create Your Account"}
+          {showVerification ? "Verify Your Email" : "Create Your Account"}
         </h1>
         
         {error && (
@@ -204,7 +158,7 @@ export default function SignUpPage() {
           </div>
         )}
 
-        {registrationStep === "form" && (
+        {!showVerification && (
           <>
             {/* Social Login Buttons */}
             <div className="space-y-3 mb-6">
@@ -308,20 +262,6 @@ export default function SignUpPage() {
                 </p>
               </div>
 
-              {/* Face Recognition Toggle */}
-              <div className="flex items-center space-x-2">
-                <input
-                  id="faceRegistration"
-                  type="checkbox"
-                  checked={showFaceRegistration}
-                  onChange={(e) => setShowFaceRegistration(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="faceRegistration" className="text-sm text-gray-700">
-                  Enable face recognition for faster login
-                </label>
-              </div>
-
               <button
                 type="submit"
                 disabled={isLoading}
@@ -333,28 +273,7 @@ export default function SignUpPage() {
           </>
         )}
 
-        {registrationStep === "face" && (
-          <div className="space-y-4">
-            <FaceRecognition
-              onFaceDetected={handleFaceDetected}
-              onError={setError}
-              mode="register"
-              isActive={true}
-            />
-            
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setRegistrationStep("form")}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                ← Back to sign up
-              </button>
-            </div>
-          </div>
-        )}
-
-        {registrationStep === "verification" && (
+        {showVerification && (
           <>
             <div className="mb-6 text-center">
               <p className="text-sm text-gray-600 mb-4">
@@ -397,7 +316,7 @@ export default function SignUpPage() {
               <div className="text-center">
                 <button
                   type="button"
-                  onClick={() => setRegistrationStep("form")}
+                  onClick={() => setShowVerification(false)}
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   ← Back to sign up
@@ -409,14 +328,14 @@ export default function SignUpPage() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            {registrationStep === "form" ? (
+            {!showVerification ? (
               <>
                 Already have an account?{" "}
                 <a href="/sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
                   Sign in
                 </a>
               </>
-            ) : registrationStep === "verification" ? (
+            ) : (
               <>
                 Didn&apos;t receive the code?{" "}
                 <button
@@ -426,8 +345,16 @@ export default function SignUpPage() {
                   Resend code
                 </button>
               </>
-            ) : null}
+            )}
           </p>
+          {!showVerification && (
+            <p className="text-sm text-gray-600 mt-2">
+              Or{" "}
+              <a href="/face-sign-up" className="text-blue-600 hover:text-blue-700 font-medium">
+                sign up with face recognition
+              </a>
+            </p>
+          )}
         </div>
       </div>
     </div>

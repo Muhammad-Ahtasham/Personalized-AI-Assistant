@@ -1,69 +1,104 @@
-import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { cosineSimilarity } from "../../../lib/face-utils";
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+// Function to calculate cosine similarity between two embeddings
+function cosineSimilarity(embedding1: number[], embedding2: number[]): number {
+  if (embedding1.length !== embedding2.length) {
+    return 0;
+  }
+
+  let dotProduct = 0;
+  let norm1 = 0;
+  let norm2 = 0;
+
+  for (let i = 0; i < embedding1.length; i++) {
+    dotProduct += embedding1[i] * embedding2[i];
+    norm1 += embedding1[i] * embedding1[i];
+    norm2 += embedding2[i] * embedding2[i];
+  }
+
+  norm1 = Math.sqrt(norm1);
+  norm2 = Math.sqrt(norm2);
+
+  if (norm1 === 0 || norm2 === 0) {
+    return 0;
+  }
+
+  return dotProduct / (norm1 * norm2);
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { faceEmbedding, email } = await request.json();
+    const { faceEmbedding } = await request.json();
 
-    if (!faceEmbedding || !Array.isArray(faceEmbedding) || !email) {
-      return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
+    if (!faceEmbedding) {
+      return NextResponse.json(
+        { error: 'Face embedding is required' },
+        { status: 400 }
+      );
     }
 
-    // Find user by email - simpler approach
-    const allUsers = await prisma.user.findMany();
-    console.log("All users:", allUsers.map(u => ({ id: u.id, clerkId: u.clerkId, hasFaceEmbedding: !!u.faceEmbedding })));
-    
-    // Try to find user by email in clerkId
-    let user = allUsers.find(u => u.clerkId.includes(email));
-    
-    // If not found, try with email domain
-    if (!user) {
-      const emailDomain = email.split('@')[0];
-      user = allUsers.find(u => u.clerkId.includes(emailDomain));
+    // Get all face embeddings from the database
+    const faceEmbeddings = await prisma.faceEmbedding.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            clerkId: true,
+            password: true,
+          },
+        },
+      },
+    });
+
+    let bestMatch = null;
+    let highestSimilarity = 0;
+    const similarityThreshold = 0.6; // Adjust this threshold as needed
+
+    // Compare the provided embedding with all stored embeddings
+    for (const storedEmbedding of faceEmbeddings) {
+      const storedEmbeddingArray = storedEmbedding.embedding as number[];
+      const similarity = cosineSimilarity(faceEmbedding, storedEmbeddingArray);
+
+      if (similarity > highestSimilarity && similarity >= similarityThreshold) {
+        highestSimilarity = similarity;
+        bestMatch = storedEmbedding;
+      }
     }
 
-    console.log(`Looking for user with email: ${email}, found: ${user ? 'yes' : 'no'}`);
-    if (user) {
-      console.log(`User has face embedding: ${user.faceEmbedding ? 'yes' : 'no'}`);
-      console.log(`User clerkId: ${user.clerkId}`);
-    } else {
-      // Debug: show all users in database
-      console.log("All users in database:", allUsers.map(u => ({ id: u.id, clerkId: u.clerkId, hasFaceEmbedding: !!u.faceEmbedding })));
+    if (!bestMatch) {
+      return NextResponse.json(
+        { error: 'Face not recognized. Please try again or register first.' },
+        { status: 401 }
+      );
     }
 
-    if (!user || !user.faceEmbedding) {
-      return NextResponse.json({ error: "User not found or no face registered" }, { status: 404 });
-    }
+    // Return user information for Clerk authentication
+    return NextResponse.json({
+      success: true,
+      message: 'Face authentication successful',
+      user: {
+        id: bestMatch.user.id,
+        email: bestMatch.user.email,
+        firstName: bestMatch.user.firstName,
+        lastName: bestMatch.user.lastName,
+        clerkId: bestMatch.user.clerkId,
+        password: bestMatch.user.password, // Include password for Clerk auth
+      },
+      similarity: highestSimilarity,
+    });
 
-    // Parse stored embedding
-    const storedEmbedding = JSON.parse(user.faceEmbedding);
-    
-    // Calculate similarity
-    const similarity = cosineSimilarity(faceEmbedding, storedEmbedding);
-    
-    // Threshold for face recognition (0.6 is a good starting point)
-    const threshold = 0.6;
-    
-    if (similarity >= threshold) {
-      return NextResponse.json({ 
-        success: true, 
-        userId: user.clerkId,
-        similarity,
-        userEmail: email,
-        // Return a temporary token for authentication
-        authToken: `face_auth_${Date.now()}_${user.clerkId}`
-      });
-    } else {
-      return NextResponse.json({ 
-        error: "Face not recognized", 
-        similarity 
-      }, { status: 401 });
-    }
   } catch (error) {
-    console.error("Error during face login:", error);
-    return NextResponse.json({ error: "Face authentication failed" }, { status: 500 });
+    console.error('Face login error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 } 
