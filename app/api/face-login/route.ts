@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     let bestMatch = null;
     let highestSimilarity = 0;
-    const similarityThreshold = 0.6; // Adjust this threshold as needed
+    const similarityThreshold = 0.9; // Adjust this threshold as needed
 
     // Compare the provided embedding with all stored embeddings
     for (const storedEmbedding of faceEmbeddings) {

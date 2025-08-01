@@ -15,6 +15,7 @@ function FaceSignInContent() {
   const [success, setSuccess] = useState("");
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [recognizedUser, setRecognizedUser] = useState<any>(null);
 
   // Handle registration success message
   useEffect(() => {
@@ -65,6 +66,7 @@ function FaceSignInContent() {
       }
 
       setUserEmail(faceData.user.email);
+      setRecognizedUser(faceData.user);
 
       // Check if user has a Clerk ID
       if (faceData.user.clerkId) {
@@ -134,10 +136,16 @@ function FaceSignInContent() {
       return;
     }
 
+    // SECURITY FIX: Verify that the entered email matches the face-recognized user
+    if (email !== userEmail || !recognizedUser) {
+      setError("Email does not match the recognized face. Please enter the correct email for the recognized user.");
+      return;
+    }
+
     try {
       console.log("Starting face user authentication for:", email);
       
-      // First, set up the user's password in Clerk
+      // First, set up the user's password in Clerk using the recognized user's ID
       const setupResponse = await fetch("/api/auth/setup-face-user-password", {
         method: "POST",
         headers: {
@@ -145,6 +153,7 @@ function FaceSignInContent() {
         },
         body: JSON.stringify({
           email: email,
+          userId: recognizedUser.id, // Use the recognized user's ID for additional security
         }),
       });
 
@@ -253,7 +262,7 @@ function FaceSignInContent() {
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-4">
-                Face authentication successful! Please enter your email to complete the sign-in process.
+                Face authentication successful! Please enter the email address for the recognized user: <strong>{userEmail}</strong>
               </p>
             </div>
             
@@ -271,9 +280,10 @@ function FaceSignInContent() {
                   name="email"
                   type="email"
                   defaultValue={userEmail}
+                  readOnly
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                  placeholder="Email will be auto-filled"
                 />
               </div>
               
@@ -290,6 +300,7 @@ function FaceSignInContent() {
                 setShowEmailInput(false);
                 setSuccess("");
                 setUserEmail("");
+                setRecognizedUser(null);
               }}
               className="w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
             >

@@ -5,8 +5,8 @@ const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
-    console.log("Setting up password for face user:", email);
+    const { email, userId } = await request.json();
+    console.log("Setting up password for face user:", email, "userId:", userId);
 
     if (!email) {
       return NextResponse.json(
@@ -27,6 +27,15 @@ export async function POST(request: NextRequest) {
         lastName: true,
       },
     });
+
+    // SECURITY: Verify that the userId matches the email (if provided)
+    if (userId && user && user.id !== userId) {
+      console.error("Security violation: userId mismatch", { providedUserId: userId, actualUserId: user.id });
+      return NextResponse.json(
+        { error: 'Security validation failed' },
+        { status: 403 }
+      );
+    }
 
     if (!user) {
       return NextResponse.json(
