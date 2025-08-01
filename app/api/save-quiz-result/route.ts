@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/app/lib/prisma";
 
 export async function POST(req: NextRequest) {
+  // Check authentication
+  const { userId } = await auth();
+  
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Authentication required. Please sign in to save quiz results." },
+      { status: 401 }
+    );
+  }
   const { topic, questions, answers, score, clerkId } = await req.json();
   if (!topic || !questions || !answers || typeof score !== 'number' || !clerkId) {
     return NextResponse.json({ error: "Missing required fields." }, { status: 400 });

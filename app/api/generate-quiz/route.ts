@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+
 console.log("Generate Quiz...")
 export async function POST(req: NextRequest) {
+  // Check authentication
+  const { userId } = await auth();
+  
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Authentication required. Please sign in to generate quizzes." },
+      { status: 401 }
+    );
+  }
+
   const { topic } = await req.json();
     console.log("Topic ", topic)
   if (!topic) {

@@ -64,7 +64,11 @@ function HomePageContent() {
       }
     } catch (err) {
       const error = err as Error;
-      setError(error.message || "Something went wrong");
+      if (error.message.includes("Authentication required")) {
+        setError("Please sign in to generate learning plans. Click the 'Sign In' button in the top right.");
+      } else {
+        setError(error.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -109,7 +113,11 @@ function HomePageContent() {
       const error = err as Error;
       setQuiz(null);
       setQuizFeedback([]);
-      setError(error.message || "Failed to generate quiz");
+      if (error.message.includes("Authentication required")) {
+        setError("Please sign in to generate quizzes. Click the 'Sign In' button in the top right.");
+      } else {
+        setError(error.message || "Failed to generate quiz");
+      }
     } finally {
       setQuizLoading(false);
     }
@@ -211,6 +219,16 @@ function HomePageContent() {
           
 
           
+          {!user && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="font-medium">Sign in to use all features</span>
+              </div>
+              <p className="text-sm">Generate learning plans and quizzes, save your progress, and access your dashboard.</p>
+            </div>
+          )}
+
           <div className="space-y-6 mb-8">
             <div className="space-y-2">
               <label htmlFor="topic" className="text-lg font-medium text-foreground">
