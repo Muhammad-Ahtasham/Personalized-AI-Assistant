@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSignIn, useClerk } from "@clerk/nextjs";
+import { useSignIn, useClerk, useUser } from "@clerk/nextjs";
 import FaceAuth from "../../components/FaceAuth";
 
 function FaceSignInContent() {
@@ -9,6 +9,7 @@ function FaceSignInContent() {
   const searchParams = useSearchParams();
   const { signIn, isLoaded } = useSignIn();
   const { setActive } = useClerk();
+  const { isSignedIn, user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -27,6 +28,18 @@ function FaceSignInContent() {
       }
     }
   }, [searchParams]);
+
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    console.log("Face sign-in page - isSignedIn:", isSignedIn);
+    console.log("Face sign-in page - user:", user);
+    console.log("Face sign-in page - isLoaded:", isLoaded);
+    
+    if (isSignedIn && user) {
+      console.log("User is signed in, redirecting to dashboard");
+      router.push("/dashboard");
+    }
+  }, [isSignedIn, user, isLoaded, router]);
 
   const handleFaceDetected = async (embedding: number[]) => {
     setIsLoading(true);
@@ -77,10 +90,19 @@ function FaceSignInContent() {
             });
 
             if (result.status === "complete") {
+              // Explicitly set the active session
+              if (result.createdSessionId) {
+                console.log("Setting active session with ID:", result.createdSessionId);
+                await setActive({ session: result.createdSessionId });
+              }
+              
+              console.log("Face authentication successful, waiting before redirect...");
               setSuccess("Face authentication successful! Redirecting to dashboard...");
+              // Force a page reload to ensure Clerk session is properly established
               setTimeout(() => {
-                router.push("/dashboard");
-              }, 2000);
+                console.log("Redirecting to dashboard...");
+                window.location.href = "/dashboard";
+              }, 1000);
               return;
             }
           }
@@ -146,10 +168,19 @@ function FaceSignInContent() {
         console.log("Clerk sign-in result:", result);
 
         if (result.status === "complete") {
+          // Explicitly set the active session
+          if (result.createdSessionId) {
+            console.log("Setting active session with ID:", result.createdSessionId);
+            await setActive({ session: result.createdSessionId });
+          }
+          
+          console.log("Sign-in completed successfully, waiting before redirect...");
           setSuccess("Sign-in completed! Redirecting to dashboard...");
+          // Force a page reload to ensure Clerk session is properly established
           setTimeout(() => {
-            router.push("/dashboard");
-          }, 2000);
+            console.log("Redirecting to dashboard...");
+            window.location.href = "/dashboard";
+          }, 1000);
         } else {
           console.error("Clerk sign-in failed:", result);
           setError(`Sign-in failed. Status: ${result.status}. Please contact support.`);
@@ -168,6 +199,18 @@ function FaceSignInContent() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // If already signed in, show loading while redirecting
+  if (isSignedIn && user) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting to dashboard...</p>
+        </div>
       </div>
     );
   }

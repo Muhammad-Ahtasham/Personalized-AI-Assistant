@@ -29,7 +29,7 @@ interface QuizQuestion {
 }
 
 export default function DashboardPage() {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user, isLoaded } = useUser();
   const [plans, setPlans] = useState<LearningPlan[]>([]);
   const [quizzes, setQuizzes] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,6 +42,10 @@ export default function DashboardPage() {
   useEffect(() => {
     console.log("isSignedIn", isSignedIn);
     console.log("user", user);
+    console.log("isLoaded", isLoaded);
+    
+    // Wait for Clerk to load before making decisions
+    if (!isLoaded) return;
     
     // If not signed in, redirect to sign-in
     if (!isSignedIn) {
@@ -92,7 +96,19 @@ export default function DashboardPage() {
     };
     
     syncUserAndFetchHistory();
-  }, [user, isSignedIn, router]);
+  }, [user, isSignedIn, isLoaded, router]);
+
+  // Show loading while Clerk is loading or user is not signed in
+  if (!isLoaded || !isSignedIn) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto mt-12 p-6 bg-white rounded-xl shadow-lg">
