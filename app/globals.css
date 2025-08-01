@@ -77,4 +77,95 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
+
+  /* Notes specific styles */
+  .prose {
+    @apply text-foreground;
+  }
+
+  .prose h1 {
+    @apply text-2xl font-bold text-foreground mb-4;
+  }
+
+  .prose h2 {
+    @apply text-xl font-semibold text-foreground mb-3;
+  }
+
+  .prose h3 {
+    @apply text-lg font-medium text-foreground mb-2;
+  }
+
+  .prose p {
+    @apply text-foreground mb-3 leading-relaxed;
+  }
+
+  .prose ul {
+    @apply list-disc list-inside mb-3 space-y-1;
+  }
+
+  .prose ol {
+    @apply list-decimal list-inside mb-3 space-y-1;
+  }
+
+  .prose li {
+    @apply text-foreground;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-primary/30 pl-4 italic text-muted-foreground my-4;
+  }
+
+  .prose code {
+    @apply bg-muted px-2 py-1 rounded text-sm font-mono;
+  }
+
+  .prose pre {
+    @apply bg-muted p-4 rounded-lg overflow-x-auto my-4;
+  }
+
+  .prose strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .prose em {
+    @apply italic text-foreground;
+  }
+
+  .prose u {
+    @apply underline text-foreground;
+  }
+
+  /* Rich text editor styles */
+  [contenteditable] {
+    @apply outline-none;
+  }
+
+  [contenteditable]:focus {
+    @apply outline-none;
+  }
+
+  /* Line clamp utility */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Scrollbar styles */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-muted rounded;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-border rounded;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
 } 
