@@ -144,30 +144,30 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
   const getSectionIcon = (type: LearningPlanSection['type']) => {
     switch (type) {
       case 'prerequisites':
-        return <CheckCircleIcon className="w-5 h-5 text-blue-500" />;
+        return <CheckCircleIcon className="w-5 h-5 text-blue-400" />;
       case 'steps':
-        return <AcademicCapIcon className="w-5 h-5 text-green-500" />;
+        return <AcademicCapIcon className="w-5 h-5 text-green-accent" />;
       case 'resources':
-        return <LinkIcon className="w-5 h-5 text-purple-500" />;
+        return <LinkIcon className="w-5 h-5 text-purple-400" />;
       case 'tips':
-        return <LightBulbIcon className="w-5 h-5 text-yellow-500" />;
+        return <LightBulbIcon className="w-5 h-5 text-yellow-400" />;
       default:
-        return <BookOpenIcon className="w-5 h-5 text-gray-500" />;
+        return <BookOpenIcon className="w-5 h-5 text-muted-foreground" />;
     }
   };
 
   const getSectionColor = (type: LearningPlanSection['type']) => {
     switch (type) {
       case 'prerequisites':
-        return 'border-blue-200 bg-blue-50/50';
+        return 'border-blue-500/20 bg-blue-500/10';
       case 'steps':
-        return 'border-green-200 bg-green-50/50';
+        return 'border-yellow-accent/20 bg-yellow-accent/10';
       case 'resources':
-        return 'border-purple-200 bg-purple-50/50';
+        return 'border-purple-500/20 bg-purple-500/10';
       case 'tips':
-        return 'border-yellow-200 bg-yellow-50/50';
+        return 'border-yellow-500/20 bg-yellow-500/10';
       default:
-        return 'border-gray-200 bg-gray-50/50';
+        return 'border-border bg-muted';
     }
   };
 
@@ -176,12 +176,12 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
   return (
     <div className="space-y-6">
       {/* Main Title Card */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-6 shadow-sm">
+      <div className="bg-yellow-accent/10 border border-yellow-accent/20 rounded-xl p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <BookOpenIcon className="w-6 h-6 text-primary" />
+          <div className="p-2 bg-yellow-accent/20 rounded-lg">
+            <BookOpenIcon className="w-6 h-6 text-yellow-accent" />
           </div>
-          <h2 className="text-2xl font-bold text-primary">{title}</h2>
+          <h2 className="text-2xl font-bold text-yellow-accent">{title}</h2>
         </div>
         <p className="text-muted-foreground leading-relaxed">
           Follow this step-by-step guide to master the fundamentals and build your skills.
@@ -190,7 +190,7 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
 
       {/* Fallback for unstructured content */}
       {sections.length === 0 && (
-        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+        <div className="card-dark">
           <div className="whitespace-pre-line text-foreground leading-relaxed">{plan}</div>
         </div>
       )}
@@ -205,13 +205,13 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
           >
             <button
               onClick={() => toggleSection(section.title)}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-white/50 transition-colors rounded-xl"
+              className="w-full p-4 flex items-center justify-between text-left hover:bg-muted transition-colors rounded-xl"
             >
               <div className="flex items-center gap-3">
-                <div className="p-1.5 bg-white/50 rounded-lg">
+                <div className="p-1.5 bg-muted rounded-lg">
                   {getSectionIcon(section.type)}
                 </div>
-                <h3 className="font-semibold text-lg text-foreground">{section.title}</h3>
+                <h3 className="font-semibold text-lg text-white">{section.title}</h3>
               </div>
               {expandedSections.has(section.title) ? (
                 <ChevronDownIcon className="w-5 h-5 text-muted-foreground" />
@@ -226,12 +226,12 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
                   {section.content.map((item, itemIndex) => (
                     <div key={itemIndex} className="text-foreground leading-relaxed">
                       {item.startsWith('*Resource*:') || item.startsWith('*Tip*:') ? (
-                        <div className="bg-white/70 rounded-lg p-3 border border-border/50 shadow-sm">
+                        <div className="bg-muted rounded-lg p-3 border border-border/50 shadow-sm">
                           <div className="flex items-center gap-2 mb-1">
                             {item.startsWith('*Resource*:') ? (
-                              <LinkIcon className="w-4 h-4 text-purple-500" />
+                              <LinkIcon className="w-4 h-4 text-purple-400" />
                             ) : (
-                              <LightBulbIcon className="w-4 h-4 text-yellow-500" />
+                              <LightBulbIcon className="w-4 h-4 text-yellow-400" />
                             )}
                             <span className="text-sm font-medium text-muted-foreground">
                               {item.startsWith('*Resource*:') ? 'Resource' : 'Tip'}:
@@ -242,11 +242,11 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
                       ) : (
                         <div className="flex items-start gap-3">
                           {item.match(/^\d+\./) ? (
-                            <span className="flex-shrink-0 w-6 h-6 bg-primary/10 text-primary text-sm font-medium rounded-full flex items-center justify-center mt-0.5">
+                            <span className="flex-shrink-0 w-6 h-6 bg-yellow-accent/20 text-yellow-accent text-sm font-medium rounded-full flex items-center justify-center mt-0.5">
                               {item.match(/^\d+\./)?.[0]?.replace('.', '')}
                             </span>
                           ) : item.startsWith('-') || item.startsWith('*') ? (
-                            <span className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-2" />
+                            <span className="flex-shrink-0 w-2 h-2 bg-yellow-accent rounded-full mt-2" />
                           ) : null}
                           <span className="flex-1">{item.replace(/^[\d\-*\.\s]+/, '')}</span>
                         </div>

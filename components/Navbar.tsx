@@ -17,21 +17,21 @@ export default function Navbar() {
           
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <span className="text-primary font-bold text-xl tracking-tight">📚 StudyMate</span>
+            <span className="text-yellow-accent font-bold text-xl tracking-tight">📚 StudyMate</span>
           </div>
 
           {/* Nav Links */}
           <div className="hidden md:flex gap-6">
-            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors font-medium">
               <Home size={18}/> Home
             </Link>
-            <Link href="/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <Link href="/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors font-medium">
               <LayoutDashboard size={18}/> Dashboard
             </Link>
-            <Link href="/notes" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <Link href="/notes" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors font-medium">
               <NotebookText size={18}/> Notes
             </Link>
-            <Link href="/profile" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-medium">
+            <Link href="/profile" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors font-medium">
               <User size={18}/> Profile
             </Link>
           </div>
@@ -41,12 +41,12 @@ export default function Navbar() {
             {!isAuthenticated ? (
               <>
                 <Link href="/sign-in">
-                  <button className="px-4 py-2 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                  <button className="btn-primary">
                     Sign In
                   </button>
                 </Link>
                 <Link href="/sign-up">
-                  <button className="px-4 py-2 border border-border text-foreground font-medium rounded-lg hover:bg-muted transition-colors">
+                  <button className="btn-secondary">
                     Sign Up
                   </button>
                 </Link>

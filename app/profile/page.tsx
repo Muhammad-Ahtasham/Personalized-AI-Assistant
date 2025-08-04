@@ -153,297 +153,302 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto mt-8 p-6">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-              <User className="w-10 h-10 text-white" />
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-6xl mx-auto p-6">
+        {/* Header */}
+        <div className="card-dark mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-yellow-accent to-yellow-500 rounded-full flex items-center justify-center">
+                <User className="w-10 h-10 text-black" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">
+                  {user?.firstName} {user?.lastName}
+                </h1>
+                <p className="text-muted-foreground flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  {user?.emailAddresses[0]?.emailAddress}
+                </p>
+                <p className="text-muted-foreground text-sm flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Member since {new Date(user?.createdAt || '').toLocaleDateString()}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {user?.firstName} {user?.lastName}
-              </h1>
-              <p className="text-gray-600 flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                {user?.emailAddresses[0]?.emailAddress}
-              </p>
-              <p className="text-gray-500 text-sm flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Member since {new Date(user?.createdAt || '').toLocaleDateString()}
-              </p>
-            </div>
+            <a
+              href="/dashboard"
+              className="text-yellow-accent hover:text-yellow-500 font-medium transition-colors"
+            >
+              ← Back to Dashboard
+            </a>
           </div>
-          <a
-            href="/dashboard"
-            className="text-purple-600 hover:text-purple-800 font-medium transition-colors"
-          >
-            ← Back to Dashboard
-          </a>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="card-dark mb-6">
+          <div className="border-b border-border">
+            <nav className="flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'overview'
+                    ? 'border-yellow-accent text-yellow-accent'
+                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('activity')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'activity'
+                    ? 'border-yellow-accent text-yellow-accent'
+                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                }`}
+              >
+                Recent Activity
+              </button>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'settings'
+                    ? 'border-yellow-accent text-yellow-accent'
+                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                }`}
+              >
+                Settings
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {loading && (
+          <div className="card-dark text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading your profile...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 mb-6">
+            <p className="text-destructive">{error}</p>
+          </div>
+        )}
+
+        {/* Content Area */}
+        <div className="w-full">
+          {/* Overview Tab */}
+          {activeTab === 'overview' && stats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              <div className="card-dark">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-accent/20 rounded-lg">
+                    <BookOpen className="w-6 h-6 text-yellow-accent" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Learning Plans</p>
+                    <p className="text-2xl font-bold text-white">{stats.totalPlans}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-dark">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-accent/20 rounded-lg">
+                    <Award className="w-6 h-6 text-yellow-accent" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Quizzes Taken</p>
+                    <p className="text-2xl font-bold text-white">{stats.totalQuizzes}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-dark">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-accent/20 rounded-lg">
+                    <FileText className="w-6 h-6 text-yellow-accent" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Notes Created</p>
+                    <p className="text-2xl font-bold text-white">{stats.totalNotes}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-dark">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-accent/20 rounded-lg">
+                    <Activity className="w-6 h-6 text-yellow-accent" />
+                  </div>
+                  <div className="ml-4">
+                    <p className="text-sm font-medium text-muted-foreground">Avg Quiz Score</p>
+                    <p className="text-2xl font-bold text-white">{stats.averageQuizScore}%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Activity Tab */}
+          {activeTab === 'activity' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Recent Learning Plans */}
+              <div className="card-dark">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-yellow-accent" />
+                  Recent Learning Plans
+                </h3>
+                {recentPlans.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">No learning plans yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {recentPlans.map(plan => (
+                      <div key={plan.id} className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20">
+                        <h4 className="font-medium text-yellow-accent">{plan.topic}</h4>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{plan.content}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {new Date(plan.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Recent Quiz Results */}
+              <div className="card-dark">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-yellow-accent" />
+                  Recent Quiz Results
+                </h3>
+                {recentQuizzes.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">No quiz results yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {recentQuizzes.map(quiz => (
+                      <div key={quiz.id} className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20">
+                        <h4 className="font-medium text-yellow-accent">{quiz.topic}</h4>
+                        <p className="text-sm text-muted-foreground mt-1">Score: {quiz.score}%</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {new Date(quiz.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Recent Notes */}
+              <div className="card-dark">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-yellow-accent" />
+                  Recent Notes
+                </h3>
+                {recentNotes.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">No notes yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {recentNotes.map(note => (
+                      <div key={note.id} className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20">
+                        <h4 className="font-medium text-yellow-accent">{note.title}</h4>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{note.content}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {new Date(note.updatedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Settings Tab */}
+          {activeTab === 'settings' && (
+            <div className="card-dark">
+              <h3 className="text-lg font-semibold text-white mb-6">Account Settings</h3>
+              
+              <div className="space-y-6">
+                {/* Profile Information */}
+                <div className="border-b border-border pb-6">
+                  <h4 className="text-md font-medium text-white mb-4 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Profile Information
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">First Name</label>
+                      <p className="text-white">{user?.firstName || 'Not set'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Last Name</label>
+                      <p className="text-white">{user?.lastName || 'Not set'}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
+                      <p className="text-white">{user?.emailAddresses[0]?.emailAddress}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Authentication Methods */}
+                <div className="border-b border-border pb-6">
+                  <h4 className="text-md font-medium text-white mb-4 flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Authentication Methods
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-white">Email & Password</span>
+                      </div>
+                      <span className="text-xs bg-yellow-accent/20 text-yellow-accent px-2 py-1 rounded-full">Active</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Camera className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-white">Face Authentication</span>
+                      </div>
+                      <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">Available</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Account Actions */}
+                <div>
+                  <h4 className="text-md font-medium text-white mb-4 flex items-center gap-2">
+                    <Settings className="w-4 h-4" />
+                    Account Actions
+                  </h4>
+                  <div className="space-y-3">
+                    <button className="w-full text-left p-3 bg-yellow-accent/10 hover:bg-yellow-accent/20 rounded-lg transition-colors border border-yellow-accent/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Edit3 className="w-4 h-4 text-yellow-accent" />
+                          <span className="text-sm font-medium text-yellow-accent">Edit Profile</span>
+                        </div>
+                        <span className="text-xs text-yellow-accent">→</span>
+                      </div>
+                    </button>
+                    <button className="w-full text-left p-3 bg-yellow-accent/10 hover:bg-yellow-accent/20 rounded-lg transition-colors border border-yellow-accent/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Camera className="w-4 h-4 text-yellow-accent" />
+                          <span className="text-sm font-medium text-yellow-accent">Setup Face Authentication</span>
+                        </div>
+                        <span className="text-xs text-yellow-accent">→</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Navigation Tabs */}
-      <div className="bg-white rounded-xl shadow-lg mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'overview'
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab('activity')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'activity'
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Recent Activity
-            </button>
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'settings'
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Settings
-            </button>
-          </nav>
-        </div>
-      </div>
-
-      {loading && (
-        <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your profile...</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
-          <p className="text-red-600">{error}</p>
-        </div>
-      )}
-
-      {/* Overview Tab */}
-      {activeTab === 'overview' && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <BookOpen className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Learning Plans</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalPlans}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Award className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Quizzes Taken</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalQuizzes}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <FileText className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Notes Created</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalNotes}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Activity className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Avg Quiz Score</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.averageQuizScore}%</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Activity Tab */}
-      {activeTab === 'activity' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Learning Plans */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-purple-600" />
-              Recent Learning Plans
-            </h3>
-            {recentPlans.length === 0 ? (
-              <p className="text-gray-500 text-sm">No learning plans yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {recentPlans.map(plan => (
-                  <div key={plan.id} className="p-3 bg-purple-50 rounded-lg">
-                    <h4 className="font-medium text-purple-800">{plan.topic}</h4>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{plan.content}</p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {new Date(plan.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Recent Quiz Results */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Award className="w-5 h-5 text-yellow-600" />
-              Recent Quiz Results
-            </h3>
-            {recentQuizzes.length === 0 ? (
-              <p className="text-gray-500 text-sm">No quiz results yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {recentQuizzes.map(quiz => (
-                  <div key={quiz.id} className="p-3 bg-yellow-50 rounded-lg">
-                    <h4 className="font-medium text-yellow-800">{quiz.topic}</h4>
-                    <p className="text-sm text-gray-600 mt-1">Score: {quiz.score}%</p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {new Date(quiz.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Recent Notes */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-green-600" />
-              Recent Notes
-            </h3>
-            {recentNotes.length === 0 ? (
-              <p className="text-gray-500 text-sm">No notes yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {recentNotes.map(note => (
-                  <div key={note.id} className="p-3 bg-green-50 rounded-lg">
-                    <h4 className="font-medium text-green-800">{note.title}</h4>
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{note.content}</p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {new Date(note.updatedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Settings Tab */}
-      {activeTab === 'settings' && (
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Account Settings</h3>
-          
-          <div className="space-y-6">
-            {/* Profile Information */}
-            <div className="border-b border-gray-200 pb-6">
-              <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <User className="w-4 h-4" />
-                Profile Information
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                  <p className="text-gray-900">{user?.firstName || 'Not set'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                  <p className="text-gray-900">{user?.lastName || 'Not set'}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <p className="text-gray-900">{user?.emailAddresses[0]?.emailAddress}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Authentication Methods */}
-            <div className="border-b border-gray-200 pb-6">
-              <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Authentication Methods
-              </h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm font-medium">Email & Password</span>
-                  </div>
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Camera className="w-4 h-4 text-gray-600" />
-                    <span className="text-sm font-medium">Face Authentication</span>
-                  </div>
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Available</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Account Actions */}
-            <div>
-              <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center gap-2">
-                <Settings className="w-4 h-4" />
-                Account Actions
-              </h4>
-              <div className="space-y-3">
-                <button className="w-full text-left p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Edit3 className="w-4 h-4 text-purple-600" />
-                      <span className="text-sm font-medium text-purple-900">Edit Profile</span>
-                    </div>
-                    <span className="text-xs text-purple-600">→</span>
-                  </div>
-                </button>
-                <button className="w-full text-left p-3 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Camera className="w-4 h-4 text-yellow-600" />
-                      <span className="text-sm font-medium text-yellow-900">Setup Face Authentication</span>
-                    </div>
-                    <span className="text-xs text-yellow-600">→</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 

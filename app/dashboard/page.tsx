@@ -293,25 +293,25 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                <UserIcon className="w-8 h-8 text-white" />
+              <div className="p-3 bg-yellow-accent rounded-xl shadow-lg">
+                <UserIcon className="w-8 h-8 text-black" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-white">
                   Welcome back, {user?.firstName || user?.emailAddresses[0]?.emailAddress || 'User'}!
                 </h1>
-                <p className="text-gray-600 mt-1">Track your learning progress and achievements</p>
+                <p className="text-muted-foreground mt-1">Track your learning progress and achievements</p>
               </div>
             </div>
             <a
               href="/"
-              className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200"
+              className="flex items-center gap-2 px-4 py-2 card-dark hover:bg-muted transition-all duration-200"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               Back to Home
@@ -321,38 +321,38 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="card-dark">
             <div className="flex items-center">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <BookOpenIcon className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-yellow-accent/20 rounded-lg">
+                <BookOpenIcon className="w-6 h-6 text-yellow-accent" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Learning Plans</p>
-                <p className="text-2xl font-bold text-gray-900">{plans.length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Learning Plans</p>
+                <p className="text-2xl font-bold text-white">{plans.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="card-dark">
             <div className="flex items-center">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <AcademicCapIcon className="w-6 h-6 text-green-600" />
+              <div className="p-3 bg-yellow-accent/20 rounded-lg">
+                <AcademicCapIcon className="w-6 h-6 text-yellow-accent" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Quizzes Taken</p>
-                <p className="text-2xl font-bold text-gray-900">{quizzes.length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Quizzes Taken</p>
+                <p className="text-2xl font-bold text-white">{quizzes.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="card-dark">
             <div className="flex items-center">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <ChartBarIcon className="w-6 h-6 text-purple-600" />
+              <div className="p-3 bg-yellow-accent/20 rounded-lg">
+                <ChartBarIcon className="w-6 h-6 text-yellow-accent" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Average Score</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-muted-foreground">Average Score</p>
+                <p className="text-2xl font-bold text-white">
                   {quizzes.length > 0 
                     ? Math.round(quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / quizzes.length)
                     : 0}%
@@ -363,13 +363,13 @@ export default function DashboardPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
             <div className="flex">
               <div className="flex-shrink-0">
-                <CheckCircleIcon className="h-5 w-5 text-red-400" />
+                <CheckCircleIcon className="h-5 w-5 text-destructive" />
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-800">{error}</p>
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             </div>
           </div>
@@ -378,26 +378,26 @@ export default function DashboardPage() {
         {/* Learning Plans Section */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <BookOpenIcon className="w-6 h-6 text-blue-600" />
+            <div className="p-2 bg-yellow-accent/20 rounded-lg">
+              <BookOpenIcon className="w-6 h-6 text-yellow-accent" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Learning Plans</h2>
+            <h2 className="text-2xl font-bold text-white">Learning Plans</h2>
           </div>
           
           {loading ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <div className="card-dark p-8">
               <div className="flex justify-center items-center py-8">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading your learning plans...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading your learning plans...</p>
                 </div>
               </div>
             </div>
           ) : plans.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-              <BookOpenIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No learning plans yet</h3>
-              <p className="text-gray-600">Start your learning journey by creating your first personalized plan!</p>
+            <div className="card-dark p-8 text-center">
+              <BookOpenIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">No learning plans yet</h3>
+              <p className="text-muted-foreground">Start your learning journey by creating your first personalized plan!</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -406,56 +406,56 @@ export default function DashboardPage() {
                 const isExpanded = expandedPlans.has(plan.id);
                 
                 return (
-                  <div key={plan.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div key={plan.id} className="card-dark overflow-hidden">
                     <button
                       onClick={() => togglePlan(plan.id)}
-                      className="w-full p-6 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      className="w-full p-6 border-b border-border hover:bg-muted transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <BookOpenIcon className="w-5 h-5 text-blue-600" />
+                          <div className="p-2 bg-yellow-accent/20 rounded-lg">
+                            <BookOpenIcon className="w-5 h-5 text-yellow-accent" />
                           </div>
                           <div className="text-left">
-                            <h3 className="text-xl font-semibold text-gray-900 mb-1">{plan.topic}</h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <h3 className="text-xl font-semibold text-white mb-1">{plan.topic}</h3>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
                               <div className="flex items-center gap-1">
                                 <ClockIcon className="w-4 h-4" />
                                 {new Date(plan.createdAt).toLocaleDateString()}
                               </div>
-                              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                              <span className="px-2 py-1 bg-yellow-accent/20 text-yellow-accent text-xs font-medium rounded-full">
                                 {sections.length} sections
                               </span>
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                          <span className="px-3 py-1 bg-yellow-accent/20 text-yellow-accent text-sm font-medium rounded-full">
                             Active
                           </span>
                           {isExpanded ? (
-                            <ChevronDownIcon className="w-5 h-5 text-gray-400" />
+                            <ChevronDownIcon className="w-5 h-5 text-muted-foreground" />
                           ) : (
-                            <ChevronRightIcon className="w-5 h-5 text-gray-400" />
+                            <ChevronRightIcon className="w-5 h-5 text-muted-foreground" />
                           )}
                         </div>
                       </div>
                     </button>
                     
                     {isExpanded && (
-                      <div className="p-6 bg-gray-50">
+                      <div className="p-6 bg-muted">
                         <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-lg font-semibold text-gray-900">Plan Details</h4>
+                          <h4 className="text-lg font-semibold text-white">Plan Details</h4>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeletePlan(plan.id);
                             }}
                             disabled={deletingPlan === plan.id}
-                            className="flex items-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
                           >
                             {deletingPlan === plan.id ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
                             ) : (
                               <TrashIcon className="w-4 h-4" />
                             )}
@@ -464,13 +464,13 @@ export default function DashboardPage() {
                         </div>
                         <div className="space-y-4">
                           {sections.map((section, sectionIndex) => (
-                            <div key={sectionIndex} className="bg-white rounded-lg border border-gray-200 p-4">
-                              <h4 className="font-semibold text-gray-900 mb-3 text-lg">{section.title}</h4>
+                            <div key={sectionIndex} className="card-dark p-4">
+                              <h4 className="font-semibold text-white mb-3 text-lg">{section.title}</h4>
                               <div className="space-y-2">
                                 {section.items.map((item, itemIndex) => (
                                   <div key={itemIndex} className="flex items-start gap-3">
-                                    <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                                    <p className="text-gray-700 leading-relaxed">{item}</p>
+                                    <div className="flex-shrink-0 w-2 h-2 bg-yellow-accent rounded-full mt-2"></div>
+                                    <p className="text-muted-foreground leading-relaxed">{item}</p>
                                   </div>
                                 ))}
                               </div>
@@ -489,75 +489,75 @@ export default function DashboardPage() {
         {/* Quiz Results Section */}
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <AcademicCapIcon className="w-6 h-6 text-green-600" />
+            <div className="p-2 bg-yellow-accent/20 rounded-lg">
+              <AcademicCapIcon className="w-6 h-6 text-yellow-accent" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Quiz Results</h2>
+            <h2 className="text-2xl font-bold text-white">Quiz Results</h2>
           </div>
           
           {loading ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <div className="card-dark p-8">
               <div className="flex justify-center items-center py-8">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading your quiz results...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading your quiz results...</p>
                 </div>
               </div>
             </div>
           ) : quizzes.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-              <AcademicCapIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No quiz results yet</h3>
-              <p className="text-gray-600">Take your first quiz to see your results here!</p>
+            <div className="card-dark p-8 text-center">
+              <AcademicCapIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">No quiz results yet</h3>
+              <p className="text-muted-foreground">Take your first quiz to see your results here!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {quizzes.map((quiz) => (
-                <div key={quiz.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative group">
+                <div key={quiz.id} className="card-dark p-6 relative group">
                   <button
                     onClick={() => handleDeleteQuiz(quiz.id)}
                     disabled={deletingQuiz === quiz.id}
-                    className="absolute top-3 right-3 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                    className="absolute top-3 right-3 p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
                   >
                     {deletingQuiz === quiz.id ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
                     ) : (
                       <TrashIcon className="w-4 h-4" />
                     )}
                   </button>
                   
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900">{quiz.topic}</h3>
+                    <h3 className="font-semibold text-white">{quiz.topic}</h3>
                     <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      quiz.score >= 80 ? 'bg-green-100 text-green-800' :
-                      quiz.score >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                      quiz.score >= 80 ? 'bg-yellow-accent/20 text-yellow-accent' :
+                      quiz.score >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
                     }`}>
                       {quiz.score}%
                     </div>
                   </div>
                   
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm text-gray-600">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>Questions</span>
                       <span>{quiz.questions.length}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-600">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>Completed</span>
                       <span>{new Date(quiz.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <div className="flex items-center gap-2">
                       {quiz.score >= 80 ? (
-                        <StarIcon className="w-4 h-4 text-yellow-500" />
+                        <StarIcon className="w-4 h-4 text-yellow-400" />
                       ) : quiz.score >= 60 ? (
-                        <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                        <CheckCircleIcon className="w-4 h-4 text-yellow-accent" />
                       ) : (
-                        <LightBulbIcon className="w-4 h-4 text-blue-500" />
+                        <LightBulbIcon className="w-4 h-4 text-blue-400" />
                       )}
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted-foreground">
                         {quiz.score >= 80 ? 'Excellent!' : 
                          quiz.score >= 60 ? 'Good job!' : 'Keep learning!'}
                       </span>

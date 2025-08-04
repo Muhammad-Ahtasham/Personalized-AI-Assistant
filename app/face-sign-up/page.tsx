@@ -139,20 +139,20 @@ export default function FaceSignUpPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
+    <div className="flex justify-center items-center min-h-screen bg-black">
+      <div className="card-dark p-8 w-full max-w-md">
+        <h1 className="text-2xl font-bold text-center mb-6 text-white">
           {showFaceAuth ? "Face Registration" : showVerification ? "Verify Your Email" : "Create Account with Face Auth"}
         </h1>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded">
             {error}
           </div>
         )}
         
         {success && (
-          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+          <div className="mb-4 p-3 bg-yellow-accent/10 border border-yellow-accent/20 text-yellow-accent rounded">
             {success}
           </div>
         )}
@@ -161,7 +161,7 @@ export default function FaceSignUpPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="firstName" className="block text-sm font-medium text-white mb-1">
                   First Name (Optional)
                 </label>
                 <input
@@ -169,12 +169,12 @@ export default function FaceSignUpPage() {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="input-dark w-full"
                   placeholder="John"
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="lastName" className="block text-sm font-medium text-white mb-1">
                   Last Name (Optional)
                 </label>
                 <input
@@ -182,14 +182,14 @@ export default function FaceSignUpPage() {
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="input-dark w-full"
                   placeholder="Doe"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
                 Email Address
               </label>
               <input
@@ -198,13 +198,13 @@ export default function FaceSignUpPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input-dark w-full"
                 placeholder="john@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
                 Password
               </label>
               <input
@@ -214,10 +214,10 @@ export default function FaceSignUpPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input-dark w-full"
                 placeholder="••••••••"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Password must be at least 8 characters long
               </p>
             </div>
@@ -225,7 +225,7 @@ export default function FaceSignUpPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Sending Verification..." : "Continue to Email Verification"}
             </button>
@@ -233,17 +233,17 @@ export default function FaceSignUpPage() {
         ) : showVerification ? (
           <>
             <div className="mb-6 text-center">
-              <p className="text-sm text-gray-600 mb-4">
-                We&apos;ve sent a verification code to <strong>{email}</strong>
+              <p className="text-sm text-muted-foreground mb-4">
+                We&apos;ve sent a verification code to <strong className="text-white">{email}</strong>
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Please check your email and enter the 6-digit verification code below.
               </p>
             </div>
 
             <form onSubmit={handleVerification} className="space-y-4">
               <div>
-                <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="verificationCode" className="block text-sm font-medium text-white mb-1">
                   Verification Code
                 </label>
                 <input
@@ -254,10 +254,10 @@ export default function FaceSignUpPage() {
                   required
                   maxLength={6}
                   pattern="[0-9]{6}"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-widest"
+                  className="input-dark w-full text-center text-lg tracking-widest"
                   placeholder="000000"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Enter the 6-digit code from your email
                 </p>
               </div>
@@ -265,7 +265,7 @@ export default function FaceSignUpPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Verifying..." : "Verify Email"}
               </button>
@@ -274,7 +274,7 @@ export default function FaceSignUpPage() {
                 <button
                   type="button"
                   onClick={handleBackToEmailForm}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-sm text-yellow-accent hover:text-yellow-500 font-medium"
                 >
                   ← Back to sign up
                 </button>
@@ -292,7 +292,7 @@ export default function FaceSignUpPage() {
             
             <button
               onClick={handleBackToForm}
-              className="w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+              className="btn-secondary w-full"
             >
               ← Back to Form
             </button>
@@ -300,11 +300,11 @@ export default function FaceSignUpPage() {
         )}
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {!showVerification ? (
               <>
                 Already have an account?{" "}
-                <a href="/face-sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
+                <a href="/face-sign-in" className="text-yellow-accent hover:text-yellow-500 font-medium">
                   Sign in with face
                 </a>
               </>
@@ -313,7 +313,7 @@ export default function FaceSignUpPage() {
                 Didn&apos;t receive the code?{" "}
                 <button
                   onClick={handleSubmit}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-yellow-accent hover:text-yellow-500 font-medium"
                 >
                   Resend code
                 </button>
@@ -321,9 +321,9 @@ export default function FaceSignUpPage() {
             )}
           </p>
           {!showVerification && (
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               Or{" "}
-              <a href="/sign-up" className="text-blue-600 hover:text-blue-700 font-medium">
+              <a href="/sign-up" className="text-yellow-accent hover:text-yellow-500 font-medium">
                 sign up with email
               </a>
             </p>

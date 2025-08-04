@@ -215,36 +215,36 @@ function HomePageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-black text-white">
       <div className="max-w-4xl mx-auto p-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-center text-primary">Personalized Study Assistant</h1>
+          <h1 className="text-4xl font-bold mb-8 text-center text-yellow-accent">Personalized Study Assistant</h1>
           
           {!user && (
-            <div className="mb-8 p-6 bg-card text-card-foreground border border-border rounded-lg shadow-sm">
+            <div className="mb-8 p-6 card-dark">
               <h2 className="text-xl font-semibold mb-4 text-center">Welcome! Please sign in to continue</h2>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
                   href="/sign-in"
-                  className="bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors text-center"
+                  className="btn-primary text-center"
                 >
                   Sign In with Email
                 </a>
                 <a
                   href="/face-sign-in"
-                  className="bg-accent text-accent-foreground font-semibold py-3 px-6 rounded-lg hover:bg-accent/80 transition-colors text-center"
+                  className="btn-secondary text-center"
                 >
                   Sign In with Face
                 </a>
               </div>
               <div className="mt-4 text-center text-sm text-muted-foreground">
                 Don't have an account?{" "}
-                <a href="/sign-up" className="text-primary hover:underline">Sign up with email</a>
+                <a href="/sign-up" className="text-green-accent hover:underline">Sign up with email</a>
                 {" "}or{" "}
-                <a href="/face-sign-up" className="text-primary hover:underline">sign up with face</a>
+                <a href="/face-sign-up" className="text-green-accent hover:underline">sign up with face</a>
               </div>
               <div className="mt-2 text-center text-xs text-muted-foreground">
-                <a href="/test-face-api" className="text-primary hover:underline">Test Face API</a>
+                <a href="/test-face-api" className="text-green-accent hover:underline">Test Face API</a>
               </div>
             </div>
           )}
@@ -252,9 +252,9 @@ function HomePageContent() {
 
           
           {!user && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg">
+            <div className="mb-6 p-4 bg-secondary border border-border text-muted-foreground rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-yellow-accent rounded-full"></div>
                 <span className="font-medium">Sign in to use all features</span>
               </div>
               <p className="text-sm">Generate learning plans and quizzes, save your progress, and access your dashboard.</p>
@@ -262,11 +262,11 @@ function HomePageContent() {
           )}
 
           {user && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg">
+            <div className="mb-6 p-4 bg-secondary border border-border text-foreground rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-yellow-accent rounded-full"></div>
                     <span className="font-medium">Signed in as {user.emailAddresses[0]?.emailAddress}</span>
                   </div>
                   <p className="text-sm">You can now generate and save learning plans and quizzes.</p>
@@ -283,7 +283,7 @@ function HomePageContent() {
                       alert('Test failed. Check console for details.');
                     }
                   }}
-                  className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded hover:bg-green-200 transition-colors"
+                  className="px-3 py-1 bg-yellow-accent text-black text-xs rounded hover-yellow-accent transition-colors"
                 >
                   Test Config
                 </button>
@@ -299,7 +299,7 @@ function HomePageContent() {
                       alert('Health check failed. Check console for details.');
                     }
                   }}
-                  className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded hover:bg-blue-200 transition-colors ml-2"
+                  className="px-3 py-1 bg-secondary text-foreground text-xs rounded hover:bg-muted transition-colors ml-2"
                 >
                   Health Check
                 </button>
@@ -317,7 +317,7 @@ function HomePageContent() {
                 type="text"
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
-                className="w-full p-4 bg-background text-foreground border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-colors"
+                className="input-dark w-full p-4"
                 placeholder="e.g. Linear Algebra, React, World War II..."
                 required
               />
@@ -325,14 +325,14 @@ function HomePageContent() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleSubmit}
-                className="flex-1 bg-primary text-primary-foreground font-semibold py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={loading || !topic.trim()}
               >
                 {loading ? "Generating..." : "Generate Learning Plan"}
               </button>
               <button
                 onClick={handleGenerateQuiz}
-                className="flex-1 bg-accent text-accent-foreground font-semibold py-4 px-6 rounded-lg hover:bg-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-secondary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={quizLoading || !topic.trim()}
               >
                 {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
@@ -347,7 +347,7 @@ function HomePageContent() {
           )}
           
           {saveMsg && (
-            <div className="mb-6 p-4 bg-green-100 border border-green-200 text-green-800 rounded-lg">
+            <div className="mb-6 p-4 bg-yellow-accent/10 border border-yellow-accent/20 text-yellow-accent rounded-lg">
               {saveMsg}
             </div>
           )}

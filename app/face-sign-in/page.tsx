@@ -218,8 +218,8 @@ function FaceSignInContent() {
 
   if (!isLoaded) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex justify-center items-center min-h-screen bg-black">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent"></div>
       </div>
     );
   }
@@ -227,30 +227,30 @@ function FaceSignInContent() {
   // If already signed in, show loading while redirecting
   if (isSignedIn && user) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen bg-black">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to dashboard...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
+    <div className="flex justify-center items-center min-h-screen bg-black">
+      <div className="card-dark p-8 w-full max-w-md">
+        <h1 className="text-2xl font-bold text-center mb-6 text-white">
           Sign In with Face Recognition
         </h1>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded">
             {error}
           </div>
         )}
         
         {success && (
-          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+          <div className="mb-4 p-3 bg-yellow-accent/10 border border-yellow-accent/20 text-yellow-accent rounded">
             {success}
           </div>
         )}
@@ -265,7 +265,7 @@ function FaceSignInContent() {
             />
             
             <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Position your face in the camera to sign in
               </p>
             </div>
@@ -273,8 +273,8 @@ function FaceSignInContent() {
         ) : (
           <div className="space-y-4">
             <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
-                Face authentication successful! Please enter the email address for the recognized user: <strong>{userEmail}</strong>
+              <p className="text-sm text-muted-foreground mb-4">
+                Face authentication successful! Please enter the email address for the recognized user: <strong className="text-white">{userEmail}</strong>
               </p>
             </div>
             
@@ -284,7 +284,7 @@ function FaceSignInContent() {
               handleCompleteSignIn(email);
             }} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
                   Email
                 </label>
                 <input
@@ -294,14 +294,14 @@ function FaceSignInContent() {
                   defaultValue={userEmail}
                   readOnly
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                  className="input-dark w-full bg-muted"
                   placeholder="Email will be auto-filled"
                 />
               </div>
               
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="btn-primary w-full"
               >
                 Complete Sign In
               </button>
@@ -314,7 +314,7 @@ function FaceSignInContent() {
                 setUserEmail("");
                 setRecognizedUser(null);
               }}
-              className="w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+              className="btn-secondary w-full"
             >
               Try Face Recognition Again
             </button>
@@ -322,15 +322,15 @@ function FaceSignInContent() {
         )}
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <a href="/face-sign-up" className="text-blue-600 hover:text-blue-700 font-medium">
+            <a href="/face-sign-up" className="text-yellow-accent hover:text-yellow-500 font-medium">
               Sign up with face
             </a>
           </p>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             Or{" "}
-            <a href="/sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
+            <a href="/sign-in" className="text-yellow-accent hover:text-yellow-500 font-medium">
               sign in with email
             </a>
           </p>
@@ -343,8 +343,8 @@ function FaceSignInContent() {
 export default function FaceSignInPage() {
   return (
     <Suspense fallback={
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex justify-center items-center min-h-screen bg-black">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent"></div>
       </div>
     }>
       <FaceSignInContent />
