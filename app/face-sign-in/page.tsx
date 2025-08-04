@@ -45,6 +45,7 @@ function FaceSignInContent() {
   const handleFaceDetected = async (embedding: number[]) => {
     setIsLoading(true);
     setError("");
+    setSuccess(""); // Clear any previous success message
 
     try {
       // First, authenticate face with our API
@@ -65,6 +66,8 @@ function FaceSignInContent() {
         return;
       }
 
+      // Clear any previous error since face was recognized
+      setError("");
       setUserEmail(faceData.user.email);
       setRecognizedUser(faceData.user);
 
@@ -116,7 +119,7 @@ function FaceSignInContent() {
       // If user doesn't have a Clerk ID or traditional sign-in failed,
       // show email input to complete sign-in
       setShowEmailInput(true);
-      setSuccess("Face authentication successful! Please enter your email to complete sign-in.");
+      setSuccess("Face Captured successfully! Please enter your email to complete sign-in.");
 
     } catch (error) {
       console.error("Face sign-in error:", error);
@@ -128,6 +131,7 @@ function FaceSignInContent() {
 
   const handleFaceError = (error: string) => {
     setError(error);
+    setSuccess(""); // Clear any success message when there's an error
   };
 
   const handleCompleteSignIn = async (email: string) => {
