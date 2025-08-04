@@ -21,6 +21,7 @@ const FaceAuth: React.FC<FaceAuthProps> = ({
   const [isStreamActive, setIsStreamActive] = useState(false);
   const [detectionInterval, setDetectionInterval] = useState<NodeJS.Timeout | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [hasDetectedFace, setHasDetectedFace] = useState(false); // Prevent multiple callbacks
 
   // Load face-api models
   useEffect(() => {
@@ -72,6 +73,9 @@ const FaceAuth: React.FC<FaceAuthProps> = ({
   // Start video stream
   const startVideo = async () => {
     try {
+      // Reset detection flag when starting new video session
+      setHasDetectedFace(false);
+      
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           width: 640, 
@@ -112,6 +116,7 @@ const FaceAuth: React.FC<FaceAuthProps> = ({
       setDetectionInterval(null);
     }
     setRetryCount(0);
+    setHasDetectedFace(false); // Reset the detection flag
   };
 
   // Start face detection
@@ -148,10 +153,13 @@ const FaceAuth: React.FC<FaceAuthProps> = ({
           .withFaceLandmarks()
           .withFaceDescriptors();
 
-        if (detections.length > 0) {
+        if (detections.length > 0 && !hasDetectedFace) {
           // Get the first detected face
           const face = detections[0];
           const embedding = Array.from(face.descriptor);
+          
+          // Set flag to prevent multiple callbacks
+          setHasDetectedFace(true);
           
           // Stop detection and video
           stopVideo();

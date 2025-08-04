@@ -43,11 +43,13 @@ function FaceSignInContent() {
   }, [isSignedIn, user, isLoaded, router]);
 
   const handleFaceDetected = async (embedding: number[]) => {
+    console.log('FaceAuth: handleFaceDetected called');
     setIsLoading(true);
     setError("");
     setSuccess(""); // Clear any previous success message
 
     try {
+      console.log('FaceAuth: Making API call to face-login');
       // First, authenticate face with our API
       const faceResponse = await fetch("/api/face-login", {
         method: "POST",
@@ -60,19 +62,23 @@ function FaceSignInContent() {
       });
 
       const faceData = await faceResponse.json();
+      console.log('FaceAuth: API response received:', faceResponse.ok, faceData);
 
       if (!faceResponse.ok) {
+        console.log('FaceAuth: Face not recognized, setting error');
         setError(faceData.error || "Face authentication failed");
         return;
       }
 
       // Clear any previous error since face was recognized
+      console.log('FaceAuth: Face recognized, clearing error and setting user data');
       setError("");
       setUserEmail(faceData.user.email);
       setRecognizedUser(faceData.user);
 
       // Check if user has a Clerk ID
       if (faceData.user.clerkId) {
+        console.log('FaceAuth: User has Clerk ID, attempting traditional sign-in');
         // User exists in Clerk, try to sign in
         try {
           const passwordResponse = await fetch("/api/auth/get-user-password", {
@@ -118,6 +124,7 @@ function FaceSignInContent() {
 
       // If user doesn't have a Clerk ID or traditional sign-in failed,
       // show email input to complete sign-in
+      console.log('FaceAuth: Showing email input for manual sign-in');
       setShowEmailInput(true);
       setSuccess("Face Captured successfully! Please enter your email to complete sign-in.");
 
@@ -130,6 +137,7 @@ function FaceSignInContent() {
   };
 
   const handleFaceError = (error: string) => {
+    console.log('FaceAuth: handleFaceError called with:', error);
     setError(error);
     setSuccess(""); // Clear any success message when there's an error
   };
