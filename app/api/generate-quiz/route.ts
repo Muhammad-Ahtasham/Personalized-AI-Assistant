@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: "You are an expert study assistant. Given a topic, generate a short interactive quiz (3-5 questions) for a beginner. Return the quiz as a JSON array of objects with 'question', 'choices' (array), and 'answer' (string). Do not include explanations unless asked.",
+            content: "You are an expert study assistant. Given a topic, generate a short interactive quiz (minimum 5 questions) from beginner to advanced level. Return the quiz as a JSON array of objects with 'question', 'choices' (array), and 'answer' (string). Do not include explanations unless asked.",
           },
           {
             role: "user",

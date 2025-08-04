@@ -28,9 +28,11 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
   const parsePlan = (planText: string): { title: string; sections: LearningPlanSection[] } => {
     const lines = planText.split('\n').filter(line => line.trim());
     
-    // Extract title (usually the first line with **)
+    // Extract title (usually the first line with ** or after "Personalized Learning Plan:")
     const titleMatch = planText.match(/\*\*(.*?)\*\*/);
-    const title = titleMatch ? titleMatch[1] : "Learning Plan";
+    const planTitleMatch = planText.match(/Personalized Learning Plan:\s*(.*?)(?:\n|$)/i);
+    const title = titleMatch ? titleMatch[1] : 
+                 planTitleMatch ? planTitleMatch[1] : "Learning Plan";
     
     const sections: LearningPlanSection[] = [];
     let currentSection: LearningPlanSection | null = null;
@@ -39,43 +41,64 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
       const trimmedLine = line.trim();
       
       // Skip empty lines and title
-      if (!trimmedLine || trimmedLine.includes('**Personalized Learning Plan:')) continue;
+      if (!trimmedLine || trimmedLine.includes('Personalized Learning Plan:')) continue;
       
-      // Check for section headers (### or **)
+      // Check for section headers (### or **) - clean them up
       if (trimmedLine.startsWith('###') || (trimmedLine.startsWith('**') && trimmedLine.endsWith('**'))) {
         if (currentSection) {
           sections.push(currentSection);
         }
         
-        const sectionTitle = trimmedLine.replace(/^###\s*/, '').replace(/\*\*/g, '').trim();
+        const sectionTitle = trimmedLine
+          .replace(/^###\s*/, '')
+          .replace(/\*\*/g, '')
+          .trim();
         currentSection = {
           title: sectionTitle,
           content: [],
           type: getSectionType(sectionTitle)
         };
       } else if (currentSection && trimmedLine) {
-        // Handle numbered lists, bullet points, and regular content
-        if (trimmedLine.match(/^\d+\./)) {
+        // Handle numbered lists, bullet points, and regular content - clean up markdown
+        let cleanContent = trimmedLine
+          .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+          .replace(/\*(.*?)\*/g, '$1') // Remove italic
+          .replace(/###\s*/g, '') // Remove headers
+          .replace(/##\s*/g, '') // Remove subheaders
+          .replace(/#\s*/g, '') // Remove single headers
+          .replace(/---/g, '') // Remove separators
+          .trim();
+        
+        if (cleanContent.match(/^\d+\./)) {
           // Numbered list item
-          currentSection.content.push(trimmedLine);
-        } else if (trimmedLine.startsWith('-') || trimmedLine.startsWith('*')) {
+          currentSection.content.push(cleanContent);
+        } else if (cleanContent.startsWith('-') || cleanContent.startsWith('*')) {
           // Bullet point
-          currentSection.content.push(trimmedLine);
-        } else if (trimmedLine.startsWith('*Resource*:') || trimmedLine.startsWith('*Tip*:')) {
+          currentSection.content.push(cleanContent);
+        } else if (cleanContent.startsWith('*Resource*:') || cleanContent.startsWith('*Tip*:')) {
           // Resource or tip
-          currentSection.content.push(trimmedLine);
-        } else if (trimmedLine.includes('---')) {
+          currentSection.content.push(cleanContent);
+        } else if (cleanContent.includes('---')) {
           // Separator, skip
           continue;
-        } else {
+        } else if (cleanContent.length > 0) {
           // Regular content
-          currentSection.content.push(trimmedLine);
+          currentSection.content.push(cleanContent);
         }
       } else if (!currentSection && trimmedLine) {
         // If no section is created yet, create a default one
+        const cleanContent = trimmedLine
+          .replace(/\*\*(.*?)\*\*/g, '$1')
+          .replace(/\*(.*?)\*/g, '$1')
+          .replace(/###\s*/g, '')
+          .replace(/##\s*/g, '')
+          .replace(/#\s*/g, '')
+          .replace(/---/g, '')
+          .trim();
+        
         currentSection = {
           title: "Overview",
-          content: [trimmedLine],
+          content: [cleanContent],
           type: 'general'
         };
       }
@@ -87,9 +110,21 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
     
     // If no sections were found, create a default section with all content
     if (sections.length === 0) {
+      const cleanLines = lines
+        .filter(line => line.trim() && !line.includes('Personalized Learning Plan:'))
+        .map(line => line
+          .replace(/\*\*(.*?)\*\*/g, '$1')
+          .replace(/\*(.*?)\*/g, '$1')
+          .replace(/###\s*/g, '')
+          .replace(/##\s*/g, '')
+          .replace(/#\s*/g, '')
+          .replace(/---/g, '')
+          .trim()
+        );
+      
       sections.push({
         title: "Learning Plan",
-        content: lines.filter(line => line.trim() && !line.includes('**Personalized Learning Plan:')),
+        content: cleanLines,
         type: 'general'
       });
     }

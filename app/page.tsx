@@ -53,12 +53,25 @@ function HomePageContent() {
         console.log(data, " Here is data")
         throw new Error(data.error || "Failed to generate plan");
       }
-      setPlan(data.plan);
-      if (user) {
+      
+      // Validate the generated plan
+      const planContent = data.plan;
+      if (!planContent || 
+          planContent.trim() === "" || 
+          planContent.toLowerCase().includes("no plan generated") ||
+          planContent.toLowerCase().includes("failed to generate") ||
+          planContent.length < 50) {
+        throw new Error("Failed to generate a proper learning plan. Please try again.");
+      }
+      
+      setPlan(planContent);
+      
+      // Only save if we have a valid plan and user is signed in
+      if (user && planContent && planContent.trim() !== "") {
         const saveRes = await fetch("/api/save-learning-plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic, content: data.plan, clerkId: user.id }),
+          body: JSON.stringify({ topic, content: planContent, clerkId: user.id }),
         });
         if (saveRes.ok) setSaveMsg("Learning plan saved to your dashboard!");
       }
