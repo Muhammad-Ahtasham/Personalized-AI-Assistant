@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import { clerkClient } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
@@ -32,6 +32,21 @@ export async function POST(request: NextRequest) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Try to find existing Clerk user first
+    let clerkUser = null;
+    try {
+      const clerk = await clerkClient();
+      const usersResponse = await clerk.users.getUserList({
+        emailAddress: [email],
+      });
+      
+      if (usersResponse.data && usersResponse.data.length > 0) {
+        clerkUser = usersResponse.data[0];
+      }
+    } catch (clerkError) {
+      console.error('Error checking for existing Clerk user:', clerkError);
+    }
+
     // Create user and face embedding in a transaction
     const result = await prisma.$transaction(async (tx) => {
       // Create the user in Prisma first
@@ -41,6 +56,7 @@ export async function POST(request: NextRequest) {
           password: hashedPassword,
           firstName: firstName || null,
           lastName: lastName || null,
+          clerkId: clerkUser?.id || null,
         },
       });
 
@@ -55,17 +71,53 @@ export async function POST(request: NextRequest) {
       return { user, faceEmbeddingRecord };
     });
 
-    // Create Clerk user
-    try {
-      const clerk = await clerkClient();
-      const clerkUser = await clerk.users.createUser({
-        emailAddress: [email],
-        password,
-        firstName: firstName || undefined,
-        lastName: lastName || undefined,
-      });
+    // If no Clerk user exists, create one
+    if (!clerkUser) {
+      try {
+        const clerk = await clerkClient();
+        const newClerkUser = await clerk.users.createUser({
+          emailAddress: [email],
+          password,
+          firstName: firstName || undefined,
+          lastName: lastName || undefined,
+        });
 
-      // Update user in database with Clerk ID
+        // Update user in database with Clerk ID
+        await prisma.user.update({
+          where: { id: result.user.id },
+          data: {
+            clerkId: newClerkUser.id,
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          message: 'User registered successfully with face authentication',
+          user: {
+            id: result.user.id,
+            email: result.user.email,
+            firstName: result.user.firstName,
+            lastName: result.user.lastName,
+            clerkId: newClerkUser.id,
+          },
+        });
+      } catch (clerkError) {
+        console.error('Failed to create Clerk user:', clerkError);
+        // If Clerk user creation fails, still return success but without clerkId
+        return NextResponse.json({
+          success: true,
+          message: 'User registered successfully with face authentication (Clerk user creation failed)',
+          user: {
+            id: result.user.id,
+            email: result.user.email,
+            firstName: result.user.firstName,
+            lastName: result.user.lastName,
+            clerkId: null,
+          },
+        });
+      }
+    } else {
+      // Clerk user already exists (from email verification), just update the database
       await prisma.user.update({
         where: { id: result.user.id },
         data: {
@@ -82,20 +134,6 @@ export async function POST(request: NextRequest) {
           firstName: result.user.firstName,
           lastName: result.user.lastName,
           clerkId: clerkUser.id,
-        },
-      });
-    } catch (clerkError) {
-      console.error('Failed to create Clerk user:', clerkError);
-      // If Clerk user creation fails, still return success but without clerkId
-      return NextResponse.json({
-        success: true,
-        message: 'User registered successfully with face authentication (Clerk user creation failed)',
-        user: {
-          id: result.user.id,
-          email: result.user.email,
-          firstName: result.user.firstName,
-          lastName: result.user.lastName,
-          clerkId: null,
         },
       });
     }

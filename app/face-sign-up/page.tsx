@@ -11,9 +11,11 @@ export default function FaceSignUpPage() {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showVerification, setShowVerification] = useState(false);
   const [showFaceAuth, setShowFaceAuth] = useState(false);
   const [faceEmbedding, setFaceEmbedding] = useState<number[] | null>(null);
 
@@ -27,7 +29,58 @@ export default function FaceSignUpPage() {
       return;
     }
 
-    setShowFaceAuth(true);
+    setIsLoading(true);
+
+    try {
+      if (!signUp) {
+        throw new Error("Sign up not available");
+      }
+
+      // Create the signup with just email and password
+      await signUp.create({
+        emailAddress: email,
+        password,
+      });
+
+      await signUp.prepareEmailAddressVerification();
+      
+      setShowVerification(true);
+      setSuccess("Verification code sent to your email!");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      if (!signUp) {
+        throw new Error("Sign up not available");
+      }
+
+      const result = await signUp.attemptEmailAddressVerification({
+        code: verificationCode,
+      });
+
+      if (result.status === "complete") {
+        setSuccess("Email verified! Please proceed to face registration.");
+        setShowVerification(false);
+        setShowFaceAuth(true);
+      } else {
+        setError("Verification failed. Please check your code and try again.");
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Verification failed. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFaceDetected = async (embedding: number[]) => {
@@ -80,11 +133,16 @@ export default function FaceSignUpPage() {
     setFaceEmbedding(null);
   };
 
+  const handleBackToEmailForm = () => {
+    setShowVerification(false);
+    setVerificationCode("");
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
-          {showFaceAuth ? "Face Registration" : "Create Account with Face Auth"}
+          {showFaceAuth ? "Face Registration" : showVerification ? "Verify Your Email" : "Create Account with Face Auth"}
         </h1>
         
         {error && (
@@ -99,7 +157,7 @@ export default function FaceSignUpPage() {
           </div>
         )}
 
-        {!showFaceAuth ? (
+        {!showVerification && !showFaceAuth ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -169,9 +227,60 @@ export default function FaceSignUpPage() {
               disabled={isLoading}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? "Processing..." : "Continue to Face Registration"}
+              {isLoading ? "Sending Verification..." : "Continue to Email Verification"}
             </button>
           </form>
+        ) : showVerification ? (
+          <>
+            <div className="mb-6 text-center">
+              <p className="text-sm text-gray-600 mb-4">
+                We&apos;ve sent a verification code to <strong>{email}</strong>
+              </p>
+              <p className="text-xs text-gray-500">
+                Please check your email and enter the 6-digit verification code below.
+              </p>
+            </div>
+
+            <form onSubmit={handleVerification} className="space-y-4">
+              <div>
+                <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700 mb-1">
+                  Verification Code
+                </label>
+                <input
+                  id="verificationCode"
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  required
+                  maxLength={6}
+                  pattern="[0-9]{6}"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-widest"
+                  placeholder="000000"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter the 6-digit code from your email
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isLoading ? "Verifying..." : "Verify Email"}
+              </button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={handleBackToEmailForm}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  ← Back to sign up
+                </button>
+              </div>
+            </form>
+          </>
         ) : (
           <div className="space-y-4">
             <FaceAuth
@@ -192,17 +301,33 @@ export default function FaceSignUpPage() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Already have an account?{" "}
-            <a href="/face-sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
-              Sign in with face
-            </a>
+            {!showVerification ? (
+              <>
+                Already have an account?{" "}
+                <a href="/face-sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
+                  Sign in with face
+                </a>
+              </>
+            ) : (
+              <>
+                Didn&apos;t receive the code?{" "}
+                <button
+                  onClick={handleSubmit}
+                  className="text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Resend code
+                </button>
+              </>
+            )}
           </p>
-          <p className="text-sm text-gray-600 mt-2">
-            Or{" "}
-            <a href="/sign-up" className="text-blue-600 hover:text-blue-700 font-medium">
-              sign up with email
-            </a>
-          </p>
+          {!showVerification && (
+            <p className="text-sm text-gray-600 mt-2">
+              Or{" "}
+              <a href="/sign-up" className="text-blue-600 hover:text-blue-700 font-medium">
+                sign up with email
+              </a>
+            </p>
+          )}
         </div>
       </div>
     </div>
