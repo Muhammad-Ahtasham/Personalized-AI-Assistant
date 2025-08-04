@@ -58,9 +58,9 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
     try {
       let finalImageUrl = imageUrl.trim() || undefined;
       
-      // If there's an uploaded image, process it first
+            // If there's an uploaded image, process it first
       if (uploadedImage) {
-  
+        console.log("Uploading image to:", "/api/auth/upload-profile-image");
         const uploadResponse = await fetch("/api/auth/upload-profile-image", {
           method: "POST",
           headers: {
@@ -72,15 +72,26 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
         });
 
         if (!uploadResponse.ok) {
-          const uploadError = await uploadResponse.json();
+          let uploadError;
+          try {
+            uploadError = await uploadResponse.json();
+          } catch (error) {
+            throw new Error("Failed to upload image. Please try again.");
+          }
           throw new Error(uploadError.error || "Failed to upload image");
         }
 
-        const uploadData = await uploadResponse.json();
+        let uploadData;
+        try {
+          uploadData = await uploadResponse.json();
+        } catch (error) {
+          throw new Error("Failed to process upload response. Please try again.");
+        }
         finalImageUrl = uploadData.imageUrl;
       }
 
 
+      console.log("Sending update request to:", "/api/auth/update-user-profile");
       const response = await fetch("/api/auth/update-user-profile", {
         method: "PUT",
         headers: {
@@ -93,7 +104,13 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
         }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        // If response is not JSON (e.g., HTML error page), throw a generic error
+        throw new Error("Server returned an invalid response. Please try again.");
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to update profile");

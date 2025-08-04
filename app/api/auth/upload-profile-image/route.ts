@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { handleApiError, createErrorResponse } from '../../error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,19 +8,20 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
     
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return createErrorResponse('Not authenticated', 401);
     }
 
-    const { imageData } = await request.json();
+    let requestBody;
+    try {
+      requestBody = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    const { imageData } = requestBody;
 
     if (!imageData) {
-      return NextResponse.json(
-        { error: 'No image data provided' },
-        { status: 400 }
-      );
+      return createErrorResponse('No image data provided', 400);
     }
 
     // For now, we'll return the base64 data URL directly
@@ -33,10 +35,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Upload profile image error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Upload profile image');
   }
 } 

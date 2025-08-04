@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { auth } from '@clerk/nextjs/server';
+import { handleApiError, createErrorResponse } from '../../error-handler';
 
 const prisma = new PrismaClient();
 
@@ -10,22 +11,21 @@ export async function PUT(request: NextRequest) {
     const { userId } = await auth();
     
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return createErrorResponse('Not authenticated', 401);
     }
 
-    const { firstName, lastName, imageUrl } = await request.json();
-    
+    let requestBody;
+    try {
+      requestBody = await request.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
 
+    const { firstName, lastName, imageUrl } = requestBody;
 
     // Validate input
     if (!firstName && !lastName && !imageUrl) {
-      return NextResponse.json(
-        { error: 'At least one field must be provided' },
-        { status: 400 }
-      );
+      return createErrorResponse('At least one field must be provided', 400);
     }
 
     // Update user in Clerk
@@ -65,10 +65,6 @@ export async function PUT(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Update user profile error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'Update user profile');
   }
 } 
