@@ -20,7 +20,38 @@ export async function POST(req: NextRequest) {
     // Find or create user
     let user = await prisma.user.findUnique({ where: { clerkId } });
     if (!user) {
-      user = await prisma.user.create({ data: { clerkId } });
+      // Get user details from Clerk
+      const { clerkClient } = await import('@clerk/nextjs/server');
+      const clerk = await clerkClient();
+      const clerkUser = await clerk.users.getUser(clerkId);
+
+      if (!clerkUser) {
+        return NextResponse.json(
+          { error: "User not found in Clerk" },
+          { status: 404 }
+        );
+      }
+
+      // Get primary email
+      const primaryEmail = clerkUser.emailAddresses.find(
+        email => email.id === clerkUser.primaryEmailAddressId
+      );
+
+      if (!primaryEmail) {
+        return NextResponse.json(
+          { error: "No primary email found" },
+          { status: 400 }
+        );
+      }
+
+      user = await prisma.user.create({
+        data: {
+          clerkId,
+          email: primaryEmail.emailAddress,
+          firstName: clerkUser.firstName || null,
+          lastName: clerkUser.lastName || null,
+        },
+      });
     }
     // Save quiz result
     const result = await prisma.quizResult.create({

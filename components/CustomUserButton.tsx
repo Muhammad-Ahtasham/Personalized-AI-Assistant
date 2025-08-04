@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function CustomUserButton() {
-  const { user, isSignedIn, isFaceAuthenticated, logout } = useAuth();
+  const { user, isSignedIn, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +29,7 @@ export default function CustomUserButton() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        key={user?.imageUrl} // Force re-render when image changes
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
       >
@@ -51,9 +52,6 @@ export default function CustomUserButton() {
             <div className="px-4 py-2 border-b border-gray-100">
               <div className="text-sm font-medium text-gray-900">{userName}</div>
               <div className="text-sm text-gray-500">{userEmail}</div>
-              {isFaceAuthenticated && (
-                <div className="text-xs text-blue-600 mt-1">Face Authenticated</div>
-              )}
             </div>
             
             <div className="py-1">
@@ -86,7 +84,7 @@ export default function CustomUserButton() {
             </div>
             
             <div className="px-4 py-2 border-t border-gray-100 text-xs text-gray-500">
-              Secured by {isFaceAuthenticated ? 'Face Recognition' : 'Clerk'}
+              Secured by Clerk
               {process.env.NODE_ENV === 'development' && ' • Development mode'}
             </div>
           </div>

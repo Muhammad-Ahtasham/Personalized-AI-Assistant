@@ -8,7 +8,7 @@ import CustomUserButton from './CustomUserButton';
 
 export default function Navbar() {
   const { isSignedIn, user } = useUser();
-  const { isAuthenticated, isFaceAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <nav className="bg-card border-b border-border shadow-sm">
@@ -54,7 +54,15 @@ export default function Navbar() {
             ) : (
               <div className="flex items-center gap-3">
                 {isSignedIn ? (
-                  <UserButton afterSignOutUrl="/" />
+                  <UserButton 
+                    key={user?.id} // Force re-render when user changes
+                    afterSignOutUrl="/" 
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-8 h-8"
+                      }
+                    }}
+                  />
                 ) : (
                   <CustomUserButton />
                 )}

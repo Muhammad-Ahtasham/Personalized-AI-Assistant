@@ -17,6 +17,7 @@ import {
   Shield,
   Activity
 } from "lucide-react";
+import ProfileEditModal from "@/components/ProfileEditModal";
 
 interface UserStats {
   totalPlans: number;
@@ -60,8 +61,21 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'settings'>('overview');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const router = useRouter();
+
+  const handleProfileUpdate = () => {
+    // Force a refresh of the user data from Clerk
+    // This will trigger the useEffect to re-run and fetch updated data
+    setLoading(true);
+    // Small delay to ensure the update has propagated
+    setTimeout(() => {
+      setLoading(false);
+      // Force a re-render by updating a state
+      setActiveTab(activeTab);
+    }, 1000);
+  };
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -159,8 +173,16 @@ export default function ProfilePage() {
         <div className="card-dark mb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-yellow-accent to-yellow-500 rounded-full flex items-center justify-center">
-                <User className="w-10 h-10 text-black" />
+              <div className="w-20 h-20 bg-gradient-to-br from-yellow-accent to-yellow-500 rounded-full flex items-center justify-center overflow-hidden">
+                {user?.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt="Profile"
+                    className="w-20 h-20 object-cover"
+                  />
+                ) : (
+                  <User className="w-10 h-10 text-black" />
+                )}
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white">
@@ -390,6 +412,23 @@ export default function ProfilePage() {
                       <label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
                       <p className="text-white">{user?.emailAddresses[0]?.emailAddress}</p>
                     </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">Profile Image</label>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-yellow-accent to-yellow-500 rounded-full flex items-center justify-center overflow-hidden">
+                          {user?.imageUrl ? (
+                            <img
+                              src={user.imageUrl}
+                              alt="Profile"
+                              className="w-12 h-12 object-cover"
+                            />
+                          ) : (
+                            <User className="w-6 h-6 text-black" />
+                          )}
+                        </div>
+                        <p className="text-white">{user?.imageUrl ? 'Image set' : 'No image set'}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -424,7 +463,10 @@ export default function ProfilePage() {
                     Account Actions
                   </h4>
                   <div className="space-y-3">
-                    <button className="w-full text-left p-3 bg-yellow-accent/10 hover:bg-yellow-accent/20 rounded-lg transition-colors border border-yellow-accent/20">
+                    <button 
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="w-full text-left p-3 bg-yellow-accent/10 hover:bg-yellow-accent/20 rounded-lg transition-colors border border-yellow-accent/20"
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Edit3 className="w-4 h-4 text-yellow-accent" />
@@ -433,6 +475,7 @@ export default function ProfilePage() {
                         <span className="text-xs text-yellow-accent">→</span>
                       </div>
                     </button>
+
                     <button className="w-full text-left p-3 bg-yellow-accent/10 hover:bg-yellow-accent/20 rounded-lg transition-colors border border-yellow-accent/20">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -449,6 +492,13 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      {/* Profile Edit Modal */}
+      <ProfileEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onUpdate={handleProfileUpdate}
+      />
     </div>
   );
 } 

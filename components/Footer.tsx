@@ -20,10 +20,10 @@ export default function Footer() {
 
           {/* Right - Social Icons */}
           <div className="flex gap-4">
-            <a href="https://github.com" target="_blank" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="https://github.com/Muhammad-Ahtasham/ " target="_blank" className="text-muted-foreground hover:text-foreground transition-colors">
               <Github size={18} />
             </a>
-            <a href="https://twitter.com" target="_blank" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a href="https://atiiisham.vercel.app" target="_blank" className="text-muted-foreground hover:text-foreground transition-colors">
               <Twitter size={18} />
             </a>
             <a href="mailto:support@studymate.com" className="text-muted-foreground hover:text-foreground transition-colors">

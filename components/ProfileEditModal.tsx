@@ -1,0 +1,293 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { useUser } from "@clerk/nextjs";
+import { X, Camera, User, Mail, Upload, Image } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
+
+interface ProfileEditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdate: () => void;
+}
+
+export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileEditModalProps) {
+  const { user } = useUser();
+  const { client } = useClerk();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [imageUrl, setImageUrl] = useState(user?.imageUrl || "");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setUploadedImage(result);
+        setImageUrl(''); // Clear URL input when file is uploaded
+        setError(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      let finalImageUrl = imageUrl.trim() || undefined;
+      
+      // If there's an uploaded image, process it first
+      if (uploadedImage) {
+  
+        const uploadResponse = await fetch("/api/auth/upload-profile-image", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            imageData: uploadedImage,
+          }),
+        });
+
+        if (!uploadResponse.ok) {
+          const uploadError = await uploadResponse.json();
+          throw new Error(uploadError.error || "Failed to upload image");
+        }
+
+        const uploadData = await uploadResponse.json();
+        finalImageUrl = uploadData.imageUrl;
+      }
+
+
+      const response = await fetch("/api/auth/update-user-profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          imageUrl: finalImageUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update profile");
+      }
+
+      setSuccess(true);
+      
+      // Force a page refresh to update all components including navbar
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      
+      onUpdate();
+      
+      // Close modal after a short delay
+      setTimeout(() => {
+        onClose();
+        setSuccess(false);
+      }, 1500);
+
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-card-dark border border-border rounded-xl p-6 w-full max-w-md mx-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-white">Edit Profile</h2>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Profile Image */}
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Profile Image
+            </label>
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-accent to-yellow-500 flex items-center justify-center overflow-hidden">
+                {uploadedImage ? (
+                  <img
+                    src={uploadedImage}
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                ) : imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                ) : (
+                  <User className="w-8 h-8 text-black" />
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                {/* File Upload */}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 px-3 py-2 bg-yellow-accent/10 hover:bg-yellow-accent/20 text-yellow-accent rounded-lg transition-colors border border-yellow-accent/20 text-sm"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload Image
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  {uploadedImage && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadedImage(null);
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                      }}
+                      className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors border border-red-500/20 text-sm"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                {/* URL Input */}
+                <div className="flex items-center gap-2">
+                  <Image className="w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="url"
+                    placeholder="Or enter image URL"
+                    value={imageUrl}
+                    onChange={(e) => {
+                      setImageUrl(e.target.value);
+                      setUploadedImage(null); // Clear uploaded image when URL is entered
+                    }}
+                    className="flex-1 px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Upload an image file (max 5MB) or provide an image URL
+            </p>
+          </div>
+
+          {/* First Name */}
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              First Name
+            </label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
+              placeholder="Enter first name"
+            />
+          </div>
+
+          {/* Last Name */}
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Last Name
+            </label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
+              placeholder="Enter last name"
+            />
+          </div>
+
+          {/* Email (Read-only) */}
+          <div>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Email
+            </label>
+            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border border-border rounded-lg text-muted-foreground">
+              <Mail className="w-4 h-4" />
+              <span>{user?.emailAddresses[0]?.emailAddress}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Email cannot be changed for security reasons
+            </p>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <p className="text-destructive text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+              <p className="text-green-400 text-sm">Profile updated successfully!</p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-border rounded-lg text-white hover:bg-muted transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-4 py-2 bg-yellow-accent hover:bg-yellow-500 text-black font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Updating..." : "Update Profile"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+} 
