@@ -287,6 +287,22 @@ function HomePageContent() {
                 >
                   Test Config
                 </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/health');
+                      const data = await res.json();
+                      console.log('Health check:', data);
+                      alert(`Health Check:\nStatus: ${data.status}\nEnvironment: ${data.environment}\nOpenRouter: ${data.openRouterKey}`);
+                    } catch (error) {
+                      console.error('Health check failed:', error);
+                      alert('Health check failed. Check console for details.');
+                    }
+                  }}
+                  className="px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded hover:bg-blue-200 transition-colors ml-2"
+                >
+                  Health Check
+                </button>
               </div>
             </div>
           )}
