@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "prisma generate",
     "start": "next start",
     "lint": "next lint"
   },

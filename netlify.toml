@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && npx prisma generate && npm run build"
+  command = "npm install && npm run build"
   publish = ".next"
 
 [[plugins]]
@@ -8,10 +8,18 @@
 # ✅ Serverless function configuration
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["@prisma/client"]
 
 # ✅ Environment variables for serverless functions
 [context.production.environment]
   NODE_ENV = "production"
+
+# ✅ Ensure API routes are handled correctly
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/___netlify-handler"
+  status = 200
+  force = true
 
 # ✅ Ensure static assets are cached correctly
 [[headers]]
