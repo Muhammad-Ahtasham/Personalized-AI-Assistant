@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "dev": "next dev",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@clerk/nextjs": "^6.28.0",
     "@heroicons/react": "^2.2.0",
-    "@netlify/plugin-nextjs": "^5.11.6",
+    "@netlify/plugin-nextjs": "^5.12.0",
     "@prisma/client": "^6.13.0",
     "@types/bcryptjs": "^2.4.6",
     "autoprefixer": "^10.4.21",
@@ -28,7 +28,6 @@
     "prisma": "^6.13.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-router-dom": "^7.7.1",
     "svix": "^1.69.0",
     "swr": "^2.2.5",
     "tailwindcss-animate": "^1.0.7"
