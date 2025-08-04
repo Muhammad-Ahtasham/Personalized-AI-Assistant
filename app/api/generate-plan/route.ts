@@ -2,28 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
-  // Check authentication
-  const { userId } = await auth();
-  
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Authentication required. Please sign in to generate learning plans." },
-      { status: 401 }
-    );
-  }
-
-  const { topic } = await req.json();
-
-  if (!topic) {
-    return NextResponse.json({ error: "No topic provided." }, { status: 400 });
-  }
-
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "OpenRouter API key not set." }, { status: 500 });
-  }
-
   try {
+    // Check authentication
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please sign in to generate learning plans." },
+        { status: 401 }
+      );
+    }
+
+    const { topic } = await req.json();
+
+    if (!topic) {
+      return NextResponse.json({ error: "No topic provided." }, { status: 400 });
+    }
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      console.error("OpenRouter API key not set in environment variables");
+      return NextResponse.json({ 
+        error: "OpenRouter API key not set. Please check your deployment configuration." 
+      }, { status: 500 });
+    }
+
+    console.log("Making request to OpenRouter with topic:", topic);
+
     const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -47,13 +52,21 @@ export async function POST(req: NextRequest) {
       }),
     });
 
+    console.log("OpenRouter response status:", openRouterRes.status);
+
     if (!openRouterRes.ok) {
-      const error = await openRouterRes.text();
-      return NextResponse.json({ error: `OpenRouter error: ${error}` }, { status: 500 });
+      const errorText = await openRouterRes.text();
+      console.error("OpenRouter error response:", errorText);
+      return NextResponse.json({ 
+        error: `OpenRouter API error (${openRouterRes.status}): ${errorText}` 
+      }, { status: 500 });
     }
 
     const data = await openRouterRes.json();
+    console.log("OpenRouter response data received");
+    
     const plan = data.choices?.[0]?.message?.content || "";
+    console.log("Generated plan length:", plan.length);
     
     // Validate the generated plan
     if (!plan || 
@@ -63,14 +76,19 @@ export async function POST(req: NextRequest) {
         plan.toLowerCase().includes("i cannot") ||
         plan.toLowerCase().includes("i'm unable") ||
         plan.length < 100) {
+      console.log("Plan validation failed - plan too short or contains failure indicators");
       return NextResponse.json({ 
         error: "Failed to generate a proper learning plan. Please try again with a different topic or check your internet connection." 
       }, { status: 500 });
     }
     
+    console.log("Plan validation passed, returning plan");
     return NextResponse.json({ plan });
   } catch (err) {
     const error = err as Error;
-    return NextResponse.json({ error: error.message || "Failed to fetch from OpenRouter." }, { status: 500 });
+    console.error("Error in generate-plan API:", error);
+    return NextResponse.json({ 
+      error: `Server error: ${error.message || "Failed to fetch from OpenRouter."}` 
+    }, { status: 500 });
   }
 } 

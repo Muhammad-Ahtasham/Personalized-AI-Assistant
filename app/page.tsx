@@ -43,14 +43,19 @@ function HomePageContent() {
     setError(null);
     setSaveMsg(null);
     try {
+      console.log("Sending request to generate plan for topic:", topic);
       const res = await fetch("/api/generate-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic }),
       });
+      
+      console.log("Response status:", res.status);
       const data = await res.json();
+      console.log("Response data:", data);
+      
       if (!res.ok) {
-        console.log(data, " Here is data")
+        console.error("API error:", data);
         throw new Error(data.error || "Failed to generate plan");
       }
       
@@ -77,10 +82,15 @@ function HomePageContent() {
       }
     } catch (err) {
       const error = err as Error;
+      console.error("Error generating plan:", error);
       if (error.message.includes("Authentication required")) {
         setError("Please sign in to generate learning plans. Click the 'Sign In' button in the top right.");
+      } else if (error.message.includes("OpenRouter API key not set")) {
+        setError("API configuration error. Please contact support.");
+      } else if (error.message.includes("OpenRouter API error")) {
+        setError("AI service temporarily unavailable. Please try again later.");
       } else {
-        setError(error.message || "Something went wrong");
+        setError(error.message || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -102,17 +112,21 @@ function HomePageContent() {
     setError(null);
     
     try {
+      console.log("Sending request to generate quiz for topic:", topic);
       const res = await fetch("/api/generate-quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to generate quiz");
       
-      console.log("Quiz data received:", data);
-      console.log("Quiz type:", typeof data.quiz);
-      console.log("Quiz value:", data.quiz);
+      console.log("Quiz response status:", res.status);
+      const data = await res.json();
+      console.log("Quiz response data:", data);
+      
+      if (!res.ok) {
+        console.error("Quiz API error:", data);
+        throw new Error(data.error || "Failed to generate quiz");
+      }
       
       if (Array.isArray(data.quiz) && data.quiz.length > 0) {
         console.log("Setting quiz with", data.quiz.length, "questions");
@@ -124,12 +138,17 @@ function HomePageContent() {
       }
     } catch (err) {
       const error = err as Error;
+      console.error("Error generating quiz:", error);
       setQuiz(null);
       setQuizFeedback([]);
       if (error.message.includes("Authentication required")) {
         setError("Please sign in to generate quizzes. Click the 'Sign In' button in the top right.");
+      } else if (error.message.includes("OpenRouter API key not set")) {
+        setError("API configuration error. Please contact support.");
+      } else if (error.message.includes("OpenRouter API error")) {
+        setError("AI service temporarily unavailable. Please try again later.");
       } else {
-        setError(error.message || "Failed to generate quiz");
+        setError(error.message || "Failed to generate quiz. Please try again.");
       }
     } finally {
       setQuizLoading(false);
@@ -239,6 +258,36 @@ function HomePageContent() {
                 <span className="font-medium">Sign in to use all features</span>
               </div>
               <p className="text-sm">Generate learning plans and quizzes, save your progress, and access your dashboard.</p>
+            </div>
+          )}
+
+          {user && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="font-medium">Signed in as {user.emailAddresses[0]?.emailAddress}</span>
+                  </div>
+                  <p className="text-sm">You can now generate and save learning plans and quizzes.</p>
+                </div>
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/test-config');
+                      const data = await res.json();
+                      console.log('Configuration test:', data);
+                      alert(`Config Test:\nOpenRouter: ${data.config.openRouterKey}\nDatabase: ${data.config.databaseUrl}\nOpenRouter Test: ${data.openRouterTest}`);
+                    } catch (error) {
+                      console.error('Test failed:', error);
+                      alert('Test failed. Check console for details.');
+                    }
+                  }}
+                  className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded hover:bg-green-200 transition-colors"
+                >
+                  Test Config
+                </button>
+              </div>
             </div>
           )}
 
