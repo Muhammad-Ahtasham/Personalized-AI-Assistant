@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --save-dev @types/react @types/node && npm install && npx prisma generate && npm run build"
+  command = "npm install && npx prisma generate && npm run build"
   publish = ".next"
 
 [[plugins]]
