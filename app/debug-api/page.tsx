@@ -117,7 +117,7 @@ export default function DebugAPI() {
               </h3>
               <span className={`px-2 py-1 rounded text-sm ${
                 result.status >= 200 && result.status < 300 
-                  ? "bg-green-100 text-green-800"
+                  ? "bg-red-100 text-green-800"
                   : result.status >= 400 
                   ? "bg-red-100 text-red-800"
                   : "bg-yellow-100 text-yellow-800"
@@ -133,7 +133,7 @@ export default function DebugAPI() {
                 <p className="text-red-800 font-mono text-sm">{result.error}</p>
               </div>
             ) : (
-              <pre className="bg-white p-3 rounded border text-sm overflow-x-auto">
+              <pre className="bg-white text-black p-3 rounded border text-sm overflow-x-auto">
                 {JSON.stringify(result.data, null, 2)}
               </pre>
             )}
