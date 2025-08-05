@@ -272,7 +272,7 @@ function HomePageContent() {
               <p className="text-sm">Generate learning plans and quizzes, save your progress, and access your dashboard.</p>
             </div>
           )}
-
+          {/* 
           {user && (
             <div className="mb-6 p-4 bg-secondary border border-border text-foreground rounded-lg">
               <div className="flex items-center justify-between">
@@ -317,7 +317,7 @@ function HomePageContent() {
                 </button>
               </div>
             </div>
-          )}
+          )} */}
 
           <div className="space-y-6 mb-8">
             <div className="space-y-2">
