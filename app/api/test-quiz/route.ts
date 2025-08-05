@@ -1,33 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("Generate Quiz API called");
-    
-    // Check authentication
-    const { userId } = await auth();
-    console.log("Auth check result - userId:", userId ? "present" : "missing");
-    
-    if (!userId) {
-      console.log("Authentication failed - no userId");
-      return NextResponse.json(
-        { error: "Authentication required. Please sign in to generate quizzes." },
-        { status: 401 }
-      );
-    }
-
     const { topic } = await req.json();
-    console.log("Generate Quiz for topic:", topic);
+    console.log("Test Quiz for topic:", topic);
     
     if (!topic) {
-      console.log("No topic provided");
       return NextResponse.json({ error: "No topic provided." }, { status: 400 });
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
-    console.log("OpenRouter API key check:", apiKey ? "Set" : "Not set");
-    
     if (!apiKey) {
       console.error("OpenRouter API key not set in environment variables");
       return NextResponse.json({ 
@@ -35,7 +17,7 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log("Making request to OpenRouter for quiz with topic:", topic);
+    console.log("Making request to OpenRouter for test quiz with topic:", topic);
 
     // Add timeout to the fetch request
     const controller = new AbortController();
@@ -114,7 +96,6 @@ export async function POST(req: NextRequest) {
         quiz = [];
       }
       
-      console.log("Returning quiz response");
       return NextResponse.json({ quiz });
     } catch (fetchError) {
       clearTimeout(timeoutId);
@@ -124,12 +105,11 @@ export async function POST(req: NextRequest) {
           error: "Request timeout. Please try again." 
         }, { status: 408 });
       }
-      console.error("Fetch error:", fetchError);
       throw fetchError;
     }
   } catch (err) {
     const error = err as Error;
-    console.error("Error in generate-quiz API:", error);
+    console.error("Error in test-quiz API:", error);
     return NextResponse.json({ 
       error: `Server error: ${error.message || "Failed to fetch from OpenRouter."}` 
     }, { status: 500 });

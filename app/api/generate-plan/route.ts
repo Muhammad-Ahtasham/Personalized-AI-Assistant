@@ -3,10 +3,14 @@ import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("Generate Plan API called");
+    
     // Check authentication
     const { userId } = await auth();
+    console.log("Auth check result - userId:", userId ? "present" : "missing");
     
     if (!userId) {
+      console.log("Authentication failed - no userId");
       return NextResponse.json(
         { error: "Authentication required. Please sign in to generate learning plans." },
         { status: 401 }
@@ -14,12 +18,16 @@ export async function POST(req: NextRequest) {
     }
 
     const { topic } = await req.json();
+    console.log("Generate Plan for topic:", topic);
 
     if (!topic) {
+      console.log("No topic provided");
       return NextResponse.json({ error: "No topic provided." }, { status: 400 });
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
+    console.log("OpenRouter API key check:", apiKey ? "Set" : "Not set");
+    
     if (!apiKey) {
       console.error("OpenRouter API key not set in environment variables");
       return NextResponse.json({ 
@@ -100,6 +108,7 @@ export async function POST(req: NextRequest) {
           error: "Request timeout. Please try again." 
         }, { status: 408 });
       }
+      console.error("Fetch error:", fetchError);
       throw fetchError;
     }
   } catch (err) {

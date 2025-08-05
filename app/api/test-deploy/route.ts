@@ -3,16 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   try {
     return NextResponse.json({
-      message: "API is working on Netlify!",
+      status: "success",
+      message: "API is working correctly",
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
-      url: request.url,
-      method: request.method,
+      openRouterKey: process.env.OPENROUTER_API_KEY ? "Set" : "Not set",
+      clerkKey: process.env.CLERK_SECRET_KEY ? "Set" : "Not set",
     });
   } catch (error) {
     console.error("Test deploy error:", error);
     return NextResponse.json(
-      { error: "Test deploy failed", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: "error", error: "Test endpoint failed" },
       { status: 500 }
     );
   }
@@ -22,14 +23,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     return NextResponse.json({
-      message: "POST API is working on Netlify!",
-      timestamp: new Date().toISOString(),
+      status: "success",
+      message: "POST request received",
       receivedData: body,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error("Test deploy POST error:", error);
     return NextResponse.json(
-      { error: "Test deploy POST failed", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: "error", error: "POST test failed" },
       { status: 500 }
     );
   }
