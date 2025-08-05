@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
 import { X, Camera, User, Mail, Upload, Image } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
+import { useAlertContext } from "@/components/AlertProvider";
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -14,27 +15,26 @@ interface ProfileEditModalProps {
 export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileEditModalProps) {
   const { user } = useUser();
   const { client } = useClerk();
+  const { showSuccess, showError } = useAlertContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
   const [imageUrl, setImageUrl] = useState(user?.imageUrl || "");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        setError('Please select an image file');
+        showError('Please select an image file');
         return;
       }
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('Image size must be less than 5MB');
+        showError('Image size must be less than 5MB');
         return;
       }
 
@@ -43,7 +43,6 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
         const result = e.target?.result as string;
         setUploadedImage(result);
         setImageUrl(''); // Clear URL input when file is uploaded
-        setError(null);
       };
       reader.readAsDataURL(file);
     }
@@ -52,8 +51,6 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(false);
 
     try {
       let finalImageUrl = imageUrl.trim() || undefined;
@@ -116,7 +113,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
         throw new Error(data.error || "Failed to update profile");
       }
 
-      setSuccess(true);
+      showSuccess("Profile updated successfully!");
       
       // Force a page refresh to update all components including navbar
       setTimeout(() => {
@@ -128,12 +125,11 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
       // Close modal after a short delay
       setTimeout(() => {
         onClose();
-        setSuccess(false);
       }, 1500);
 
     } catch (err) {
       const error = err as Error;
-      setError(error.message);
+      showError(error.message);
     } finally {
       setLoading(false);
     }
@@ -272,19 +268,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
             </p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-              <p className="text-destructive text-sm">{error}</p>
-            </div>
-          )}
 
-          {/* Success Message */}
-          {success && (
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-              <p className="text-green-400 text-sm">Profile updated successfully!</p>
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">

@@ -1,34 +1,38 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSignUp } from "@clerk/nextjs";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSignUp, useClerk, useUser } from "@clerk/nextjs";
 import FaceAuth from "../../components/FaceAuth";
+import { useAlertContext } from "@/components/AlertProvider";
 
-export default function FaceSignUpPage() {
+
+function FaceSignUpContent() {
   const router = useRouter();
-  const { signUp } = useSignUp();
+  const searchParams = useSearchParams();
+  const { signUp, isLoaded } = useSignUp();
+  const { setActive } = useClerk();
+  const { isSignedIn, user } = useUser();
+  const { showSuccess, showError } = useAlertContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [showVerification, setShowVerification] = useState(false);
-  const [showFaceAuth, setShowFaceAuth] = useState(false);
   const [faceEmbedding, setFaceEmbedding] = useState<number[] | null>(null);
+  const [tempFaceId, setTempFaceId] = useState<string | null>(null);
+
+  // Redirect to dashboard if already signed in
+  useEffect(() => {
+    if (isSignedIn && user) {
+      router.push("/dashboard");
+    }
+  }, [isSignedIn, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (!email || !password) {
-      setError("Email and password are required");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -36,7 +40,7 @@ export default function FaceSignUpPage() {
         throw new Error("Sign up not available");
       }
 
-      // Create the signup with just email and password
+      // Only create the Clerk user (don't create database user yet)
       await signUp.create({
         emailAddress: email,
         password,
@@ -45,10 +49,10 @@ export default function FaceSignUpPage() {
       await signUp.prepareEmailAddressVerification();
       
       setShowVerification(true);
-      setSuccess("Verification code sent to your email!");
+      showSuccess("Verification code sent to your email!");
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
-      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +61,6 @@ export default function FaceSignUpPage() {
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     try {
       if (!signUp) {
@@ -69,68 +72,91 @@ export default function FaceSignUpPage() {
       });
 
       if (result.status === "complete") {
-        setSuccess("Email verified! Please proceed to face registration.");
-        setShowVerification(false);
-        setShowFaceAuth(true);
+        // Now create the user in our database with face embedding
+        if (faceEmbedding) {
+          const registerResponse = await fetch("/api/face-register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email,
+              password,
+              firstName,
+              lastName,
+              faceEmbedding,
+            }),
+          });
+
+          if (!registerResponse.ok) {
+            const errorData = await registerResponse.json();
+            showError(errorData.error || "Failed to register user with face authentication");
+            return;
+          }
+        }
+        
+        showSuccess("Registration completed! Redirecting to dashboard...");
+        
+        // Redirect to dashboard after successful verification
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 2000);
       } else {
-        setError("Verification failed. Please check your code and try again.");
+        showError("Verification failed. Please check your code and try again.");
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Verification failed. Please try again.";
-      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleFaceDetected = async (embedding: number[]) => {
-    setFaceEmbedding(embedding);
+    console.log('FaceAuth: handleFaceDetected called');
     setIsLoading(true);
-    setError("");
-
+    
     try {
+      console.log('FaceAuth: Making API call to face-register for temporary storage');
       const response = await fetch("/api/face-register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email,
-          password,
-          firstName: firstName || null,
-          lastName: lastName || null,
           faceEmbedding: embedding,
         }),
       });
 
       const data = await response.json();
+      console.log('FaceAuth: API response received:', response.ok, data);
 
-      if (response.ok) {
-        setSuccess("Account created successfully! Redirecting to dashboard...");
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 2000);
-      } else {
-        setError(data.error || "Registration failed");
-        setShowFaceAuth(false);
+      if (!response.ok) {
+        showError("Face capture failed");
+        return;
       }
+
+      setFaceEmbedding(embedding);
+      setTempFaceId(data.tempId);
+      setShowEmailForm(true);
+      showSuccess("Face captured successfully! Please enter your details to complete registration.");
     } catch (error) {
-      console.error("Registration error:", error);
-      setError("Registration failed. Please try again.");
-      setShowFaceAuth(false);
+      console.error('FaceAuth: Error during face capture:', error);
+      showError("Face capture failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleFaceError = (error: string) => {
-    setError(error);
-    setShowFaceAuth(false);
+    console.error('FaceAuth: Error:', error);
+    showError(error);
   };
 
   const handleBackToForm = () => {
-    setShowFaceAuth(false);
+    setShowEmailForm(false);
     setFaceEmbedding(null);
+    setTempFaceId(null);
   };
 
   const handleBackToEmailForm = () => {
@@ -138,98 +164,37 @@ export default function FaceSignUpPage() {
     setVerificationCode("");
   };
 
+  if (!isLoaded) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-black">
       <div className="card-dark p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6 text-white">
-          {showFaceAuth ? "Face Registration" : showVerification ? "Verify Your Email" : "Create Account with Face Auth"}
+          Sign Up with Face Recognition
         </h1>
-        
-        {error && (
-          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded">
-            {error}
-          </div>
-        )}
-        
-        {success && (
-          <div className="mb-4 p-3 bg-yellow-accent/10 border border-yellow-accent/20 text-yellow-accent rounded">
-            {success}
-          </div>
-        )}
 
-        {!showVerification && !showFaceAuth ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-white mb-1">
-                  First Name (Optional)
-                </label>
-                <input
-                  id="firstName"
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="input-dark w-full"
-                  placeholder="John"
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-white mb-1">
-                  Last Name (Optional)
-                </label>
-                <input
-                  id="lastName"
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="input-dark w-full"
-                  placeholder="Doe"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="input-dark w-full"
-                placeholder="john@example.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                className="input-dark w-full"
-                placeholder="••••••••"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Password must be at least 8 characters long
-              </p>
-            </div>
-
+        {!showEmailForm ? (
+          <div className="space-y-4">
+            <FaceAuth
+              mode="register"
+              onFaceDetected={handleFaceDetected}
+              onError={handleFaceError}
+              isLoading={isLoading}
+            />
+            
             <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleBackToForm}
+              className="btn-secondary w-full"
             >
-              {isLoading ? "Sending Verification..." : "Continue to Email Verification"}
+              ← Back to Form
             </button>
-          </form>
+          </div>
         ) : showVerification ? (
           <>
             <div className="mb-6 text-center">
@@ -283,19 +248,81 @@ export default function FaceSignUpPage() {
           </>
         ) : (
           <div className="space-y-4">
-            <FaceAuth
-              mode="register"
-              onFaceDetected={handleFaceDetected}
-              onError={handleFaceError}
-              isLoading={isLoading}
-            />
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-4">
+                Face captured successfully! Please enter your details to complete registration.
+              </p>
+            </div>
             
-            <button
-              onClick={handleBackToForm}
-              className="btn-secondary w-full"
-            >
-              ← Back to Form
-            </button>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="input-dark w-full"
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="input-dark w-full"
+                  placeholder="Create a strong password"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-white mb-1">
+                    First Name
+                  </label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="input-dark w-full"
+                    placeholder="John"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-white mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="input-dark w-full"
+                    placeholder="Doe"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "Sending Verification..." : "Continue to Email Verification"}
+              </button>
+            </form>
           </div>
         )}
 
@@ -332,4 +359,16 @@ export default function FaceSignUpPage() {
       </div>
     </div>
   );
-} 
+}
+
+export default function FaceSignUpPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen bg-black">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent"></div>
+      </div>
+    }>
+      <FaceSignUpContent />
+    </Suspense>
+  );
+}

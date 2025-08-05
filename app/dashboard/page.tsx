@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useAlertContext } from "@/components/AlertProvider";
 import { 
   BookOpenIcon, 
   AcademicCapIcon, 
@@ -44,10 +45,10 @@ interface QuizQuestion {
 
 export default function DashboardPage() {
   const { isSignedIn, user, isLoaded } = useUser();
+  const { showSuccess, showError } = useAlertContext();
   const [plans, setPlans] = useState<LearningPlan[]>([]);
   const [quizzes, setQuizzes] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
   const [deletingPlan, setDeletingPlan] = useState<string | null>(null);
   const [deletingQuiz, setDeletingQuiz] = useState<string | null>(null);
@@ -89,11 +90,11 @@ export default function DashboardPage() {
         newExpanded.delete(planId);
         setExpandedPlans(newExpanded);
       } else {
-        setError(data.error || 'Failed to delete learning plan');
+        showError(data.error || 'Failed to delete learning plan');
       }
     } catch (error) {
       console.error('Error deleting learning plan:', error);
-      setError('Failed to delete learning plan');
+      showError('Failed to delete learning plan');
     } finally {
       setDeletingPlan(null);
     }
@@ -120,11 +121,11 @@ export default function DashboardPage() {
         // Remove the quiz from the state
         setQuizzes(quizzes.filter(quiz => quiz.id !== quizId));
       } else {
-        setError(data.error || 'Failed to delete quiz result');
+        showError(data.error || 'Failed to delete quiz result');
       }
     } catch (error) {
       console.error('Error deleting quiz result:', error);
-      setError('Failed to delete quiz result');
+      showError('Failed to delete quiz result');
     } finally {
       setDeletingQuiz(null);
     }
@@ -149,7 +150,6 @@ export default function DashboardPage() {
     
     const syncUserAndFetchHistory = async () => {
       setLoading(true);
-      setError(null);
       try {
         // First, sync user to database
         const syncResponse = await fetch("/api/auth/sync-user-to-database", {
@@ -190,7 +190,7 @@ export default function DashboardPage() {
         setQuizzes(data.quizzes || []);
       } catch (err) {
         const error = err as Error;
-        setError(error.message || "Failed to fetch history");
+        showError(error.message || "Failed to fetch history");
       } finally {
         setLoading(false);
       }
@@ -362,18 +362,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <CheckCircleIcon className="h-5 w-5 text-destructive" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* Learning Plans Section */}
         <div className="mb-8">

@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSignIn, useClerk, useUser } from "@clerk/nextjs";
 import FaceAuth from "../../components/FaceAuth";
+import { useAlertContext } from "@/components/AlertProvider";
 
 function FaceSignInContent() {
   const router = useRouter();
@@ -11,8 +12,8 @@ function FaceSignInContent() {
   const { setActive } = useClerk();
   const { isSignedIn, user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { showSuccess, showError } = useAlertContext();
+  
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [recognizedUser, setRecognizedUser] = useState<any>(null);
@@ -23,7 +24,7 @@ function FaceSignInContent() {
     const email = searchParams.get('email');
     
     if (message === 'registration-success') {
-      setSuccess("Registration successful! Please sign in with your face.");
+      showSuccess("Registration successful! Please sign in with your face.");
       if (email) {
         setUserEmail(email);
       }
@@ -45,8 +46,8 @@ function FaceSignInContent() {
   const handleFaceDetected = async (embedding: number[]) => {
     console.log('FaceAuth: handleFaceDetected called');
     setIsLoading(true);
-    setError("");
-    setSuccess(""); // Clear any previous success message
+    
+    
 
     try {
       console.log('FaceAuth: Making API call to face-login');
@@ -66,13 +67,13 @@ function FaceSignInContent() {
 
       if (!faceResponse.ok) {
         console.log('FaceAuth: Face not recognized, setting error');
-        setError(faceData.error || "Face authentication failed");
+        showError(faceData.error || "Face authentication failed");
         return;
       }
 
       // Clear any previous error since face was recognized
       console.log('FaceAuth: Face recognized, clearing error and setting user data');
-      setError("");
+      
       setUserEmail(faceData.user.email);
       setRecognizedUser(faceData.user);
 
@@ -108,7 +109,7 @@ function FaceSignInContent() {
               }
               
               console.log("Face authentication successful, waiting before redirect...");
-              setSuccess("Face authentication successful! Redirecting to dashboard...");
+              showSuccess("Face authentication successful! Redirecting to dashboard...");
               // Force a page reload to ensure Clerk session is properly established
               setTimeout(() => {
                 console.log("Redirecting to dashboard...");
@@ -126,11 +127,11 @@ function FaceSignInContent() {
       // show email input to complete sign-in
       console.log('FaceAuth: Showing email input for manual sign-in');
       setShowEmailInput(true);
-      setSuccess("Face Captured successfully! Please enter your email to complete sign-in.");
+      showSuccess("Face Captured successfully! Please enter your email to complete sign-in.");
 
     } catch (error) {
       console.error("Face sign-in error:", error);
-      setError("Authentication failed. Please try again.");
+      showError("Authentication failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -138,19 +139,19 @@ function FaceSignInContent() {
 
   const handleFaceError = (error: string) => {
     console.log('FaceAuth: handleFaceError called with:', error);
-    setError(error);
-    setSuccess(""); // Clear any success message when there's an error
+    showError(error);
+    
   };
 
   const handleCompleteSignIn = async (email: string) => {
     if (!signIn) {
-      setError("Sign in not available");
+      showError("Sign in not available");
       return;
     }
 
     // SECURITY FIX: Verify that the entered email matches the face-recognized user
     if (email !== userEmail || !recognizedUser) {
-      setError("Email does not match the recognized face. Please enter the correct email for the recognized user.");
+      showError("Email does not match the recognized face. Please enter the correct email for the recognized user.");
       return;
     }
 
@@ -174,7 +175,7 @@ function FaceSignInContent() {
 
       if (!setupResponse.ok) {
         console.error("Setup response not ok:", setupResponse.status, setupData);
-        setError(setupData.error || "Failed to set up user");
+        showError(setupData.error || "Failed to set up user");
         return;
       }
 
@@ -196,7 +197,7 @@ function FaceSignInContent() {
           }
           
           console.log("Sign-in completed successfully, waiting before redirect...");
-          setSuccess("Sign-in completed! Redirecting to dashboard...");
+          showSuccess("Sign-in completed! Redirecting to dashboard...");
           // Force a page reload to ensure Clerk session is properly established
           setTimeout(() => {
             console.log("Redirecting to dashboard...");
@@ -204,15 +205,15 @@ function FaceSignInContent() {
           }, 1000);
         } else {
           console.error("Clerk sign-in failed:", result);
-          setError(`Sign-in failed. Status: ${result.status}. Please contact support.`);
+          showError(`Sign-in failed. Status: ${result.status}. Please contact support.`);
         }
       } catch (signInError) {
         console.error("Sign in error:", signInError);
-        setError(`Sign-in failed: ${signInError instanceof Error ? signInError.message : 'Unknown error'}. Please contact support.`);
+        showError(`Sign-in failed: ${signInError instanceof Error ? signInError.message : 'Unknown error'}. Please contact support.`);
       }
     } catch (error) {
       console.error("Face sign-in error:", error);
-      setError(`Sign-in failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showError(`Sign-in failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -243,18 +244,6 @@ function FaceSignInContent() {
           Sign In with Face Recognition
         </h1>
         
-        {error && (
-          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded">
-            {error}
-          </div>
-        )}
-        
-        {success && (
-          <div className="mb-4 p-3 bg-yellow-accent/10 border border-yellow-accent/20 text-yellow-accent rounded">
-            {success}
-          </div>
-        )}
-
         {!showEmailInput ? (
           <div className="space-y-4">
             <FaceAuth
@@ -310,7 +299,6 @@ function FaceSignInContent() {
             <button
               onClick={() => {
                 setShowEmailInput(false);
-                setSuccess("");
                 setUserEmail("");
                 setRecognizedUser(null);
               }}

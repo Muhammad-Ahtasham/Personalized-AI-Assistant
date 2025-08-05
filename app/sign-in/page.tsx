@@ -2,15 +2,16 @@
 import { useSignIn, useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAlertContext } from "@/components/AlertProvider";
 
 export default function SignInPage() {
   const { signIn, isLoaded } = useSignIn();
   const { isSignedIn, user } = useUser();
   const router = useRouter();
+  const { showError } = useAlertContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   console.log("User from Sign-in Page --> ", user);
   
@@ -33,7 +34,6 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     try {
       if (!signIn) {
@@ -65,11 +65,11 @@ export default function SignInPage() {
         // Redirect to dashboard or home page
         window.location.href = "/dashboard";
       } else {
-        setError("Sign in failed. Please check your credentials.");
+        showError("Sign in failed. Please check your credentials.");
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
-      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +87,7 @@ export default function SignInPage() {
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Google sign in failed. Please try again.";
-      setError(errorMessage);
+      showError(errorMessage);
     }
   };
 
@@ -103,7 +103,7 @@ export default function SignInPage() {
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Facebook sign in failed. Please try again.";
-      setError(errorMessage);
+      showError(errorMessage);
     }
   };
 
@@ -122,11 +122,7 @@ export default function SignInPage() {
           Welcome Back
         </h1>
         
-        {error && (
-          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded">
-            {error}
-          </div>
-        )}
+
 
         {/* Social Login Buttons */}
         <div className="space-y-3 mb-6">

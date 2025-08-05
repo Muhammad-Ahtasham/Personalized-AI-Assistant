@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
 import LearningPlanDisplay from "@/components/LearningPlanDisplay";
 import QuizDisplay from "@/components/QuizDisplay";
+import { useAlertContext } from "@/components/AlertProvider";
 
 interface QuizQuestion {
   question: string;
@@ -14,11 +15,10 @@ interface QuizQuestion {
 function HomePageContent() {
   const { user } = useUser();
   const searchParams = useSearchParams();
+  const { showSuccess, showError } = useAlertContext();
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null);
   
   // Quiz generation states
   const [quiz, setQuiz] = useState<QuizQuestion[] | null>(null);
@@ -40,8 +40,6 @@ function HomePageContent() {
     e.preventDefault();
     setLoading(true);
     setPlan(null);
-    setError(null);
-    setSaveMsg(null);
     try {
       console.log("Sending request to generate plan for topic:", topic);
       const res = await fetch("/api/generate-plan", {
@@ -78,19 +76,19 @@ function HomePageContent() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ topic, content: planContent, clerkId: user.id }),
         });
-        if (saveRes.ok) setSaveMsg("Learning plan saved to your dashboard!");
+        if (saveRes.ok) showSuccess("Learning plan saved to your dashboard!");
       }
     } catch (err) {
       const error = err as Error;
       console.error("Error generating plan:", error);
       if (error.message.includes("Authentication required")) {
-        setError("Please sign in to generate learning plans. Click the 'Sign In' button in the top right.");
+        showError("Please sign in to generate learning plans. Click the 'Sign In' button in the top right.");
       } else if (error.message.includes("OpenRouter API key not set")) {
-        setError("API configuration error. Please contact support.");
+        showError("API configuration error. Please contact support.");
       } else if (error.message.includes("OpenRouter API error")) {
-        setError("AI service temporarily unavailable. Please try again later.");
+        showError("AI service temporarily unavailable. Please try again later.");
       } else {
-        setError(error.message || "Something went wrong. Please try again.");
+        showError(error.message || "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -99,7 +97,7 @@ function HomePageContent() {
 
   const handleGenerateQuiz = async () => {
     if (!topic.trim()) {
-      setError("Please enter a topic for the quiz");
+      showError("Please enter a topic for the quiz");
       return;
     }
     
@@ -107,9 +105,7 @@ function HomePageContent() {
     setQuiz(null);
     setUserAnswers([]);
     setQuizFeedback([]);
-    setSaveMsg(null);
     setExplanations([]);
-    setError(null);
     
     try {
       console.log("Sending request to generate quiz for topic:", topic);
@@ -134,7 +130,7 @@ function HomePageContent() {
       } else {
         console.log("Invalid quiz format or empty quiz");
         setQuiz(null);
-        setError("Failed to generate quiz. Please try again.");
+        showError("Failed to generate quiz. Please try again.");
       }
     } catch (err) {
       const error = err as Error;
@@ -142,13 +138,13 @@ function HomePageContent() {
       setQuiz(null);
       setQuizFeedback([]);
       if (error.message.includes("Authentication required")) {
-        setError("Please sign in to generate quizzes. Click the 'Sign In' button in the top right.");
+        showError("Please sign in to generate quizzes. Click the 'Sign In' button in the top right.");
       } else if (error.message.includes("OpenRouter API key not set")) {
-        setError("API configuration error. Please contact support.");
+        showError("API configuration error. Please contact support.");
       } else if (error.message.includes("OpenRouter API error")) {
-        setError("AI service temporarily unavailable. Please try again later.");
+        showError("AI service temporarily unavailable. Please try again later.");
       } else {
-        setError(error.message || "Failed to generate quiz. Please try again.");
+        showError(error.message || "Failed to generate quiz. Please try again.");
       }
     } finally {
       setQuizLoading(false);
@@ -183,7 +179,7 @@ function HomePageContent() {
           clerkId: user.id,
         }),
       });
-      if (saveRes.ok) setSaveMsg("Quiz result saved to your dashboard!");
+      if (saveRes.ok) showSuccess("Quiz result saved to your dashboard!");
     }
   };
 
@@ -340,17 +336,7 @@ function HomePageContent() {
             </div>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
-              {error}
-            </div>
-          )}
-          
-          {saveMsg && (
-            <div className="mb-6 p-4 bg-yellow-accent/10 border border-yellow-accent/20 text-yellow-accent rounded-lg">
-              {saveMsg}
-            </div>
-          )}
+
 
           {plan && (
             <LearningPlanDisplay 
