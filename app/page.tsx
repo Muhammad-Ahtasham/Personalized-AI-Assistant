@@ -197,14 +197,30 @@ function HomePageContent() {
           topic,
         }),
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Explanation API error:", errorData);
+        throw new Error(errorData.error || "Failed to fetch explanation");
+      }
+      
       const data = await res.json();
       const newExplanations = [...explanations];
       newExplanations[qIdx] = data.explanation || "No explanation available.";
       setExplanations(newExplanations);
-    } catch {
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error fetching explanation:", error);
       const newExplanations = [...explanations];
-      newExplanations[qIdx] = "Failed to fetch explanation.";
+      newExplanations[qIdx] = error.message || "Failed to fetch explanation.";
       setExplanations(newExplanations);
+      
+      // Show error alert for authentication issues
+      if (error.message.includes("Authentication required")) {
+        showError("Please sign in to get explanations for wrong answers.");
+      } else if (error.message.includes("OpenRouter API")) {
+        showError("AI service temporarily unavailable. Please try again later.");
+      }
     } finally {
       setExplanationLoading(null);
     }
