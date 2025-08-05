@@ -465,24 +465,24 @@ export default function ProfilePage() {
                   <div className="space-y-3">
                     <button 
                       onClick={() => setIsEditModalOpen(true)}
-                      className="w-full text-left p-3 bg-yellow-accent/10 hover:bg-yellow-accent/20 rounded-lg transition-colors border border-yellow-accent/20"
+                      className="group w-full text-left p-3 bg-secondary hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent rounded-lg transition-colors border border-border hover:border-yellow-accent/20"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Edit3 className="w-4 h-4 text-yellow-accent" />
-                          <span className="text-sm font-medium text-yellow-accent">Edit Profile</span>
+                          <Edit3 className="w-4 h-4 text-muted-foreground group-hover:text-yellow-accent" />
+                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">Edit Profile</span>
                         </div>
-                        <span className="text-xs text-yellow-accent">→</span>
+                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
                       </div>
                     </button>
 
-                    <button className="w-full text-left p-3 bg-yellow-accent/10 hover:bg-yellow-accent/20 rounded-lg transition-colors border border-yellow-accent/20">
+                    <button className="group w-full text-left p-3 bg-secondary hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent rounded-lg transition-colors border border-border hover:border-yellow-accent/20">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Camera className="w-4 h-4 text-yellow-accent" />
-                          <span className="text-sm font-medium text-yellow-accent">Setup Face Authentication</span>
+                          <Camera className="w-4 h-4 text-muted-foreground group-hover:text-yellow-accent" />
+                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">Setup Face Authentication</span>
                         </div>
-                        <span className="text-xs text-yellow-accent">→</span>
+                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
                       </div>
                     </button>
                   </div>

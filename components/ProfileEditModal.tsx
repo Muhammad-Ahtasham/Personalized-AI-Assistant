@@ -282,7 +282,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-yellow-accent hover:bg-yellow-500 text-black font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-secondary hover:bg-yellow-accent hover:text-black active:bg-yellow-accent active:text-black text-foreground font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Updating..." : "Update Profile"}
             </button>

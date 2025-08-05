@@ -1,58 +1,21 @@
 [build]
   command = "npm install && npm run build"
-  
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# ✅ Serverless function configuration
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@prisma/client"]
 
-# ✅ Environment variables for serverless functions
 [context.production.environment]
   NODE_ENV = "production"
 
-# ✅ Handle API routes - this is the most important part
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/___netlify-handler"
-  status = 200
-  force = true
-
-# ✅ Handle Next.js static assets
-[[redirects]]
-  from = "/_next/static/*"
-  to = "/_next/static/:splat"
-  status = 200
-
-# ✅ Handle Next.js image optimization
-[[redirects]]
-  from = "/_next/image"
-  query = { q = ":quality", url = ":url", w = ":width" }
-  to = "/.netlify/images?url=:url&w=:width&q=:quality"
-  status = 200
-
-# ✅ Handle IPX image optimization
-[[redirects]]
-  from = "/_ipx/*"
-  query = { q = ":quality", url = ":url", w = ":width" }
-  to = "/.netlify/images?url=:url&w=:width&q=:quality"
-  status = 200
-
-# ✅ Handle all other routes (SPA fallback)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# ✅ Cache static assets
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# ✅ Cache API responses
 [[headers]]
   for = "/api/*"
   [headers.values]

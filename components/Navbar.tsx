@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { UserButton, SignInButton, SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import { Home, LayoutDashboard, NotebookText, User } from "lucide-react";
 import { useAuth } from '../hooks/useAuth';
@@ -9,6 +10,7 @@ import CustomUserButton from './CustomUserButton';
 export default function Navbar() {
   const { isSignedIn, user } = useUser();
   const { isAuthenticated } = useAuth();
+  const pathname = usePathname();
 
   return (
     <nav className="bg-card border-b border-border shadow-sm">
@@ -22,16 +24,24 @@ export default function Navbar() {
 
           {/* Nav Links */}
           <div className="hidden md:flex gap-6">
-            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors font-medium">
+            <Link href="/" className={`flex items-center gap-2 transition-colors font-medium ${
+              pathname === "/" ? "text-yellow-accent" : "text-muted-foreground hover:text-white"
+            }`}>
               <Home size={18}/> Home
             </Link>
-            <Link href="/dashboard" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors font-medium">
+            <Link href="/dashboard" className={`flex items-center gap-2 transition-colors font-medium ${
+              pathname === "/dashboard" ? "text-yellow-accent" : "text-muted-foreground hover:text-white"
+            }`}>
               <LayoutDashboard size={18}/> Dashboard
             </Link>
-            <Link href="/notes" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors font-medium">
+            <Link href="/notes" className={`flex items-center gap-2 transition-colors font-medium ${
+              pathname === "/notes" ? "text-yellow-accent" : "text-muted-foreground hover:text-white"
+            }`}>
               <NotebookText size={18}/> Notes
             </Link>
-            <Link href="/profile" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors font-medium">
+            <Link href="/profile" className={`flex items-center gap-2 transition-colors font-medium ${
+              pathname === "/profile" ? "text-yellow-accent" : "text-muted-foreground hover:text-white"
+            }`}>
               <User size={18}/> Profile
             </Link>
           </div>

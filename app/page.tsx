@@ -295,7 +295,7 @@ function HomePageContent() {
                       alert('Test failed. Check console for details.');
                     }
                   }}
-                  className="px-3 py-1 bg-yellow-accent text-black text-xs rounded hover-yellow-accent transition-colors"
+                  className="px-3 py-1 bg-secondary text-foreground text-xs rounded hover:bg-yellow-accent hover:text-black active:bg-yellow-accent active:text-black transition-colors"
                 >
                   Test Config
                 </button>
