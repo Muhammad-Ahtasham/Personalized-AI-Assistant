@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDownIcon, ChevronRightIcon, BookOpenIcon, CheckCircleIcon, AcademicCapIcon, LightBulbIcon, LinkIcon } from "@heroicons/react/24/outline";
 
 interface LearningPlanSection {
@@ -26,7 +26,7 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
   };
 
   // Parse the plan and set the first section as expanded by default
-  const parsePlan = (planText: string): { title: string; sections: LearningPlanSection[] } => {
+  const parsePlan = useCallback((planText: string): { title: string; sections: LearningPlanSection[] } => {
     const lines = planText.split('\n').filter(line => line.trim());
     
     // Extract title (usually the first line with ** or after "Personalized Learning Plan:")
@@ -61,7 +61,7 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
         };
       } else if (currentSection && trimmedLine) {
         // Handle numbered lists, bullet points, and regular content - clean up markdown
-        let cleanContent = trimmedLine
+        const cleanContent = trimmedLine
           .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
           .replace(/\*(.*?)\*/g, '$1') // Remove italic
           .replace(/###\s*/g, '') // Remove headers
@@ -131,7 +131,7 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
     }
     
     return { title, sections };
-  };
+  }, []);
 
   // Set the first section as expanded by default when plan changes
   useEffect(() => {
@@ -142,7 +142,7 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
         setIsInitialized(true);
       }
     }
-  }, [plan, isInitialized]);
+  }, [plan, isInitialized, parsePlan]);
 
   // Scroll to the newly opened section
   useEffect(() => {

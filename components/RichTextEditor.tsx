@@ -57,7 +57,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     title, 
     isActive = false 
   }: { 
-    icon: any; 
+    icon: React.ComponentType<{ size: number }>; 
     onClick: () => void; 
     title: string; 
     isActive?: boolean;

@@ -250,7 +250,7 @@ function HomePageContent() {
                 </a>
               </div>
               <div className="mt-4 text-center text-sm text-muted-foreground">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <a href="/sign-up" className="text-green-accent hover:underline">Sign up with email</a>
                 {" "}or{" "}
                 <a href="/face-sign-up" className="text-green-accent hover:underline">sign up with face</a>

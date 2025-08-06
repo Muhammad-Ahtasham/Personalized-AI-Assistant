@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { 
   User, 
   Mail, 
@@ -175,9 +176,11 @@ export default function ProfilePage() {
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 bg-gradient-to-br from-yellow-accent to-yellow-500 rounded-full flex items-center justify-center overflow-hidden">
                 {user?.imageUrl ? (
-                  <img
+                  <Image
                     src={user.imageUrl}
                     alt="Profile"
+                    width={80}
+                    height={80}
                     className="w-20 h-20 object-cover"
                   />
                 ) : (
@@ -417,9 +420,11 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-yellow-accent to-yellow-500 rounded-full flex items-center justify-center overflow-hidden">
                           {user?.imageUrl ? (
-                            <img
+                            <Image
                               src={user.imageUrl}
                               alt="Profile"
+                              width={48}
+                              height={48}
                               className="w-12 h-12 object-cover"
                             />
                           ) : (

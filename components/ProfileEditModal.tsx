@@ -2,8 +2,9 @@
 
 import { useState, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
-import { X, Camera, User, Mail, Upload, Image } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
+import { X, User, Mail, Upload, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
+
 import { useAlertContext } from "@/components/AlertProvider";
 
 interface ProfileEditModalProps {
@@ -14,7 +15,7 @@ interface ProfileEditModalProps {
 
 export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileEditModalProps) {
   const { user } = useUser();
-  const { client } = useClerk();
+
   const { showSuccess, showError } = useAlertContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [firstName, setFirstName] = useState(user?.firstName || "");
@@ -72,7 +73,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
           let uploadError;
           try {
             uploadError = await uploadResponse.json();
-          } catch (error) {
+          } catch {
             throw new Error("Failed to upload image. Please try again.");
           }
           throw new Error(uploadError.error || "Failed to upload image");
@@ -81,7 +82,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
         let uploadData;
         try {
           uploadData = await uploadResponse.json();
-        } catch (error) {
+        } catch {
           throw new Error("Failed to process upload response. Please try again.");
         }
         finalImageUrl = uploadData.imageUrl;
@@ -104,7 +105,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
       let data;
       try {
         data = await response.json();
-      } catch (error) {
+      } catch {
         // If response is not JSON (e.g., HTML error page), throw a generic error
         throw new Error("Server returned an invalid response. Please try again.");
       }
@@ -159,15 +160,19 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-accent to-yellow-500 flex items-center justify-center overflow-hidden">
                 {uploadedImage ? (
-                  <img
+                  <Image
                     src={uploadedImage}
                     alt="Profile"
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full object-cover"
                   />
                 ) : imageUrl ? (
-                  <img
+                  <Image
                     src={imageUrl}
                     alt="Profile"
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full object-cover"
                   />
                 ) : (
@@ -207,7 +212,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
                 </div>
                 {/* URL Input */}
                 <div className="flex items-center gap-2">
-                  <Image className="w-4 h-4 text-muted-foreground" />
+                  <ImageIcon className="w-4 h-4 text-muted-foreground" />
                   <input
                     type="url"
                     placeholder="Or enter image URL"

@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         // First try to parse as JSON
         quiz = JSON.parse(aiResponse);
         console.log("Successfully parsed quiz as JSON");
-      } catch (parseError) {
+      } catch {
         console.log("Failed to parse as JSON, treating as string");
         // If parsing fails, try to extract JSON from the response
         const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
           try {
             quiz = JSON.parse(jsonMatch[1]);
             console.log("Successfully extracted and parsed JSON from markdown");
-          } catch (extractError) {
+          } catch {
             console.log("Failed to extract JSON from markdown");
             quiz = [];
           }

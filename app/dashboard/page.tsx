@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAlertContext } from "@/components/AlertProvider";
 import { 
   BookOpenIcon, 
@@ -14,7 +15,6 @@ import {
   ArrowLeftIcon,
   CheckCircleIcon,
   LightBulbIcon,
-  LinkIcon,
   StarIcon,
   ChevronDownIcon,
   ChevronRightIcon,
@@ -45,7 +45,7 @@ interface QuizQuestion {
 
 export default function DashboardPage() {
   const { isSignedIn, user, isLoaded } = useUser();
-  const { showSuccess, showError } = useAlertContext();
+  const { showError } = useAlertContext();
   const [plans, setPlans] = useState<LearningPlan[]>([]);
   const [quizzes, setQuizzes] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -213,7 +213,7 @@ export default function DashboardPage() {
     };
     
     syncUserAndFetchHistory();
-  }, [user, isSignedIn, isLoaded, router]);
+  }, [user, isSignedIn, isLoaded, router, showError]);
 
   // Show loading while Clerk is loading or user is not signed in
   if (!isLoaded || !isSignedIn) {
@@ -229,20 +229,7 @@ export default function DashboardPage() {
     );
   }
 
-  const formatContent = (content: string) => {
-    // Remove markdown formatting and clean up the content
-    return content
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic
-      .replace(/###\s*/g, '') // Remove headers
-      .replace(/##\s*/g, '') // Remove subheaders
-      .replace(/#\s*/g, '') // Remove single headers
-      .replace(/---/g, '') // Remove separators
-      .replace(/\n\n/g, '\n') // Remove double line breaks
-      .replace(/Personalized Learning Plan:\s*/gi, '') // Remove plan title
-      .replace(/Face Recognition/gi, 'Face Recognition') // Keep topic name clean
-      .trim();
-  };
+
 
   const parseLearningPlan = (content: string) => {
     const lines = content.split('\n').filter(line => line.trim());
@@ -325,13 +312,13 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground mt-1">Track your learning progress and achievements</p>
               </div>
             </div>
-            <a
+            <Link
               href="/"
               className="flex items-center gap-2 px-4 py-2 card-dark hover:bg-muted transition-all duration-200"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               Back to Home
-            </a>
+            </Link>
           </div>
         </div>
 

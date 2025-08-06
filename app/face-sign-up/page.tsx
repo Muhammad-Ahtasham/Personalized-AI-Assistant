@@ -1,16 +1,14 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useSignUp, useClerk, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useSignUp, useUser } from "@clerk/nextjs";
 import FaceAuth from "../../components/FaceAuth";
 import { useAlertContext } from "@/components/AlertProvider";
 
 
 function FaceSignUpContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { signUp, isLoaded } = useSignUp();
-  const { setActive } = useClerk();
   const { isSignedIn, user } = useUser();
   const { showSuccess, showError } = useAlertContext();
   const [isLoading, setIsLoading] = useState(false);
@@ -114,6 +112,7 @@ function FaceSignUpContent() {
 
   const handleFaceDetected = async (embedding: number[]) => {
     console.log('FaceAuth: handleFaceDetected called');
+    console.log(tempFaceId? "TempFaceId Loaded": "TempFaceId Not Loaded")
     setIsLoading(true);
     
     try {

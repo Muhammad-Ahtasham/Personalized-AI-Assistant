@@ -15,7 +15,7 @@ export default function Footer() {
 
           {/* Center - Quote */}
           <span className="italic text-xs text-muted-foreground text-center">
-            "Success is the sum of small efforts, repeated day in and day out."
+            &ldquo;Success is the sum of small efforts, repeated day in and day out.&rdquo;
           </span>
 
           {/* Right - Social Icons */}

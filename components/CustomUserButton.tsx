@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '../hooks/useAuth';
 
 export default function CustomUserButton() {
-  const { user, isSignedIn, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -34,9 +35,11 @@ export default function CustomUserButton() {
         className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
       >
         {user.imageUrl ? (
-          <img 
+          <Image 
             src={user.imageUrl} 
             alt={userName}
+            width={32}
+            height={32}
             className="w-8 h-8 rounded-full object-cover"
           />
         ) : (
