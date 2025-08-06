@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChevronDownIcon, ChevronRightIcon, BookOpenIcon, CheckCircleIcon, AcademicCapIcon, LightBulbIcon, LinkIcon } from "@heroicons/react/24/outline";
 
 interface LearningPlanSection {
@@ -13,18 +13,19 @@ interface LearningPlanDisplayProps {
 }
 
 const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const toggleSection = (sectionTitle: string) => {
-    const newExpanded = new Set(expandedSections);
-    if (newExpanded.has(sectionTitle)) {
-      newExpanded.delete(sectionTitle);
+    if (expandedSection === sectionTitle) {
+      setExpandedSection(null);
     } else {
-      newExpanded.add(sectionTitle);
+      setExpandedSection(sectionTitle);
     }
-    setExpandedSections(newExpanded);
   };
 
+  // Parse the plan and set the first section as expanded by default
   const parsePlan = (planText: string): { title: string; sections: LearningPlanSection[] } => {
     const lines = planText.split('\n').filter(line => line.trim());
     
@@ -132,6 +133,34 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
     return { title, sections };
   };
 
+  // Set the first section as expanded by default when plan changes
+  useEffect(() => {
+    if (plan && !isInitialized) {
+      const { sections } = parsePlan(plan);
+      if (sections.length > 0) {
+        setExpandedSection(sections[0].title);
+        setIsInitialized(true);
+      }
+    }
+  }, [plan, isInitialized]);
+
+  // Scroll to the newly opened section
+  useEffect(() => {
+    if (expandedSection && sectionRefs.current[expandedSection]) {
+      const element = sectionRefs.current[expandedSection];
+      if (element) {
+        // Add a small delay to ensure the accordion animation has started
+        setTimeout(() => {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
+          });
+        }, 100);
+      }
+    }
+  }, [expandedSection]);
+
   const getSectionType = (title: string): LearningPlanSection['type'] => {
     const lowerTitle = title.toLowerCase();
     if (lowerTitle.includes('prerequisite')) return 'prerequisites';
@@ -201,6 +230,7 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
           {sections.map((section, index) => (
           <div
             key={index}
+            ref={(el) => { sectionRefs.current[section.title] = el; }}
             className={`border rounded-xl shadow-sm transition-all duration-200 hover:shadow-md ${getSectionColor(section.type)}`}
           >
             <button
@@ -213,14 +243,14 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
                 </div>
                 <h3 className="font-semibold text-lg text-white">{section.title}</h3>
               </div>
-              {expandedSections.has(section.title) ? (
+              {expandedSection === section.title ? (
                 <ChevronDownIcon className="w-5 h-5 text-muted-foreground" />
               ) : (
                 <ChevronRightIcon className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
             
-            {expandedSections.has(section.title) && (
+            {expandedSection === section.title && (
               <div className="px-4 pb-4 border-t border-border/50">
                 <div className="pt-4 space-y-3">
                   {section.content.map((item, itemIndex) => (

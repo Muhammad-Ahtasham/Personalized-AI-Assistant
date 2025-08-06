@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useAlertContext } from "@/components/AlertProvider";
@@ -49,21 +49,37 @@ export default function DashboardPage() {
   const [plans, setPlans] = useState<LearningPlan[]>([]);
   const [quizzes, setQuizzes] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [expandedPlans, setExpandedPlans] = useState<Set<string>>(new Set());
+  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [deletingPlan, setDeletingPlan] = useState<string | null>(null);
   const [deletingQuiz, setDeletingQuiz] = useState<string | null>(null);
+  const planRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   
   const router = useRouter();
 
   const togglePlan = (planId: string) => {
-    const newExpanded = new Set(expandedPlans);
-    if (newExpanded.has(planId)) {
-      newExpanded.delete(planId);
+    if (expandedPlan === planId) {
+      setExpandedPlan(null);
     } else {
-      newExpanded.add(planId);
+      setExpandedPlan(planId);
     }
-    setExpandedPlans(newExpanded);
   };
+
+  // Scroll to the newly opened plan
+  useEffect(() => {
+    if (expandedPlan && planRefs.current[expandedPlan]) {
+      const element = planRefs.current[expandedPlan];
+      if (element) {
+        // Add a small delay to ensure the accordion animation has started
+        setTimeout(() => {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
+          });
+        }, 100);
+      }
+    }
+  }, [expandedPlan]);
 
   const handleDeletePlan = async (planId: string) => {
     if (!confirm('Are you sure you want to delete this learning plan? This action cannot be undone.')) {
@@ -86,9 +102,9 @@ export default function DashboardPage() {
         // Remove the plan from the state
         setPlans(plans.filter(plan => plan.id !== planId));
         // Remove from expanded plans if it was expanded
-        const newExpanded = new Set(expandedPlans);
-        newExpanded.delete(planId);
-        setExpandedPlans(newExpanded);
+        if (expandedPlan === planId) {
+          setExpandedPlan(null);
+        }
       } else {
         showError(data.error || 'Failed to delete learning plan');
       }
@@ -362,8 +378,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-
-
         {/* Learning Plans Section */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-6">
@@ -392,10 +406,14 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {plans.map((plan) => {
                 const sections = parseLearningPlan(plan.content);
-                const isExpanded = expandedPlans.has(plan.id);
+                const isExpanded = expandedPlan === plan.id;
                 
                 return (
-                  <div key={plan.id} className="card-dark overflow-hidden">
+                  <div 
+                    key={plan.id} 
+                    ref={(el) => { planRefs.current[plan.id] = el; }}
+                    className="card-dark overflow-hidden"
+                  >
                     <button
                       onClick={() => togglePlan(plan.id)}
                       className="w-full p-6 border-b border-border hover:bg-muted transition-colors"
