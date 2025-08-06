@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton, SignInButton, SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { Home, LayoutDashboard, NotebookText, User } from "lucide-react";
 import { useAuth } from '../hooks/useAuth';
 import CustomUserButton from './CustomUserButton';

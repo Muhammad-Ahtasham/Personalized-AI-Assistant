@@ -3,10 +3,17 @@
 import { useState } from "react";
 
 export default function DebugAPI() {
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Array<{
+    endpoint: string;
+    method: string;
+    status?: number;
+    data?: unknown;
+    error?: string;
+    timestamp: string;
+  }>>([]);
   const [loading, setLoading] = useState(false);
 
-  const testEndpoint = async (endpoint: string, method: string = "GET", body?: any) => {
+  const testEndpoint = async (endpoint: string, method: string = "GET", body?: unknown) => {
     setLoading(true);
     try {
       const response = await fetch(`/api/${endpoint}`, {
@@ -21,7 +28,7 @@ export default function DebugAPI() {
       let data;
       try {
         data = JSON.parse(text);
-      } catch (e) {
+      } catch {
         data = { rawResponse: text };
       }
 
@@ -116,9 +123,9 @@ export default function DebugAPI() {
                 {result.method} /api/{result.endpoint}
               </h3>
               <span className={`px-2 py-1 rounded text-sm ${
-                result.status >= 200 && result.status < 300 
+                (result.status ?? 0) >= 200 && (result.status ?? 0) < 300 
                   ? "bg-red-100 text-green-800"
-                  : result.status >= 400 
+                  : (result.status ?? 0) >= 400 
                   ? "bg-red-100 text-red-800"
                   : "bg-yellow-100 text-yellow-800"
               }`}>

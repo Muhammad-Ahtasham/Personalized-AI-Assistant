@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
+
 import { useAuth } from '../../hooks/useAuth';
 import { 
   Plus, 
@@ -46,7 +46,6 @@ interface NoteVersion {
 }
 
 export default function NotesPage() {
-  const { isSignedIn, user } = useUser();
   const { isAuthenticated } = useAuth();
   
   const [notes, setNotes] = useState<Note[]>([]);
@@ -59,7 +58,6 @@ export default function NotesPage() {
   const [showVersions, setShowVersions] = useState(false);
   const [versions, setVersions] = useState<NoteVersion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [localNote, setLocalNote] = useState<Note | null>(null);
 
@@ -373,7 +371,7 @@ export default function NotesPage() {
             <div className="space-y-2">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as 'updatedAt' | 'createdAt' | 'title')}
                 className="w-full p-2 border border-border rounded-lg bg-background"
               >
                 <option value="updatedAt">Last Modified</option>

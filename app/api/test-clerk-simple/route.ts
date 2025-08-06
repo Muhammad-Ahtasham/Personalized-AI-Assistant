@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Test if we can import and call clerkClient
-    const { clerkClient } = await import('@clerk/nextjs/server');
-    const clerk = await clerkClient();
+          // Test if we can import clerkClient
+      await import('@clerk/nextjs/server');
+
     
     return NextResponse.json({
       success: true,

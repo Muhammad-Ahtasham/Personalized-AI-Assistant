@@ -5,6 +5,14 @@ import { useSignIn, useClerk, useUser } from "@clerk/nextjs";
 import FaceAuth from "../../components/FaceAuth";
 import { useAlertContext } from "@/components/AlertProvider";
 
+// Define a type for the recognized user
+interface RecognizedUser {
+  id: string;
+  email: string;
+  clerkId?: string;
+  // Add other fields as needed
+}
+
 function FaceSignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -16,7 +24,7 @@ function FaceSignInContent() {
   
   const [showEmailInput, setShowEmailInput] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [recognizedUser, setRecognizedUser] = useState<any>(null);
+  const [recognizedUser, setRecognizedUser] = useState<RecognizedUser | null>(null);
 
   // Handle registration success message
   useEffect(() => {
@@ -29,7 +37,7 @@ function FaceSignInContent() {
         setUserEmail(email);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, showSuccess]);
 
   // Redirect to dashboard if already signed in
   useEffect(() => {
@@ -118,7 +126,7 @@ function FaceSignInContent() {
               return;
             }
           }
-        } catch (signInError) {
+        } catch {
           console.log("Traditional sign-in failed, showing email input");
         }
       }

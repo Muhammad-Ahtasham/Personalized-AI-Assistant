@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 
-export function handleApiError(error: any, context: string = 'API') {
+export function handleApiError(error: unknown, context: string = 'API') {
   console.error(`${context} error:`, error);
   
   // Check for Prisma connection errors
-  if (error.message?.includes('Prisma') || error.message?.includes('database')) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  if (errorMessage.includes('Prisma') || errorMessage.includes('database')) {
     return NextResponse.json(
       { 
         error: 'Database connection error',
@@ -18,7 +19,7 @@ export function handleApiError(error: any, context: string = 'API') {
   return NextResponse.json(
     { 
       error: 'Internal server error',
-      message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      message: process.env.NODE_ENV === 'development' ? errorMessage : 'Something went wrong'
     },
     { status: 500 }
   );

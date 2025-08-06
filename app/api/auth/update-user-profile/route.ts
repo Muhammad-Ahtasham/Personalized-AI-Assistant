@@ -17,7 +17,7 @@ export async function PUT(request: NextRequest) {
     let requestBody;
     try {
       requestBody = await request.json();
-    } catch (error) {
+    } catch {
       return createErrorResponse('Invalid JSON in request body', 400);
     }
 
@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest) {
     const { clerkClient } = await import('@clerk/nextjs/server');
     const clerk = await clerkClient();
     
-    const updateData: any = {};
+    const updateData: Record<string, string> = {};
     if (firstName !== undefined) updateData.firstName = firstName;
     if (lastName !== undefined) updateData.lastName = lastName;
     if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest) {
     await clerk.users.updateUser(userId, updateData);
 
     // Update user in database
-    const dbUpdateData: any = {};
+    const dbUpdateData: Record<string, string> = {};
     if (firstName !== undefined) dbUpdateData.firstName = firstName;
     if (lastName !== undefined) dbUpdateData.lastName = lastName;
 

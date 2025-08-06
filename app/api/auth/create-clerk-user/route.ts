@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { clerkClient } from '@clerk/nextjs/server';
-import bcrypt from 'bcryptjs';
+
 
 const prisma = new PrismaClient();
 
