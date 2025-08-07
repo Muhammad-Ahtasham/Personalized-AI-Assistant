@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton, useUser } from "@clerk/nextjs";
+// import { useUser } from "@clerk/nextjs";
 import { Home, LayoutDashboard, NotebookText, User } from "lucide-react";
 import { useAuth } from '../hooks/useAuth';
 import CustomUserButton from './CustomUserButton';
 
 export default function Navbar() {
-  const { isSignedIn, user } = useUser();
+  // const { isSignedIn, user } = useUser();
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
 
@@ -62,24 +62,24 @@ export default function Navbar() {
                 </Link>
               </>
             ) : (
-              <div className="flex items-center gap-3">
-                {isSignedIn ? (
-                  <UserButton 
-                    key={user?.id} // Force re-render when user changes
-                    afterSignOutUrl="/" 
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-8 h-8"
-                      }
-                    }}
-                  />
-                ) : (
-                  <CustomUserButton />
-                )}
-              </div>
               // <div className="flex items-center gap-3">
+              //   {isSignedIn ? (
+              //     <UserButton 
+              //       key={user?.id} // Force re-render when user changes
+              //       afterSignOutUrl="/" 
+              //       appearance={{
+              //         elements: {
+              //           avatarBox: "w-8 h-8"
+              //         }
+              //       }}
+              //     />
+              //   ) : (
               //     <CustomUserButton />
+              //   )}
               // </div>
+              <div className="flex items-center gap-3">
+                  <CustomUserButton />
+              </div>
             )}
           </div>
         </div>

@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function CustomUserButton() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -33,46 +35,50 @@ export default function CustomUserButton() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        key={user?.imageUrl} // Force re-render when image changes
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
-      >
-        {user.imageUrl ? (
-          <Image
-            src={user.imageUrl}
-            alt={userName}
-            width={32}
-            height={32}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        ) : (
-          <span className="text-sm font-medium">
-            {userName.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          key={user?.imageUrl} // Force re-render when image changes
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+        >
+          {user.imageUrl ? (
+            <Image
+              src={user.imageUrl}
+              alt={userName}
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          ) : (
+            <span className="text-sm font-medium">
+              {userName.charAt(0).toUpperCase()}
+            </span>
+          )}
+        </button>
+        <div>{user.firstName + " " + user.lastName}</div>
+      </div>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-black border border-border rounded-xl shadow-lg z-50">
           <div className="py-2">
-            <div className="px-4 py-2 border-b border-gray-100">
-              <div className="text-sm font-medium text-gray-900">
+            <div className="px-4 py-3 border-b border-border">
+              <div className="text-base font-semibold text-foreground truncate">
                 {userName}
               </div>
-              <div className="text-sm text-gray-500">{userEmail}</div>
+              <div className="text-xs text-muted-foreground truncate">
+                {userEmail}
+              </div>
             </div>
-
             <div className="py-1">
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  // Handle manage account (could redirect to a profile page)
+                  router.push("/profile");
                 }}
-                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-accent/10 transition-colors rounded-none"
               >
                 <svg
-                  className="w-4 h-4 mr-2"
+                  className="w-4 h-4 mr-2 text-yellow-accent"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -90,18 +96,17 @@ export default function CustomUserButton() {
                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <a href="/profile">Manage account</a>
+                <span className="font-medium">Manage account</span>
               </button>
-
               <button
                 onClick={() => {
                   setIsOpen(false);
                   logout();
                 }}
-                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-red-500/10 hover:text-white-500 transition-colors rounded-none"
               >
                 <svg
-                  className="w-4 h-4 mr-2"
+                  className="w-4 h-4 mr-2 text-red-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -113,13 +118,8 @@ export default function CustomUserButton() {
                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
-                Sign out
+                <span className="font-medium">Sign out</span>
               </button>
-            </div>
-
-            <div className="px-4 py-2 border-t border-gray-100 text-xs text-gray-500">
-              Secured by Clerk
-              {process.env.NODE_ENV === "development" && " • Development mode"}
             </div>
           </div>
         </div>

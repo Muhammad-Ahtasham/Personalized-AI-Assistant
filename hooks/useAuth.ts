@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useClerk } from "@clerk/nextjs";
 
 export function useAuth() {
   const { isSignedIn, user } = useUser();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { signOut } = useClerk();
 
   useEffect(() => {
     setIsAuthenticated(isSignedIn || false);
   }, [isSignedIn]);
 
   const logout = () => {
-    // Clerk will handle its own logout
-    window.location.href = '/sign-in';
+    signOut();
   };
 
   const getUserId = () => {
@@ -26,6 +27,6 @@ export function useAuth() {
     isSignedIn,
     user,
     logout,
-    getUserId
+    getUserId,
   };
-} 
+}
