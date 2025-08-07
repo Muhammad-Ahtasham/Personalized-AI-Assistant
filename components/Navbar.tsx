@@ -56,7 +56,7 @@ export default function Navbar() {
                   </button>
                 </Link>
                 <Link href="/sign-up">
-                  <button className="btn-secondary">
+                  <button className="btn-primary">
                     Sign Up
                   </button>
                 </Link>
@@ -77,6 +77,9 @@ export default function Navbar() {
                   <CustomUserButton />
                 )}
               </div>
+              // <div className="flex items-center gap-3">
+              //     <CustomUserButton />
+              // </div>
             )}
           </div>
         </div>

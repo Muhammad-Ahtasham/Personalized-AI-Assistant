@@ -3,6 +3,7 @@ import { useSignIn, useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAlertContext } from "@/components/AlertProvider";
+import ForgotPasswordModal from '@/components/ForgotPasswordModal';
 
 export default function SignInPage() {
   const { signIn, isLoaded } = useSignIn();
@@ -12,6 +13,7 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   console.log("User from Sign-in Page --> ", user);
   
@@ -203,6 +205,17 @@ export default function SignInPage() {
             {isLoading ? "Signing In..." : "Sign In"}
           </button>
         </form>
+        {/* Add Forgot Password button at the bottom */}
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            className="text-sm text-yellow-accent hover:underline focus:outline-none"
+            onClick={() => setForgotOpen(true)}
+          >
+            Forgot Password?
+          </button>
+        </div>
+        <ForgotPasswordModal isOpen={forgotOpen} onClose={() => setForgotOpen(false)} />
 
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">

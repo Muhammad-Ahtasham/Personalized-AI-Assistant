@@ -189,7 +189,7 @@ function FaceSignUpContent() {
             
             <button
               onClick={handleBackToForm}
-              className="btn-secondary w-full"
+              className="btn-primary w-full"
             >
               ← Back to Form
             </button>

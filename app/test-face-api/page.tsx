@@ -16,7 +16,7 @@ export default function TestFaceApiPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: "test@example.com",
+          email: "ahtasham@gmail.com",
           firstName: "Test",
           lastName: "User",
         }),
@@ -42,7 +42,7 @@ export default function TestFaceApiPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: "test@example.com",
+          email: "ahtasham@gmail.com",
         }),
       });
 
@@ -247,7 +247,7 @@ export default function TestFaceApiPage() {
           {testResult && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold mb-2">Test Result:</h3>
-              <pre className="bg-gray-100 p-4 rounded-md overflow-auto text-sm">
+              <pre className="bg-gray-100 text-black p-4 rounded-md overflow-auto text-sm">
                 {testResult}
               </pre>
             </div>

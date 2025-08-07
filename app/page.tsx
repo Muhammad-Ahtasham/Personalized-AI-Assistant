@@ -244,7 +244,7 @@ function HomePageContent() {
                 </a>
                 <a
                   href="/face-sign-in"
-                  className="btn-secondary text-center"
+                  className="btn-primary text-center"
                 >
                   Sign In with Face
                 </a>
@@ -255,15 +255,15 @@ function HomePageContent() {
                 {" "}or{" "}
                 <a href="/face-sign-up" className="text-green-accent hover:underline">sign up with face</a>
               </div>
-              <div className="mt-2 text-center text-xs text-muted-foreground">
+              {/* <div className="mt-2 text-center text-xs text-muted-foreground">
                 <a href="/test-face-api" className="text-green-accent hover:underline">Test Face API</a>
-              </div>
+              </div> */}
             </div>
           )}
           
 
           
-          {!user && (
+          {/* {!user && (
             <div className="mb-6 p-4 bg-secondary border border-border text-muted-foreground rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 bg-yellow-accent rounded-full"></div>
@@ -271,7 +271,7 @@ function HomePageContent() {
               </div>
               <p className="text-sm">Generate learning plans and quizzes, save your progress, and access your dashboard.</p>
             </div>
-          )}
+          )} */}
           {/* 
           {user && (
             <div className="mb-6 p-4 bg-secondary border border-border text-foreground rounded-lg">
@@ -344,7 +344,7 @@ function HomePageContent() {
               </button>
               <button
                 onClick={handleGenerateQuiz}
-                className="btn-secondary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={quizLoading || !topic.trim()}
               >
                 {quizLoading ? "Generating Quiz..." : "Generate Quiz"}

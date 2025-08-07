@@ -19,6 +19,7 @@ import {
   Activity
 } from "lucide-react";
 import ProfileEditModal from "@/components/ProfileEditModal";
+import ChangePasswordModal from '@/components/ChangePasswordModal';
 
 interface UserStats {
   totalPlans: number;
@@ -63,6 +64,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'settings'>('overview');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   
   const router = useRouter();
 
@@ -480,7 +482,18 @@ export default function ProfilePage() {
                         <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
                       </div>
                     </button>
-
+                    <button
+                      onClick={() => setIsChangePasswordModalOpen(true)}
+                      className="group w-full text-left p-3 bg-secondary hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent rounded-lg transition-colors border border-border hover:border-yellow-accent/20"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Shield className="w-4 h-4 text-muted-foreground group-hover:text-yellow-accent" />
+                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">Change Password</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
+                      </div>
+                    </button>
                     <button className="group w-full text-left p-3 bg-secondary hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent rounded-lg transition-colors border border-border hover:border-yellow-accent/20">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -503,6 +516,10 @@ export default function ProfilePage() {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onUpdate={handleProfileUpdate}
+      />
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
       />
     </div>
   );
