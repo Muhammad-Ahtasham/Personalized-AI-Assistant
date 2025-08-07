@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     if (!imageData) {
       return createErrorResponse('No image data provided', 400);
     }
-
+    console.log("imageData", imageData);
     // For now, we'll return the base64 data URL directly
     // In a production environment, you might want to upload to a cloud storage service
     // like AWS S3, Cloudinary, or similar
