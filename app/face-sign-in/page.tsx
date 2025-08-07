@@ -310,7 +310,7 @@ function FaceSignInContent() {
                 setUserEmail("");
                 setRecognizedUser(null);
               }}
-              className="btn-secondary w-full"
+              className="btn-primary w-full"
             >
               Try Face Recognition Again
             </button>

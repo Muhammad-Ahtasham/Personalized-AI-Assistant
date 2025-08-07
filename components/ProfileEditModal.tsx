@@ -280,7 +280,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-border rounded-lg text-white hover:bg-muted transition-colors"
+              className="flex-1 px-4 py-2 bg-secondary rounded-lg text-white hover:bg-yellow-accent hover:text-black transition-colors"
             >
               Cancel
             </button>
