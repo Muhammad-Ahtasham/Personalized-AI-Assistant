@@ -6,10 +6,10 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAlertContext } from "@/components/AlertProvider";
-import { 
-  BookOpenIcon, 
-  AcademicCapIcon, 
-  ChartBarIcon, 
+import {
+  BookOpenIcon,
+  AcademicCapIcon,
+  ChartBarIcon,
   ClockIcon,
   UserIcon,
   ArrowLeftIcon,
@@ -53,7 +53,7 @@ export default function DashboardPage() {
   const [deletingPlan, setDeletingPlan] = useState<string | null>(null);
   const [deletingQuiz, setDeletingQuiz] = useState<string | null>(null);
   const planRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  
+
   const router = useRouter();
 
   const togglePlan = (planId: string) => {
@@ -151,19 +151,19 @@ export default function DashboardPage() {
     console.log("isSignedIn", isSignedIn);
     console.log("user", user);
     console.log("isLoaded", isLoaded);
-    
+
     // Wait for Clerk to load before making decisions
     if (!isLoaded) return;
-    
+
     // If not signed in, redirect to sign-in
     if (!isSignedIn) {
       router.push("/sign-in");
       return;
     }
-    
+
     // If we don't have a user object yet, wait
     if (!user) return;
-    
+
     const syncUserAndFetchHistory = async () => {
       setLoading(true);
       try {
@@ -172,11 +172,11 @@ export default function DashboardPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
-        
+
         if (!syncResponse.ok) {
           console.error("Failed to sync user to database");
         }
-        
+
         // Clean up any failed plans
         try {
           await fetch("/api/cleanup-failed-plans", {
@@ -186,15 +186,15 @@ export default function DashboardPage() {
         } catch (cleanupError) {
           console.error("Failed to cleanup failed plans:", cleanupError);
         }
-        
+
         // Then fetch user history
         const clerkId = user.id;
-        
+
         if (!clerkId) {
           console.log("No clerkId found for user history");
           return;
         }
-        
+
         const res = await fetch("/api/user-history", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -211,7 +211,7 @@ export default function DashboardPage() {
         setLoading(false);
       }
     };
-    
+
     syncUserAndFetchHistory();
   }, [user, isSignedIn, isLoaded, router, showError]);
 
@@ -235,11 +235,11 @@ export default function DashboardPage() {
     const lines = content.split('\n').filter(line => line.trim());
     const sections: { title: string; items: string[] }[] = [];
     let currentSection = { title: 'Overview', items: [] as string[] };
-    
+
     for (const line of lines) {
       const cleanLine = line.trim();
       if (!cleanLine) continue;
-      
+
       // Check for section headers (remove markdown formatting)
       const cleanHeader = cleanLine
         .replace(/\*\*(.*?)\*\*/g, '$1')
@@ -247,10 +247,10 @@ export default function DashboardPage() {
         .replace(/###\s*/g, '')
         .replace(/##\s*/g, '')
         .replace(/#\s*/g, '');
-      
-      if (cleanHeader.includes('Level') || cleanHeader.includes('Objective') || 
-          cleanHeader.includes('Beginner') || cleanHeader.includes('Intermediate') || 
-          cleanHeader.includes('Advanced') || cleanHeader.includes('Stage')) {
+
+      if (cleanHeader.includes('Level') || cleanHeader.includes('Objective') ||
+        cleanHeader.includes('Beginner') || cleanHeader.includes('Intermediate') ||
+        cleanHeader.includes('Advanced') || cleanHeader.includes('Stage')) {
         if (currentSection.items.length > 0) {
           sections.push(currentSection);
         }
@@ -269,8 +269,8 @@ export default function DashboardPage() {
           .replace(/\*\*(.*?)\*\*/g, '$1')
           .replace(/\*(.*?)\*/g, '$1');
         currentSection.items.push(cleanItem);
-      } else if (cleanLine.includes('Resource:') || cleanLine.includes('Tip:') || 
-                 cleanLine.includes('Resource') || cleanLine.includes('Tip')) {
+      } else if (cleanLine.includes('Resource:') || cleanLine.includes('Tip:') ||
+        cleanLine.includes('Resource') || cleanLine.includes('Tip')) {
         // Resources and tips - clean up the content
         const cleanItem = cleanLine
           .replace(/\*\*(.*?)\*\*/g, '$1')
@@ -287,11 +287,11 @@ export default function DashboardPage() {
         currentSection.items.push(cleanItem);
       }
     }
-    
+
     if (currentSection.items.length > 0) {
       sections.push(currentSection);
     }
-    
+
     return sections;
   };
 
@@ -335,7 +335,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="card-dark">
             <div className="flex items-center">
               <div className="p-3 bg-yellow-accent/20 rounded-lg">
@@ -347,7 +347,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="card-dark">
             <div className="flex items-center">
               <div className="p-3 bg-yellow-accent/20 rounded-lg">
@@ -356,8 +356,9 @@ export default function DashboardPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-muted-foreground">Average Score</p>
                 <p className="text-2xl font-bold text-white">
-                  {quizzes.length > 0 
-                    ? Math.round(quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / quizzes.length)
+                  {quizzes.length > 0
+                    // ? Math.round((quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / quizzes.length))
+                    ? Math.round((quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / (quizzes.length * 5)) * 100)
                     : 0}%
                 </p>
               </div>
@@ -373,7 +374,7 @@ export default function DashboardPage() {
             </div>
             <h2 className="text-2xl font-bold text-white">Learning Plans</h2>
           </div>
-          
+
           {loading ? (
             <div className="card-dark p-8">
               <div className="flex justify-center items-center py-8">
@@ -394,10 +395,10 @@ export default function DashboardPage() {
               {plans.map((plan) => {
                 const sections = parseLearningPlan(plan.content);
                 const isExpanded = expandedPlan === plan.id;
-                
+
                 return (
-                  <div 
-                    key={plan.id} 
+                  <div
+                    key={plan.id}
                     ref={(el) => { planRefs.current[plan.id] = el; }}
                     className="card-dark overflow-hidden"
                   >
@@ -435,7 +436,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </button>
-                    
+
                     {isExpanded && (
                       <div className="p-6 bg-muted">
                         <div className="flex items-center justify-between mb-4">
@@ -488,7 +489,7 @@ export default function DashboardPage() {
             </div>
             <h2 className="text-2xl font-bold text-white">Quiz Results</h2>
           </div>
-          
+
           {loading ? (
             <div className="card-dark p-8">
               <div className="flex justify-center items-center py-8">
@@ -519,18 +520,17 @@ export default function DashboardPage() {
                       <TrashIcon className="w-4 h-4" />
                     )}
                   </button>
-                  
+
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-white">{quiz.topic}</h3>
-                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      quiz.score >= 80 ? 'bg-yellow-accent/20 text-yellow-accent' :
-                      quiz.score >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-red-500/20 text-red-400'
-                    }`}>
-                      {quiz.score}%
+                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${(quiz.score / 5) * 100 >= 80 ? 'bg-yellow-accent/20 text-yellow-accent' :
+                        (quiz.score / 5) * 100 >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                      }`}>
+                      {(quiz.score / 5) * 100}%
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>Questions</span>
@@ -541,19 +541,19 @@ export default function DashboardPage() {
                       <span>{new Date(quiz.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 pt-4 border-t border-border">
                     <div className="flex items-center gap-2">
-                      {quiz.score >= 80 ? (
+                      {(quiz.score / 5) * 100 >= 80 ? (
                         <StarIcon className="w-4 h-4 text-yellow-400" />
-                      ) : quiz.score >= 60 ? (
+                      ) : (quiz.score / 5) * 100 >= 60 ? (
                         <CheckCircleIcon className="w-4 h-4 text-yellow-accent" />
                       ) : (
                         <LightBulbIcon className="w-4 h-4 text-blue-400" />
                       )}
                       <span className="text-sm text-muted-foreground">
-                        {quiz.score >= 80 ? 'Excellent!' : 
-                         quiz.score >= 60 ? 'Good job!' : 'Keep learning!'}
+                        {(quiz.score / 5) * 100 >= 80 ? 'Excellent!' :
+                          (quiz.score / 5) * 100 >= 60 ? 'Good job!' : 'Keep learning!'}
                       </span>
                     </div>
                   </div>

@@ -4,11 +4,11 @@ import { auth } from "@clerk/nextjs/server";
 export async function POST(req: NextRequest) {
   try {
     console.log("Generate Quiz API called");
-    
+
     // Check authentication
     const { userId } = await auth();
     console.log("Auth check result - userId:", userId ? "present" : "missing");
-    
+
     if (!userId) {
       console.log("Authentication failed - no userId");
       return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const { topic } = await req.json();
     console.log("Generate Quiz for topic:", topic);
-    
+
     if (!topic) {
       console.log("No topic provided");
       return NextResponse.json({ error: "No topic provided." }, { status: 400 });
@@ -27,11 +27,11 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     console.log("OpenRouter API key check:", apiKey ? "Set" : "Not set");
-    
+
     if (!apiKey) {
       console.error("OpenRouter API key not set in environment variables");
-      return NextResponse.json({ 
-        error: "OpenRouter API key not set. Please check your deployment configuration." 
+      return NextResponse.json({
+        error: "OpenRouter API key not set. Please check your deployment configuration."
       }, { status: 500 });
     }
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
           messages: [
             {
               role: "system",
-              content: "You are an expert study assistant. Given a topic, generate a short interactive quiz (3 - 5 questions) from beginner to advanced level. Return the quiz as a JSON array of objects with 'question', 'choices' (array), and 'answer' (string). Do not include explanations unless asked.",
+              content: "You are an expert study assistant. Given a topic, generate a short interactive quiz (5 questions) from beginner to advanced level. Return the quiz as a JSON array of objects with 'question', 'choices' (array), and 'answer' (string). Do not include explanations unless asked.",
             },
             {
               role: "user",
@@ -73,15 +73,15 @@ export async function POST(req: NextRequest) {
       if (!openRouterRes.ok) {
         const errorText = await openRouterRes.text();
         console.error("OpenRouter error response:", errorText);
-        return NextResponse.json({ 
-          error: `OpenRouter API error (${openRouterRes.status}): ${errorText}` 
+        return NextResponse.json({
+          error: `OpenRouter API error (${openRouterRes.status}): ${errorText}`
         }, { status: 500 });
       }
 
       const data = await openRouterRes.json();
       const aiResponse = data.choices?.[0]?.message?.content || "";
       console.log("AI Response received, length:", aiResponse.length);
-      
+
       // Try to parse the quiz from the AI's response
       let quiz = null;
       try {
@@ -105,23 +105,23 @@ export async function POST(req: NextRequest) {
           quiz = [];
         }
       }
-      
+
       console.log("Final quiz:", quiz);
-      
+
       // Ensure quiz is an array
       if (!Array.isArray(quiz)) {
         console.log("Quiz is not an array, setting to empty array");
         quiz = [];
       }
-      
+
       console.log("Returning quiz response");
       return NextResponse.json({ quiz });
     } catch (fetchError) {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         console.error("Request timeout");
-        return NextResponse.json({ 
-          error: "Request timeout. Please try again." 
+        return NextResponse.json({
+          error: "Request timeout. Please try again."
         }, { status: 408 });
       }
       console.error("Fetch error:", fetchError);
@@ -130,8 +130,8 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const error = err as Error;
     console.error("Error in generate-quiz API:", error);
-    return NextResponse.json({ 
-      error: `Server error: ${error.message || "Failed to fetch from OpenRouter."}` 
+    return NextResponse.json({
+      error: `Server error: ${error.message || "Failed to fetch from OpenRouter."}`
     }, { status: 500 });
   }
 } 

@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  BookOpen, 
-  Award, 
-  FileText, 
-  Settings, 
+import {
+  User,
+  Mail,
+  Calendar,
+  BookOpen,
+  Award,
+  FileText,
+  Settings,
   Edit3,
   Camera,
   Shield,
@@ -65,7 +65,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'settings'>('overview');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
-  
+
   const router = useRouter();
 
   const handleProfileUpdate = () => {
@@ -82,14 +82,14 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isLoaded) return;
-    
+
     if (!isSignedIn) {
       router.push("/sign-in");
       return;
     }
-    
+
     if (!user) return;
-    
+
     const fetchUserData = async () => {
       setLoading(true);
       setError(null);
@@ -99,11 +99,11 @@ export default function ProfilePage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
-        
+
         if (!syncResponse.ok) {
           console.error("Failed to sync user to database");
         }
-        
+
         // Fetch user history and stats
         const clerkId = user.id;
         const res = await fetch("/api/user-history", {
@@ -111,30 +111,30 @@ export default function ProfilePage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ clerkId }),
         });
-        
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to fetch user data");
-        
+
         const plans = data.plans || [];
         const quizzes = data.quizzes || [];
         const notes = data.notes || [];
-        
+
         // Calculate stats
         const totalPlans = plans.length;
         const totalQuizzes = quizzes.length;
         const totalNotes = notes.length;
-        const averageQuizScore = quizzes.length > 0 
-          ? Math.round(quizzes.reduce((sum: number, quiz: QuizResult) => sum + quiz.score, 0) / quizzes.length)
+        const averageQuizScore = quizzes.length > 0
+          ? Math.round((quizzes.reduce((sum: number, quiz: QuizResult) => sum + quiz.score, 0) / (quizzes.length * 5)) * 100)
           : 0;
-        
+
         const lastActive = plans.length > 0 || quizzes.length > 0 || notes.length > 0
           ? new Date(Math.max(
-              ...plans.map((p: LearningPlan) => new Date(p.createdAt).getTime()),
-              ...quizzes.map((q: QuizResult) => new Date(q.createdAt).getTime()),
-              ...notes.map((n: Note) => new Date(n.updatedAt).getTime())
-            )).toLocaleDateString()
+            ...plans.map((p: LearningPlan) => new Date(p.createdAt).getTime()),
+            ...quizzes.map((q: QuizResult) => new Date(q.createdAt).getTime()),
+            ...notes.map((n: Note) => new Date(n.updatedAt).getTime())
+          )).toLocaleDateString()
           : "Never";
-        
+
         setStats({
           totalPlans,
           totalQuizzes,
@@ -142,11 +142,11 @@ export default function ProfilePage() {
           averageQuizScore,
           lastActive
         });
-        
+
         setRecentPlans(plans.slice(0, 3));
         setRecentQuizzes(quizzes.slice(0, 3));
         setRecentNotes(notes.slice(0, 3));
-        
+
       } catch (err) {
         const error = err as Error;
         setError(error.message || "Failed to fetch user data");
@@ -154,7 +154,7 @@ export default function ProfilePage() {
         setLoading(false);
       }
     };
-    
+
     fetchUserData();
   }, [user, isSignedIn, isLoaded, router]);
 
@@ -218,31 +218,28 @@ export default function ProfilePage() {
             <nav className="flex space-x-8 px-6">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'overview'
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'overview'
                     ? 'border-yellow-accent text-yellow-accent'
                     : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
-                }`}
+                  }`}
               >
                 Overview
               </button>
               <button
                 onClick={() => setActiveTab('activity')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'activity'
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'activity'
                     ? 'border-yellow-accent text-yellow-accent'
                     : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
-                }`}
+                  }`}
               >
                 Recent Activity
               </button>
               <button
                 onClick={() => setActiveTab('settings')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'settings'
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'settings'
                     ? 'border-yellow-accent text-yellow-accent'
                     : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
-                }`}
+                  }`}
               >
                 Settings
               </button>
@@ -357,7 +354,7 @@ export default function ProfilePage() {
                     {recentQuizzes.map(quiz => (
                       <div key={quiz.id} className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20">
                         <h4 className="font-medium text-yellow-accent">{quiz.topic}</h4>
-                        <p className="text-sm text-muted-foreground mt-1">Score: {quiz.score}%</p>
+                        <p className="text-sm text-muted-foreground mt-1">Score: {(quiz.score / 5) * 100}%</p>
                         <p className="text-xs text-muted-foreground mt-2">
                           {new Date(quiz.createdAt).toLocaleDateString()}
                         </p>
@@ -396,7 +393,7 @@ export default function ProfilePage() {
           {activeTab === 'settings' && (
             <div className="card-dark">
               <h3 className="text-lg font-semibold text-white mb-6">Account Settings</h3>
-              
+
               <div className="space-y-6">
                 {/* Profile Information */}
                 <div className="border-b border-border pb-6">
@@ -470,7 +467,7 @@ export default function ProfilePage() {
                     Account Actions
                   </h4>
                   <div className="space-y-3">
-                    <button 
+                    <button
                       onClick={() => setIsEditModalOpen(true)}
                       className="group w-full text-left p-3 bg-secondary hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent rounded-lg transition-colors border border-border hover:border-yellow-accent/20"
                     >
