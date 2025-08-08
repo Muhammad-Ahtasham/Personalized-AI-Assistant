@@ -27,11 +27,11 @@ export default function CustomUserButton() {
 
   if (!user) return null;
 
-  const userEmail = user.emailAddresses?.[0]?.emailAddress || "Face User";
+  const userEmail = user.emailAddresses?.[0]?.emailAddress || "";
   const userName =
     user.firstName && user.lastName
       ? `${user.firstName} ${user.lastName}`
-      : user.firstName || "Face User";
+      : "";
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -55,7 +55,7 @@ export default function CustomUserButton() {
             </span>
           )}
         </button>
-        <div>{user.firstName + " " + user.lastName}</div>
+        <div>{userName ? userName : userEmail ? userEmail.slice(0, 8) + "..." : ""}</div>
       </div>
 
       {isOpen && (

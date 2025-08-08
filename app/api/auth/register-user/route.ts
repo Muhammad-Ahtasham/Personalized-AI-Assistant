@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
 import { clerkClient } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
@@ -30,7 +29,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    // const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = password;
 
     // Try to find existing Clerk user first
     let clerkUser = null;

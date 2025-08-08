@@ -164,24 +164,32 @@ const FaceAuth: React.FC<FaceAuthProps> = ({
           return;
         }
 
-        const detections = await faceapi
-          .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+        const detection = await faceapi
+          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
           .withFaceLandmarks()
-          .withFaceDescriptors();
+          .withFaceDescriptor();
 
-        if (detections.length > 0 && !hasDetectedFace) {
-          // Get the first detected face
-          const face = detections[0];
-          const embedding = Array.from(face.descriptor);
+        if (detection && !hasDetectedFace) {
+          const normalizeEmbedding = (vec: number[]) => {
+            const mag = Math.sqrt(vec.reduce((acc, val) => acc + val * val, 0));
+            return vec.map(val => val / (mag || 1));
+          };
 
-          // Set flag to prevent multiple callbacks
+          const rawEmbedding = Array.from(detection.descriptor);
+          const normalizedEmbedding = normalizeEmbedding(rawEmbedding);
+          console.log(`[${mode.toUpperCase()}] embedding:`, normalizedEmbedding);
+          console.log(`[${mode.toUpperCase()}] length:`, normalizedEmbedding.length);
+
+
+          console.log(`[FaceAuth] mode=${mode}, embedding length: ${normalizedEmbedding.length}`);
+          if (normalizedEmbedding.length !== 128) {
+            onError("Face embedding is invalid. Try again.");
+            return;
+          }
+
           setHasDetectedFace(true);
-
-          // Stop detection and video
           stopVideo();
-
-          // Call the callback with the embedding
-          onFaceDetected(embedding);
+          onFaceDetected(normalizedEmbedding);
         }
       } catch (error) {
         console.error("Error during face detection:", error);

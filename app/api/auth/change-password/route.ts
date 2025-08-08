@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
 import { auth } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
@@ -39,7 +38,8 @@ export async function PUT(request: NextRequest) {
       if (!currentPassword) {
         return NextResponse.json({ error: 'Current password is required' }, { status: 400 });
       }
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      // const isMatch = await bcrypt.compare(currentPassword, user.password);
+      const isMatch = currentPassword === user.password;
       if (!isMatch) {
         return NextResponse.json({ error: 'Current password is incorrect' }, { status: 403 });
       }
@@ -47,7 +47,8 @@ export async function PUT(request: NextRequest) {
     // If user.password is null, allow setting a new password (first time set)
 
     // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    // const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = newPassword;
 
     // Update password in Clerk
     try {
