@@ -1,73 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
 import { clerkClient } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
 
-// Temporary storage for face embeddings (in production, use Redis or similar)
+// Temporary storage for face embeddings (only for short-lived capture flow)
 const tempFaceEmbeddings = new Map<string, number[]>();
+
+// Utility to validate and normalize an embedding
+function validateEmbedding(embedding: number[]): { valid: boolean; message?: string } {
+  if (!Array.isArray(embedding)) {
+    return { valid: false, message: "Embedding is not an array." };
+  }
+
+  if (embedding.length !== 128) {
+    return { valid: false, message: `Embedding must be 128 floats. Got: ${embedding.length}` };
+  }
+
+  const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
+  if (magnitude < 0.9 || magnitude > 1.1) {
+    return {
+      valid: false,
+      message: `Embedding not normalized (magnitude = ${magnitude.toFixed(2)}). Ensure it's pre-normalized.`,
+    };
+  }
+
+  return { valid: true };
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password, firstName, lastName, faceEmbedding, tempId } = body;
 
-    // If this is just face capture (no user data yet)
+    // 💾 Temporary face capture storage only
     if (faceEmbedding && !email) {
+      const validation = validateEmbedding(faceEmbedding);
+      if (!validation.valid) {
+        return NextResponse.json({ error: validation.message }, { status: 400 });
+      }
+
       const tempId = Date.now().toString();
       tempFaceEmbeddings.set(tempId, faceEmbedding);
-      
+
       return NextResponse.json({
         success: true,
         tempId,
-        message: 'Face captured successfully'
+        message: "Face captured successfully",
       });
     }
 
-    // If this is the final registration with all user data
+    // 🧍 Final face + user registration
     if (email && password && faceEmbedding) {
-      // Validate required fields
-      if (!email || !password || !faceEmbedding) {
-        return NextResponse.json(
-          { error: 'Email, password, and face embedding are required' },
-          { status: 400 }
-        );
+      const validation = validateEmbedding(faceEmbedding);
+      if (!validation.valid) {
+        return NextResponse.json({ error: validation.message }, { status: 400 });
       }
 
-      // Check if user already exists in Prisma
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
-
+      const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
-        return NextResponse.json(
-          { error: 'User with this email already exists' },
-          { status: 409 }
-        );
+        return NextResponse.json({ error: "User with this email already exists" }, { status: 409 });
       }
 
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 12);
+      // const hashedPassword = await bcrypt.hash(password, 12);
+      const hashedPassword = password;
 
-      // Try to find existing Clerk user first
+      // Check if Clerk user exists
       let clerkUser = null;
       try {
         const clerk = await clerkClient();
-        const usersResponse = await clerk.users.getUserList({
-          emailAddress: [email],
-        });
-        
-        if (usersResponse.data && usersResponse.data.length > 0) {
-          clerkUser = usersResponse.data[0];
+        const result = await clerk.users.getUserList({ emailAddress: [email] });
+        if (result.data?.length) {
+          clerkUser = result.data[0];
         }
-      } catch (clerkError) {
-        console.error('Error checking for existing Clerk user:', clerkError);
+      } catch (err) {
+        console.error("Error checking Clerk user:", err);
       }
 
-      // Create user and face embedding in a transaction
+      // Transaction to store user + face embedding
       const result = await prisma.$transaction(async (tx) => {
-        // Create the user in Prisma first
         const user = await tx.user.create({
           data: {
             email,
@@ -78,7 +89,6 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        // Create the face embedding
         const faceEmbeddingRecord = await tx.faceEmbedding.create({
           data: {
             userId: user.id,
@@ -89,7 +99,7 @@ export async function POST(request: NextRequest) {
         return { user, faceEmbeddingRecord };
       });
 
-      // If no Clerk user exists, create one
+      // Sync with Clerk if needed
       if (!clerkUser) {
         try {
           const clerk = await clerkClient();
@@ -100,17 +110,14 @@ export async function POST(request: NextRequest) {
             lastName: lastName || undefined,
           });
 
-          // Update user in database with Clerk ID
           await prisma.user.update({
             where: { id: result.user.id },
-            data: {
-              clerkId: newClerkUser.id,
-            },
+            data: { clerkId: newClerkUser.id },
           });
 
           return NextResponse.json({
             success: true,
-            message: 'User registered successfully with face authentication',
+            message: "User registered with face and Clerk",
             user: {
               id: result.user.id,
               email: result.user.email,
@@ -119,71 +126,38 @@ export async function POST(request: NextRequest) {
               clerkId: newClerkUser.id,
             },
           });
-        } catch (clerkError) {
-          console.error('Failed to create Clerk user:', clerkError);
-          // If Clerk user creation fails, still return success but without clerkId
-          return NextResponse.json({
-            success: true,
-            message: 'User registered successfully with face authentication (Clerk user creation failed)',
-            user: {
-              id: result.user.id,
-              email: result.user.email,
-              firstName: result.user.firstName,
-              lastName: result.user.lastName,
-              clerkId: null,
-            },
-          });
+        } catch (err) {
+          console.error("Clerk user creation failed:", err);
         }
-      } else {
-        // Clerk user already exists (from email verification), just update the database
-        await prisma.user.update({
-          where: { id: result.user.id },
-          data: {
-            clerkId: clerkUser.id,
-          },
-        });
-
-        return NextResponse.json({
-          success: true,
-          message: 'User registered successfully with face authentication',
-          user: {
-            id: result.user.id,
-            email: result.user.email,
-            firstName: result.user.firstName,
-            lastName: result.user.lastName,
-            clerkId: clerkUser.id,
-          },
-        });
       }
+
+      // If Clerk already existed, just return
+      return NextResponse.json({
+        success: true,
+        message: "User registered successfully with face",
+        user: {
+          id: result.user.id,
+          email: result.user.email,
+          firstName: result.user.firstName,
+          lastName: result.user.lastName,
+          clerkId: clerkUser?.id ?? null,
+        },
+      });
     }
 
-    // If this is retrieving a stored face embedding
+    // 🧪 Retrieve temp embedding (not typically used now)
     if (tempId && !faceEmbedding) {
-      const storedEmbedding = tempFaceEmbeddings.get(tempId);
-      if (storedEmbedding) {
-        tempFaceEmbeddings.delete(tempId); // Clean up
-        return NextResponse.json({
-          success: true,
-          faceEmbedding: storedEmbedding
-        });
-      } else {
-        return NextResponse.json(
-          { error: 'Face embedding not found or expired' },
-          { status: 404 }
-        );
+      const stored = tempFaceEmbeddings.get(tempId);
+      if (stored) {
+        tempFaceEmbeddings.delete(tempId);
+        return NextResponse.json({ success: true, faceEmbedding: stored });
       }
+      return NextResponse.json({ error: "Face embedding not found or expired" }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { error: 'Invalid request parameters' },
-      { status: 400 }
-    );
-
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   } catch (error) {
-    console.error('Face registration error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error("Face register error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-} 
+}

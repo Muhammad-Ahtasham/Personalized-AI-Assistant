@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
 import { codeStore } from '../send-code/route';
 
 const prisma = new PrismaClient();
@@ -39,7 +38,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update password in Clerk' }, { status: 500 });
     }
     // Update password in database
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    // const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = newPassword
     await prisma.user.update({
       where: { id: user.id },
       data: { password: hashedPassword },

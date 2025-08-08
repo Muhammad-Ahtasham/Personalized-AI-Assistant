@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       console.log("Explanation generated:", explanation);
       return NextResponse.json({ explanation });
           } catch (err) {
-        clearTimeout(timeoutId);
+        // clearTimeout(timeoutId);
         if (err instanceof Error && err.name === 'AbortError') {
           console.error("Explanation request timeout");
           return NextResponse.json({ 
