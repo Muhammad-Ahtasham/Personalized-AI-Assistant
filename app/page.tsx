@@ -13,13 +13,13 @@ interface QuizQuestion {
 }
 
 function HomePageContent() {
-  const { user } = useUser();
+  const { isSignedIn, user } = useUser();
   const searchParams = useSearchParams();
   const { showSuccess, showError } = useAlertContext();
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<string | null>(null);
-  
+
   // Quiz generation states
   const [quiz, setQuiz] = useState<QuizQuestion[] | null>(null);
   const [quizLoading, setQuizLoading] = useState(false);
@@ -27,7 +27,13 @@ function HomePageContent() {
   const [quizFeedback, setQuizFeedback] = useState<string[]>([]);
   const [explanations, setExplanations] = useState<(string | null)[]>([]);
   const [explanationLoading, setExplanationLoading] = useState<number | null>(null);
-
+  useEffect(() => {
+    if (!isSignedIn) {
+      setPlan("");
+      setQuiz(null);
+      setTopic("")
+    }
+  }, [isSignedIn]);
   // Handle URL parameters for topic
   useEffect(() => {
     const topicParam = searchParams.get('topic');
@@ -40,6 +46,7 @@ function HomePageContent() {
     e.preventDefault();
     setLoading(true);
     setPlan(null);
+    setQuiz(null)
     try {
       console.log("Sending request to generate plan for topic:", topic);
       const res = await fetch("/api/generate-plan", {
@@ -47,28 +54,28 @@ function HomePageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic }),
       });
-      
+
       console.log("Response status:", res.status);
       const data = await res.json();
       console.log("Response data:", data);
-      
+
       if (!res.ok) {
         console.error("API error:", data);
         throw new Error(data.error || "Failed to generate plan");
       }
-      
+
       // Validate the generated plan
       const planContent = data.plan;
-      if (!planContent || 
-          planContent.trim() === "" || 
-          planContent.toLowerCase().includes("no plan generated") ||
-          planContent.toLowerCase().includes("failed to generate") ||
-          planContent.length < 50) {
+      if (!planContent ||
+        planContent.trim() === "" ||
+        planContent.toLowerCase().includes("no plan generated") ||
+        planContent.toLowerCase().includes("failed to generate") ||
+        planContent.length < 50) {
         throw new Error("Failed to generate a proper learning plan. Please try again.");
       }
-      
+
       setPlan(planContent);
-      
+
       // Only save if we have a valid plan and user is signed in
       if (user && planContent && planContent.trim() !== "") {
         const saveRes = await fetch("/api/save-learning-plan", {
@@ -100,13 +107,14 @@ function HomePageContent() {
       showError("Please enter a topic for the quiz");
       return;
     }
-    
+
+    setPlan("")
     setQuizLoading(true);
     setQuiz(null);
     setUserAnswers([]);
     setQuizFeedback([]);
     setExplanations([]);
-    
+
     try {
       console.log("Sending request to generate quiz for topic:", topic);
       const res = await fetch("/api/generate-quiz", {
@@ -114,16 +122,16 @@ function HomePageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic }),
       });
-      
+
       console.log("Quiz response status:", res.status);
       const data = await res.json();
       console.log("Quiz response data:", data);
-      
+
       if (!res.ok) {
         console.error("Quiz API error:", data);
         throw new Error(data.error || "Failed to generate quiz");
       }
-      
+
       if (Array.isArray(data.quiz) && data.quiz.length > 0) {
         console.log("Setting quiz with", data.quiz.length, "questions");
         setQuiz(data.quiz);
@@ -165,7 +173,7 @@ function HomePageContent() {
     });
     setQuizFeedback(feedback);
     setExplanations(Array(quiz.length).fill(null));
-    
+
     if (user) {
       const score = quiz.reduce((acc, q, i) => acc + (userAnswers[i] === q.answer ? 1 : 0), 0);
       const saveRes = await fetch("/api/save-quiz-result", {
@@ -197,13 +205,13 @@ function HomePageContent() {
           topic,
         }),
       });
-      
+
       if (!res.ok) {
         const errorData = await res.json();
         console.error("Explanation API error:", errorData);
         throw new Error(errorData.error || "Failed to fetch explanation");
       }
-      
+
       const data = await res.json();
       const newExplanations = [...explanations];
       newExplanations[qIdx] = data.explanation || "No explanation available.";
@@ -214,7 +222,7 @@ function HomePageContent() {
       const newExplanations = [...explanations];
       newExplanations[qIdx] = error.message || "Failed to fetch explanation.";
       setExplanations(newExplanations);
-      
+
       // Show error alert for authentication issues
       if (error.message.includes("Authentication required")) {
         showError("Please sign in to get explanations for wrong answers.");
@@ -231,7 +239,7 @@ function HomePageContent() {
       <div className="max-w-4xl mx-auto p-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold mb-8 text-center text-yellow-accent">Personalized Study Assistant</h1>
-          
+
           {!user && (
             <div className="mb-8 p-6 card-dark">
               <h2 className="text-xl font-semibold mb-4 text-center">Welcome! Please sign in to continue</h2>
@@ -260,9 +268,9 @@ function HomePageContent() {
               </div> */}
             </div>
           )}
-          
 
-          
+
+
           {/* {!user && (
             <div className="mb-6 p-4 bg-secondary border border-border text-muted-foreground rounded-lg">
               <div className="flex items-center gap-2 mb-2">
@@ -355,7 +363,7 @@ function HomePageContent() {
 
 
           {plan && (
-            <LearningPlanDisplay 
+            <LearningPlanDisplay
               plan={plan}
             />
           )}
