@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/app/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,7 +36,17 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log("Making request to OpenRouter with topic:", topic);
+    const existingPlan = await prisma.learningPlan.findFirst({
+      where: {
+        topic,
+        user: { clerkId: userId }
+      }
+    });
+
+    if (existingPlan) {
+      console.log("Plan already exists in DB, returning cached version.");
+      return NextResponse.json({ plan: existingPlan.content, fromCache: true });
+    }
 
     // Add timeout to the fetch request
     const controller = new AbortController();
@@ -99,7 +110,7 @@ export async function POST(req: NextRequest) {
       }
       
       console.log("Plan validation passed, returning plan");
-      return NextResponse.json({ plan });
+      return NextResponse.json({ plan, fromCache: true });
     } catch (fetchError) {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {

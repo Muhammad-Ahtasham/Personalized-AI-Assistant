@@ -106,8 +106,8 @@ function HomePageContent() {
 
       setPlan(topic, planContent);
 
-      // Only save if we have a valid plan and user is signed in
-      if (user && planContent && planContent.trim() !== "") {
+      // Only save if we have a valid plan, user is signed in and the data is not in cache (databases)
+      if (user && planContent && planContent.trim() !== "" && data.fromCache == false) {
         const saveRes = await fetch("/api/save-learning-plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
