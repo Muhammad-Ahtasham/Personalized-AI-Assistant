@@ -169,20 +169,58 @@
 
   /* Custom button styles */
   .btn-primary {
-    @apply bg-secondary text-foreground px-6 py-3 rounded-lg font-semibold hover:bg-yellow-accent hover:text-black active:bg-yellow-accent active:text-black transition-colors duration-200;
+    @apply bg-secondary text-foreground px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:bg-yellow-accent hover:text-black active:bg-yellow-accent active:text-black transition-colors duration-200 text-sm sm:text-base;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-foreground px-6 py-3 rounded-lg font-semibold hover:bg-muted transition-colors duration-200;
+    @apply bg-secondary text-foreground px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:bg-muted transition-colors duration-200 text-sm sm:text-base;
   }
 
   /* Card styles */
   .card-dark {
-    @apply bg-card border border-border rounded-lg p-6 shadow-lg;
+    @apply bg-card border border-border rounded-lg p-4 sm:p-6 shadow-lg;
   }
 
   /* Input styles */
   .input-dark {
-    @apply bg-input border border-border text-foreground rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent;
+    @apply bg-input border border-border text-foreground rounded-lg px-3 sm:px-4 py-2 sm:py-3 focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm sm:text-base;
+  }
+
+  /* Responsive text utilities */
+  .text-responsive-sm {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-base {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-lg {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-responsive-xl {
+    @apply text-lg sm:text-xl;
+  }
+
+  .text-responsive-2xl {
+    @apply text-xl sm:text-2xl;
+  }
+
+  /* Responsive spacing utilities */
+  .space-responsive {
+    @apply space-y-4 sm:space-y-6;
+  }
+
+  .p-responsive {
+    @apply p-4 sm:p-6;
+  }
+
+  .px-responsive {
+    @apply px-4 sm:px-6;
+  }
+
+  .py-responsive {
+    @apply py-4 sm:py-6;
   }
 } 

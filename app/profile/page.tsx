@@ -174,38 +174,40 @@ export default function ProfilePage() {
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="card-dark mb-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-yellow-accent to-yellow-500 rounded-full flex items-center justify-center overflow-hidden">
+              <div className="relative">
                 {user?.imageUrl ? (
                   <Image
                     src={user.imageUrl}
                     alt="Profile"
                     width={80}
                     height={80}
-                    className="w-20 h-20 object-cover"
+                    className="rounded-full border-2 border-yellow-accent"
                   />
                 ) : (
-                  <User className="w-10 h-10 text-black" />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-yellow-accent/20 rounded-full flex items-center justify-center border-2 border-yellow-accent">
+                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-accent" />
+                  </div>
                 )}
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                   {user?.firstName} {user?.lastName}
                 </h1>
-                <p className="text-muted-foreground flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
+                <p className="text-muted-foreground text-sm flex items-center gap-2">
+                  <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
                   {user?.emailAddresses[0]?.emailAddress}
                 </p>
                 <p className="text-muted-foreground text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                   Member since {new Date(user?.createdAt || '').toLocaleDateString()}
                 </p>
               </div>
             </div>
             <a
               href="/dashboard"
-              className="text-yellow-accent hover:text-yellow-500 font-medium transition-colors"
+              className="text-yellow-accent hover:text-yellow-500 font-medium transition-colors text-sm sm:text-base"
             >
               ← Back to Dashboard
             </a>
@@ -215,10 +217,10 @@ export default function ProfilePage() {
         {/* Navigation Tabs */}
         <div className="card-dark mb-6">
           <div className="border-b border-border">
-            <nav className="flex space-x-8 px-6">
+            <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'overview'
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'overview'
                     ? 'border-yellow-accent text-yellow-accent'
                     : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
                   }`}
@@ -227,7 +229,7 @@ export default function ProfilePage() {
               </button>
               <button
                 onClick={() => setActiveTab('activity')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'activity'
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'activity'
                     ? 'border-yellow-accent text-yellow-accent'
                     : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
                   }`}
@@ -236,7 +238,7 @@ export default function ProfilePage() {
               </button>
               <button
                 onClick={() => setActiveTab('settings')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'settings'
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'settings'
                     ? 'border-yellow-accent text-yellow-accent'
                     : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
                   }`}
@@ -248,15 +250,15 @@ export default function ProfilePage() {
         </div>
 
         {loading && (
-          <div className="card-dark text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading your profile...</p>
+          <div className="card-dark text-center p-4 sm:p-6">
+            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-yellow-accent mx-auto mb-2 sm:mb-4"></div>
+            <p className="text-sm sm:text-base text-muted-foreground">Loading your profile...</p>
           </div>
         )}
 
         {error && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 mb-6">
-            <p className="text-destructive">{error}</p>
+          <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 sm:p-6 mb-6">
+            <p className="text-destructive text-sm sm:text-base">{error}</p>
           </div>
         )}
 
@@ -264,15 +266,15 @@ export default function ProfilePage() {
         <div className="w-full">
           {/* Overview Tab */}
           {activeTab === 'overview' && stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
               <div className="card-dark">
                 <div className="flex items-center">
                   <div className="p-2 bg-yellow-accent/20 rounded-lg">
-                    <BookOpen className="w-6 h-6 text-yellow-accent" />
+                    <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Learning Plans</p>
-                    <p className="text-2xl font-bold text-white">{stats.totalPlans}</p>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Learning Plans</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{stats.totalPlans}</p>
                   </div>
                 </div>
               </div>
@@ -280,23 +282,11 @@ export default function ProfilePage() {
               <div className="card-dark">
                 <div className="flex items-center">
                   <div className="p-2 bg-yellow-accent/20 rounded-lg">
-                    <Award className="w-6 h-6 text-yellow-accent" />
+                    <Award className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Quizzes Taken</p>
-                    <p className="text-2xl font-bold text-white">{stats.totalQuizzes}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="card-dark">
-                <div className="flex items-center">
-                  <div className="p-2 bg-yellow-accent/20 rounded-lg">
-                    <FileText className="w-6 h-6 text-yellow-accent" />
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Notes Created</p>
-                    <p className="text-2xl font-bold text-white">{stats.totalNotes}</p>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Quizzes Taken</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{stats.totalQuizzes}</p>
                   </div>
                 </div>
               </div>
@@ -304,11 +294,23 @@ export default function ProfilePage() {
               <div className="card-dark">
                 <div className="flex items-center">
                   <div className="p-2 bg-yellow-accent/20 rounded-lg">
-                    <Activity className="w-6 h-6 text-yellow-accent" />
+                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Avg Quiz Score</p>
-                    <p className="text-2xl font-bold text-white">{stats.averageQuizScore}%</p>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Notes Created</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{stats.totalNotes}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-dark">
+                <div className="flex items-center">
+                  <div className="p-2 bg-yellow-accent/20 rounded-lg">
+                    <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
+                  </div>
+                  <div className="ml-3 sm:ml-4">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Avg Quiz Score</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{stats.averageQuizScore}%</p>
                   </div>
                 </div>
               </div>

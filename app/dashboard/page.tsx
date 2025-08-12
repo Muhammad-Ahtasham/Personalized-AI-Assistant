@@ -297,24 +297,24 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-yellow-accent rounded-xl shadow-lg">
-                <UserIcon className="w-8 h-8 text-black" />
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-4 sm:mb-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-yellow-accent rounded-xl shadow-lg">
+                <UserIcon className="w-6 h-6 sm:w-8 sm:h-8 text-black" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                   Welcome back, {user?.firstName || user?.emailAddresses[0]?.emailAddress || 'User'}!
                 </h1>
-                <p className="text-muted-foreground mt-1">Track your learning progress and achievements</p>
+                <p className="text-sm sm:text-base text-muted-foreground mt-1">Track your learning progress and achievements</p>
               </div>
             </div>
             <Link
               href="/"
-              className="flex items-center gap-2 px-4 py-2 card-dark hover:bg-muted transition-all duration-200"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 card-dark hover:bg-muted transition-all duration-200 text-sm sm:text-base"
             >
               <ArrowLeftIcon className="w-4 h-4" />
               Back to Home
@@ -323,41 +323,40 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="card-dark">
             <div className="flex items-center">
-              <div className="p-3 bg-yellow-accent/20 rounded-lg">
-                <BookOpenIcon className="w-6 h-6 text-yellow-accent" />
+              <div className="p-2 sm:p-3 bg-yellow-accent/20 rounded-lg">
+                <BookOpenIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Learning Plans</p>
-                <p className="text-2xl font-bold text-white">{plans.length}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Learning Plans</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{plans.length}</p>
               </div>
             </div>
           </div>
 
           <div className="card-dark">
             <div className="flex items-center">
-              <div className="p-3 bg-yellow-accent/20 rounded-lg">
-                <AcademicCapIcon className="w-6 h-6 text-yellow-accent" />
+              <div className="p-2 sm:p-3 bg-yellow-accent/20 rounded-lg">
+                <AcademicCapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Quizzes Taken</p>
-                <p className="text-2xl font-bold text-white">{quizzes.length}</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Quizzes Taken</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{quizzes.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="card-dark">
+          <div className="card-dark sm:col-span-2 lg:col-span-1">
             <div className="flex items-center">
-              <div className="p-3 bg-yellow-accent/20 rounded-lg">
-                <ChartBarIcon className="w-6 h-6 text-yellow-accent" />
+              <div className="p-2 sm:p-3 bg-yellow-accent/20 rounded-lg">
+                <ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Average Score</p>
-                <p className="text-2xl font-bold text-white">
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Average Score</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">
                   {quizzes.length > 0
-                    // ? Math.round((quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / quizzes.length))
                     ? Math.round((quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / (quizzes.length * 5)) * 100)
                     : 0}%
                 </p>
@@ -367,31 +366,31 @@ export default function DashboardPage() {
         </div>
 
         {/* Learning Plans Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-yellow-accent/20 rounded-lg">
-              <BookOpenIcon className="w-6 h-6 text-yellow-accent" />
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="p-1.5 sm:p-2 bg-yellow-accent/20 rounded-lg">
+              <BookOpenIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
             </div>
-            <h2 className="text-2xl font-bold text-white">Learning Plans</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-white">Learning Plans</h2>
           </div>
 
           {loading ? (
-            <div className="card-dark p-8">
-              <div className="flex justify-center items-center py-8">
+            <div className="card-dark p-4 sm:p-8">
+              <div className="flex justify-center items-center py-4 sm:py-8">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Loading your learning plans...</p>
+                  <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-yellow-accent mx-auto mb-2 sm:mb-4"></div>
+                  <p className="text-sm sm:text-base text-muted-foreground">Loading your learning plans...</p>
                 </div>
               </div>
             </div>
           ) : plans.length === 0 ? (
-            <div className="card-dark p-8 text-center">
-              <BookOpenIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">No learning plans yet</h3>
-              <p className="text-muted-foreground">Start your learning journey by creating your first personalized plan!</p>
+            <div className="card-dark p-4 sm:p-8 text-center">
+              <BookOpenIcon className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-2 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-medium text-white mb-1 sm:mb-2">No learning plans yet</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">Start your learning journey by creating your first personalized plan!</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {plans.map((plan) => {
                 const sections = parseLearningPlan(plan.content);
                 const isExpanded = expandedPlan === plan.id;

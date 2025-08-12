@@ -203,30 +203,30 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
   const { title, sections } = parsePlan(plan);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Main Title Card */}
-      <div className="bg-yellow-accent/10 border border-yellow-accent/20 rounded-xl p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="p-2 bg-yellow-accent/20 rounded-lg">
-            <BookOpenIcon className="w-6 h-6 text-yellow-accent" />
+      <div className="bg-yellow-accent/10 border border-yellow-accent/20 rounded-xl p-4 sm:p-6 shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+          <div className="p-1.5 sm:p-2 bg-yellow-accent/20 rounded-lg">
+            <BookOpenIcon className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-accent" />
           </div>
-          <h2 className="text-2xl font-bold text-yellow-accent">{title}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-yellow-accent">{title}</h2>
         </div>
-        <p className="text-muted-foreground leading-relaxed">
+        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           Follow this step-by-step guide to master the fundamentals and build your skills.
         </p>
       </div>
 
       {/* Fallback for unstructured content */}
       {sections.length === 0 && (
-        <div className="card-dark">
-          <div className="whitespace-pre-line text-foreground leading-relaxed">{plan}</div>
+        <div className="card-dark p-4 sm:p-6">
+          <div className="whitespace-pre-line text-foreground leading-relaxed text-sm sm:text-base">{plan}</div>
         </div>
       )}
 
       {/* Sections */}
       {sections.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {sections.map((section, index) => (
           <div
             key={index}
@@ -235,48 +235,48 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
           >
             <button
               onClick={() => toggleSection(section.title)}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-muted transition-colors rounded-xl"
+              className="w-full p-3 sm:p-4 flex items-center justify-between text-left hover:bg-muted transition-colors rounded-xl"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-1.5 bg-muted rounded-lg">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1 sm:p-1.5 bg-muted rounded-lg">
                   {getSectionIcon(section.type)}
                 </div>
-                <h3 className="font-semibold text-lg text-white">{section.title}</h3>
+                <h3 className="font-semibold text-base sm:text-lg text-white">{section.title}</h3>
               </div>
               {expandedSection === section.title ? (
-                <ChevronDownIcon className="w-5 h-5 text-muted-foreground" />
+                <ChevronDownIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
               ) : (
-                <ChevronRightIcon className="w-5 h-5 text-muted-foreground" />
+                <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
               )}
             </button>
             
             {expandedSection === section.title && (
-              <div className="px-4 pb-4 border-t border-border/50">
-                <div className="pt-4 space-y-3">
+              <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-border/50">
+                <div className="pt-3 sm:pt-4 space-y-2 sm:space-y-3">
                   {section.content.map((item, itemIndex) => (
-                    <div key={itemIndex} className="text-foreground leading-relaxed">
+                    <div key={itemIndex} className="text-foreground leading-relaxed text-sm sm:text-base">
                       {item.startsWith('*Resource*:') || item.startsWith('*Tip*:') ? (
-                        <div className="bg-muted rounded-lg p-3 border border-border/50 shadow-sm">
+                        <div className="bg-muted rounded-lg p-2 sm:p-3 border border-border/50 shadow-sm">
                           <div className="flex items-center gap-2 mb-1">
                             {item.startsWith('*Resource*:') ? (
-                              <LinkIcon className="w-4 h-4 text-purple-400" />
+                              <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
                             ) : (
-                              <LightBulbIcon className="w-4 h-4 text-yellow-400" />
+                              <LightBulbIcon className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
                             )}
-                            <span className="text-sm font-medium text-muted-foreground">
+                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                               {item.startsWith('*Resource*:') ? 'Resource' : 'Tip'}:
                             </span>
                           </div>
                           <span className="text-foreground">{item.replace(/^\*(Resource|Tip)\*:\s*/, '')}</span>
                         </div>
                       ) : (
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-2 sm:gap-3">
                           {item.match(/^\d+\./) ? (
-                            <span className="flex-shrink-0 w-6 h-6 bg-yellow-accent/20 text-yellow-accent text-sm font-medium rounded-full flex items-center justify-center mt-0.5">
+                            <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-yellow-accent/20 text-yellow-accent text-xs sm:text-sm font-medium rounded-full flex items-center justify-center mt-0.5">
                               {item.match(/^\d+\./)?.[0]?.replace('.', '')}
                             </span>
                           ) : item.startsWith('-') || item.startsWith('*') ? (
-                            <span className="flex-shrink-0 w-2 h-2 bg-yellow-accent rounded-full mt-2" />
+                            <span className="flex-shrink-0 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-accent rounded-full mt-1.5 sm:mt-2" />
                           ) : null}
                           <span className="flex-1">{item.replace(/^[\d\-*\.\s]+/, '')}</span>
                         </div>

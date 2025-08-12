@@ -308,37 +308,37 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Notes</h1>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Notes</h1>
         <button
           onClick={createNewNote}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
         >
-          <Plus size={18} />
+          <Plus size={16} className="sm:w-[18px] sm:h-[18px]" />
           New Note
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Sidebar */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-1 space-y-3 sm:space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} className="sm:w-[18px] sm:h-[18px]" />
             <input
               type="text"
               placeholder="Search notes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
             />
           </div>
 
           {/* Tags Filter */}
           <div>
-            <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-              <Tag size={16} />
+            <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2 text-sm sm:text-base">
+              <Tag size={14} className="sm:w-4 sm:h-4" />
               Tags
             </h3>
             <div className="space-y-1">
@@ -356,7 +356,7 @@ export default function NotesPage() {
                     }}
                     className="rounded"
                   />
-                  <span className="text-sm text-muted-foreground">{tag}</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground">{tag}</span>
                 </label>
               ))}
             </div>
@@ -364,15 +364,15 @@ export default function NotesPage() {
 
           {/* Sort Options */}
           <div>
-            <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-              <Filter size={16} />
+            <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2 text-sm sm:text-base">
+              <Filter size={14} className="sm:w-4 sm:h-4" />
               Sort By
             </h3>
             <div className="space-y-2">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'updatedAt' | 'createdAt' | 'title')}
-                className="w-full p-2 border border-border rounded-lg bg-background"
+                className="w-full p-2 border border-border rounded-lg bg-background text-sm sm:text-base"
               >
                 <option value="updatedAt">Last Modified</option>
                 <option value="createdAt">Created Date</option>
@@ -380,9 +380,9 @@ export default function NotesPage() {
               </select>
               <button
                 onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                className="flex items-center gap-2 w-full p-2 border border-border rounded-lg bg-background hover:bg-muted transition-colors"
+                className="flex items-center gap-2 w-full p-2 border border-border rounded-lg bg-background hover:bg-muted transition-colors text-sm sm:text-base"
               >
-                {sortOrder === 'asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
+                {sortOrder === 'asc' ? <SortAsc size={14} className="sm:w-4 sm:h-4" /> : <SortDesc size={14} className="sm:w-4 sm:h-4" />}
                 {sortOrder === 'asc' ? 'Ascending' : 'Descending'}
               </button>
             </div>
@@ -391,88 +391,52 @@ export default function NotesPage() {
 
         {/* Notes List */}
         <div className="lg:col-span-1">
-          <h2 className="font-semibold text-foreground mb-3">All Notes ({filteredNotes.length})</h2>
+          <h2 className="font-semibold text-foreground mb-3 text-sm sm:text-base">All Notes ({filteredNotes.length})</h2>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {isLoading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="h-16 bg-muted animate-pulse rounded-lg"></div>
+                  <div key={i} className="h-12 sm:h-16 bg-muted animate-pulse rounded-lg"></div>
                 ))}
               </div>
             ) : filteredNotes.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">No notes found</p>
+              <div className="text-center py-8">
+                <NotebookText className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-2 sm:mb-4" />
+                <p className="text-sm sm:text-base text-muted-foreground">No notes found.</p>
+              </div>
             ) : (
               filteredNotes.map(note => (
                 <div
                   key={note.id}
-                  className={`p-3 border border-border rounded-lg cursor-pointer transition-colors hover:bg-muted ${
-                    selectedNote?.id === note.id ? 'bg-primary/10 border-primary' : ''
+                  onClick={() => setSelectedNote(note)}
+                  className={`p-3 sm:p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                    selectedNote?.id === note.id
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border hover:border-primary/50 hover:bg-muted/50'
                   }`}
-                  onClick={() => {
-                    if (hasUnsavedChanges) {
-                      if (confirm('You have unsaved changes. Do you want to save them before switching notes?')) {
-                        saveNote().then(() => {
-                          setSelectedNote(note);
-                          setIsEditing(false);
-                          setShowVersions(false);
-                        });
-                      } else {
-                        setSelectedNote(note);
-                        setIsEditing(false);
-                        setShowVersions(false);
-                        setHasUnsavedChanges(false);
-                      }
-                    } else {
-                      setSelectedNote(note);
-                      setIsEditing(false);
-                      setShowVersions(false);
-                    }
-                  }}
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        {note.isPinned && <Pin size={14} className="text-primary" fill="currentColor" />}
-                        {note.isStarred && <Star size={14} className="text-yellow-500" fill="currentColor" />}
-                        <h3 className="font-medium text-foreground truncate">{note.title}</h3>
+                        {note.isPinned && <Pin size={12} className="text-yellow-accent flex-shrink-0" />}
+                        {note.isStarred && <Star size={12} className="text-yellow-accent flex-shrink-0" />}
+                        <h3 className="font-medium text-foreground text-sm sm:text-base truncate">{note.title}</h3>
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {note.content.replace(/<[^>]*>/g, '').substring(0, 100)}
-                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{note.content}</p>
                       {note.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {note.tags.slice(0, 2).map(tag => (
-                            <span key={tag} className="px-2 py-1 text-xs bg-primary/10 text-primary rounded">
+                          {note.tags.slice(0, 3).map(tag => (
+                            <span key={tag} className="px-2 py-1 bg-muted text-xs rounded-full text-muted-foreground">
                               {tag}
                             </span>
                           ))}
-                          {note.tags.length > 2 && (
-                            <span className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded">
-                              +{note.tags.length - 2}
+                          {note.tags.length > 3 && (
+                            <span className="px-2 py-1 bg-muted text-xs rounded-full text-muted-foreground">
+                              +{note.tags.length - 3}
                             </span>
                           )}
                         </div>
                       )}
-                    </div>
-                    <div className="flex items-center gap-1 ml-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePin(note.id);
-                        }}
-                        className="p-1 hover:bg-muted rounded"
-                      >
-                        <Pin size={14} className={note.isPinned ? 'text-primary' : 'text-muted-foreground'} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleStar(note.id);
-                        }}
-                        className="p-1 hover:bg-muted rounded"
-                      >
-                        <Star size={14} className={note.isStarred ? 'text-yellow-500' : 'text-muted-foreground'} />
-                      </button>
                     </div>
                   </div>
                 </div>

@@ -44,24 +44,24 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Quiz Header */}
-      <div className="bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20 rounded-xl p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-4">
-          <AcademicCapIcon className="w-6 h-6 text-accent" />
-          <h2 className="text-2xl font-bold text-accent">Quiz</h2>
+      <div className="bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20 rounded-xl p-4 sm:p-6 shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <AcademicCapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
+          <h2 className="text-xl sm:text-2xl font-bold text-accent">Quiz</h2>
         </div>
         {quizFeedback.length > 0 && (
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-muted-foreground">Score:</span>
-              <span className={`text-lg font-bold ${getScoreColor(getScorePercentage())}`}>
+              <span className={`text-base sm:text-lg font-bold ${getScoreColor(getScorePercentage())}`}>
                 {getScore()}/{quiz.length} ({getScorePercentage()}%)
               </span>
             </div>
             {getScorePercentage() >= 80 && (
               <div className="flex items-center gap-1 text-green-600">
-                <CheckCircleIcon className="w-5 h-5" />
+                <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="text-sm font-medium">Excellent!</span>
               </div>
             )}
@@ -70,17 +70,17 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
       </div>
 
       {/* Quiz Questions */}
-      <form onSubmit={e => { e.preventDefault(); onSubmitQuiz(); }} className="space-y-6">
+      <form onSubmit={e => { e.preventDefault(); onSubmitQuiz(); }} className="space-y-4 sm:space-y-6">
         {quiz.map((question, qIdx) => (
           <div key={qIdx} className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
             {/* Question Header */}
-            <div className="p-6 border-b border-border/50">
-              <div className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-8 h-8 bg-primary/10 text-primary text-sm font-bold rounded-full flex items-center justify-center">
+            <div className="p-4 sm:p-6 border-b border-border/50">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <span className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-primary/10 text-primary text-sm font-bold rounded-full flex items-center justify-center">
                   {qIdx + 1}
                 </span>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-foreground leading-relaxed">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground leading-relaxed">
                     {question.question}
                   </h3>
                 </div>
@@ -88,7 +88,7 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
             </div>
 
             {/* Choices */}
-            <div className="p-6 space-y-3">
+            <div className="p-4 sm:p-6 space-y-2 sm:space-y-3">
               {question.choices.map((choice, choiceIdx) => {
                 const isSelected = userAnswers[qIdx] === choice;
                 const isCorrect = choice === question.answer;
@@ -106,7 +106,7 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
                 return (
                   <label
                     key={choiceIdx}
-                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${choiceStyle} ${
+                    className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg border cursor-pointer transition-all duration-200 ${choiceStyle} ${
                       !showFeedback ? 'hover:shadow-sm' : ''
                     }`}
                   >
@@ -119,12 +119,12 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
                       disabled={showFeedback}
                       className="text-primary focus:ring-primary"
                     />
-                    <span className="flex-1 text-foreground leading-relaxed">{choice}</span>
+                    <span className="flex-1 text-foreground leading-relaxed text-sm sm:text-base">{choice}</span>
                     {showFeedback && isCorrect && (
-                      <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                     )}
                     {showFeedback && isSelected && !isCorrect && (
-                      <XCircleIcon className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <XCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0" />
                     )}
                   </label>
                 );
@@ -133,13 +133,13 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
 
             {/* Feedback */}
             {quizFeedback[qIdx] && (
-              <div className="px-6 pb-6">
-                <div className="bg-muted/30 border border-border/50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
+              <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <div className="bg-muted/30 border border-border/50 rounded-lg p-3 sm:p-4">
+                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
                     {quizFeedback[qIdx].startsWith("✅") ? (
-                      <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                      <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     ) : (
-                      <XCircleIcon className="w-5 h-5 text-red-600" />
+                      <XCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
                     )}
                     <span className="font-medium text-sm">
                       {quizFeedback[qIdx].startsWith("✅") ? "Correct!" : "Incorrect"}
@@ -147,39 +147,39 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
                   </div>
                   
                   {quizFeedback[qIdx].startsWith("❌") && (
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       <p className="text-sm text-muted-foreground">
                         Correct answer: <span className="font-medium text-foreground">{question.answer}</span>
                       </p>
                       
                       <button
                         type="button"
-                        className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors text-sm disabled:opacity-50"
+                        className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors text-sm disabled:opacity-50"
                         onClick={() => onGetExplanation(qIdx)}
                         disabled={!!explanations[qIdx] || explanationLoading === qIdx}
                       >
                         {explanationLoading === qIdx ? (
                           <>
-                            <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                            <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                             Loading...
                           </>
                         ) : explanations[qIdx] ? (
                           <>
-                            <LightBulbIcon className="w-4 h-4" />
+                            <LightBulbIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                             Explanation Shown
                           </>
                         ) : (
                           <>
-                            <LightBulbIcon className="w-4 h-4" />
+                            <LightBulbIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                             Get Explanation
                           </>
                         )}
                       </button>
                       
                       {explanations[qIdx] && (
-                        <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+                        <div className="bg-accent/10 border border-accent/20 rounded-lg p-3 sm:p-4">
                           <div className="flex items-center gap-2 mb-2">
-                            <LightBulbIcon className="w-4 h-4 text-accent" />
+                            <LightBulbIcon className="w-3 h-3 sm:w-4 sm:h-4 text-accent" />
                             <span className="text-sm font-medium text-accent">Explanation</span>
                           </div>
                           <p className="text-sm text-foreground leading-relaxed">
@@ -200,9 +200,9 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
           <div className="flex justify-center pt-4">
             <button
               type="submit"
-              className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold py-3 px-8 rounded-lg hover:from-primary/90 hover:to-primary/70 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+              className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold py-2 sm:py-3 px-6 sm:px-8 rounded-lg hover:from-primary/90 hover:to-primary/70 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 text-sm sm:text-base"
             >
-              <AcademicCapIcon className="w-5 h-5" />
+              <AcademicCapIcon className="w-4 h-4 sm:w-5 sm:h-5" />
               Submit Quiz
             </button>
           </div>

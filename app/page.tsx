@@ -2,9 +2,12 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
+import { Trash2, X } from "lucide-react";
 import LearningPlanDisplay from "@/components/LearningPlanDisplay";
 import QuizDisplay from "@/components/QuizDisplay";
 import { useAlertContext } from "@/components/AlertProvider";
+import { usePlan } from "@/hooks/usePlan";
+import { useQuiz } from "@/hooks/useQuiz";
 
 interface QuizQuestion {
   question: string;
@@ -17,23 +20,40 @@ function HomePageContent() {
   const searchParams = useSearchParams();
   const { showSuccess, showError } = useAlertContext();
   const [topic, setTopic] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState<string | null>(null);
+  
+  // Use custom hooks for plan and quiz management
+  const { 
+    planData, 
+    setPlan, 
+    clearPlan, 
+    loading: planLoading, 
+    setLoading: setPlanLoading,
+    getTimeSinceCreated: getPlanTimeSinceCreated
+  } = usePlan();
+  
+  const { 
+    quizData, 
+    setQuiz, 
+    clearQuiz, 
+    updateUserAnswer, 
+    updateQuizFeedback, 
+    updateExplanation,
+    loading: quizLoading, 
+    setLoading: setQuizLoading,
+    explanationLoading, 
+    setExplanationLoading,
+    getTimeSinceCreated: getQuizTimeSinceCreated
+  } = useQuiz();
 
-  // Quiz generation states
-  const [quiz, setQuiz] = useState<QuizQuestion[] | null>(null);
-  const [quizLoading, setQuizLoading] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<string[]>([]);
-  const [quizFeedback, setQuizFeedback] = useState<string[]>([]);
-  const [explanations, setExplanations] = useState<(string | null)[]>([]);
-  const [explanationLoading, setExplanationLoading] = useState<number | null>(null);
+  // Clear plan and quiz when user signs out
   useEffect(() => {
     if (!isSignedIn) {
-      setPlan("");
-      setQuiz(null);
-      setTopic("")
+      clearPlan();
+      clearQuiz();
+      setTopic("");
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, clearPlan, clearQuiz]);
+
   // Handle URL parameters for topic
   useEffect(() => {
     const topicParam = searchParams.get('topic');
@@ -42,11 +62,21 @@ function HomePageContent() {
     }
   }, [searchParams]);
 
+  // Set topic from saved plan/quiz if available
+  useEffect(() => {
+    if (planData?.topic && !topic) {
+      setTopic(planData.topic);
+    } else if (quizData?.topic && !topic) {
+      setTopic(quizData.topic);
+    }
+  }, [planData, quizData, topic]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setPlan(null);
-    setQuiz(null)
+    setPlanLoading(true);
+    clearPlan();
+    clearQuiz();
+    
     try {
       console.log("Sending request to generate plan for topic:", topic);
       const res = await fetch("/api/generate-plan", {
@@ -74,7 +104,7 @@ function HomePageContent() {
         throw new Error("Failed to generate a proper learning plan. Please try again.");
       }
 
-      setPlan(planContent);
+      setPlan(topic, planContent);
 
       // Only save if we have a valid plan and user is signed in
       if (user && planContent && planContent.trim() !== "") {
@@ -98,61 +128,63 @@ function HomePageContent() {
         showError(error.message || "Something went wrong. Please try again.");
       }
     } finally {
-      setLoading(false);
+      setPlanLoading(false);
     }
   };
 
   const handleGenerateQuiz = async () => {
     if (!topic.trim()) {
-      showError("Please enter a topic for the quiz");
+      showError("Please enter a topic first.");
       return;
     }
 
-    setPlan("")
     setQuizLoading(true);
-    setQuiz(null);
-    setUserAnswers([]);
-    setQuizFeedback([]);
-    setExplanations([]);
-
+    clearQuiz();
+    
     try {
-      console.log("Sending request to generate quiz for topic:", topic);
       const res = await fetch("/api/generate-quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic }),
       });
 
-      console.log("Quiz response status:", res.status);
       const data = await res.json();
-      console.log("Quiz response data:", data);
 
       if (!res.ok) {
-        console.error("Quiz API error:", data);
         throw new Error(data.error || "Failed to generate quiz");
       }
 
-      if (Array.isArray(data.quiz) && data.quiz.length > 0) {
-        console.log("Setting quiz with", data.quiz.length, "questions");
-        setQuiz(data.quiz);
-      } else {
-        console.log("Invalid quiz format or empty quiz");
-        setQuiz(null);
-        showError("Failed to generate quiz. Please try again.");
+      if (!data.quiz || data.quiz.length === 0) {
+        throw new Error("No quiz questions were generated. Please try again.");
+      }
+
+      setQuiz(topic, data.quiz);
+      showSuccess("Quiz generated successfully!");
+
+      // Save quiz result if user is signed in
+      if (user) {
+        const saveRes = await fetch("/api/save-quiz-result", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            topic,
+            questions: data.quiz,
+            answers: [],
+            score: 0,
+            clerkId: user.id,
+          }),
+        });
+        if (saveRes.ok) showSuccess("Quiz saved to your dashboard!");
       }
     } catch (err) {
       const error = err as Error;
       console.error("Error generating quiz:", error);
-      setQuiz(null);
-      setQuizFeedback([]);
       if (error.message.includes("Authentication required")) {
         showError("Please sign in to generate quizzes. Click the 'Sign In' button in the top right.");
-      } else if (error.message.includes("OpenRouter API key not set")) {
-        showError("API configuration error. Please contact support.");
-      } else if (error.message.includes("OpenRouter API error")) {
+      } else if (error.message.includes("OpenRouter API")) {
         showError("AI service temporarily unavailable. Please try again later.");
       } else {
-        showError(error.message || "Failed to generate quiz. Please try again.");
+        showError(error.message || "Something went wrong. Please try again.");
       }
     } finally {
       setQuizLoading(false);
@@ -160,29 +192,33 @@ function HomePageContent() {
   };
 
   const handleAnswer = (qIdx: number, choice: string) => {
-    const newAnswers = [...userAnswers];
-    newAnswers[qIdx] = choice;
-    setUserAnswers(newAnswers);
+    updateUserAnswer(qIdx, choice);
   };
 
   const handleSubmitQuiz = async () => {
-    if (!quiz) return;
-    const feedback = quiz.map((q, i) => {
-      if (userAnswers[i] === undefined) return "No answer selected.";
-      return userAnswers[i] === q.answer ? "✅ Correct!" : `❌ Incorrect. Correct answer: ${q.answer}`;
-    });
-    setQuizFeedback(feedback);
-    setExplanations(Array(quiz.length).fill(null));
+    if (!quizData) return;
 
+    const feedback = quizData.quiz.map((question, index) => {
+      const userAnswer = quizData.userAnswers[index];
+      if (userAnswer === question.answer) {
+        return "✅ Correct!";
+      } else {
+        return `❌ Incorrect. The correct answer is: ${question.answer}`;
+      }
+    });
+
+    updateQuizFeedback(feedback);
+
+    // Save quiz result if user is signed in
     if (user) {
-      const score = quiz.reduce((acc, q, i) => acc + (userAnswers[i] === q.answer ? 1 : 0), 0);
+      const score = quizData.quiz.reduce((acc, q, i) => acc + (quizData.userAnswers[i] === q.answer ? 1 : 0), 0);
       const saveRes = await fetch("/api/save-quiz-result", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          topic,
-          questions: quiz,
-          answers: userAnswers,
+          topic: quizData.topic,
+          questions: quizData.quiz,
+          answers: quizData.userAnswers,
           score,
           clerkId: user.id,
         }),
@@ -192,17 +228,18 @@ function HomePageContent() {
   };
 
   const handleGetExplanation = async (qIdx: number) => {
-    if (!quiz) return;
+    if (!quizData) return;
+    
     setExplanationLoading(qIdx);
     try {
       const res = await fetch("/api/explain-answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          question: quiz[qIdx].question,
-          answer: quiz[qIdx].answer,
-          userAnswer: userAnswers[qIdx],
-          topic,
+          question: quizData.quiz[qIdx].question,
+          answer: quizData.quiz[qIdx].answer,
+          userAnswer: quizData.userAnswers[qIdx],
+          topic: quizData.topic,
         }),
       });
 
@@ -213,15 +250,11 @@ function HomePageContent() {
       }
 
       const data = await res.json();
-      const newExplanations = [...explanations];
-      newExplanations[qIdx] = data.explanation || "No explanation available.";
-      setExplanations(newExplanations);
+      updateExplanation(qIdx, data.explanation || "No explanation available.");
     } catch (err) {
       const error = err as Error;
       console.error("Error fetching explanation:", error);
-      const newExplanations = [...explanations];
-      newExplanations[qIdx] = error.message || "Failed to fetch explanation.";
-      setExplanations(newExplanations);
+      updateExplanation(qIdx, error.message || "Failed to fetch explanation.");
 
       // Show error alert for authentication issues
       if (error.message.includes("Authentication required")) {
@@ -234,102 +267,59 @@ function HomePageContent() {
     }
   };
 
+  const handleClearPlan = () => {
+    clearPlan();
+    showSuccess("Learning plan cleared!");
+  };
+
+  const handleClearQuiz = () => {
+    clearQuiz();
+    showSuccess("Quiz cleared!");
+  };
+
+  const handleClearAll = () => {
+    clearPlan();
+    clearQuiz();
+    showSuccess("All content cleared!");
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="max-w-4xl mx-auto p-8">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-center text-yellow-accent">Personalized Study Assistant</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8 text-center text-yellow-accent">
+            Personalized Study Assistant
+          </h1>
 
           {!user && (
-            <div className="mb-8 p-6 card-dark">
-              <h2 className="text-xl font-semibold mb-4 text-center">Welcome! Please sign in to continue</h2>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="mb-6 sm:mb-8 p-4 sm:p-6 card-dark">
+              <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">Welcome! Please sign in to continue</h2>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <a
                   href="/sign-in"
-                  className="btn-primary text-center"
+                  className="btn-primary text-center text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-3"
                 >
                   Sign In with Email
                 </a>
                 <a
                   href="/face-sign-in"
-                  className="btn-primary text-center"
+                  className="btn-primary text-center text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-3"
                 >
                   Sign In with Face
                 </a>
               </div>
-              <div className="mt-4 text-center text-sm text-muted-foreground">
+              <div className="mt-4 text-center text-xs sm:text-sm text-muted-foreground">
                 Don&apos;t have an account?{" "}
                 <a href="/sign-up" className="text-green-accent hover:underline">Sign up with email</a>
                 {" "}or{" "}
                 <a href="/face-sign-up" className="text-green-accent hover:underline">sign up with face</a>
               </div>
-              {/* <div className="mt-2 text-center text-xs text-muted-foreground">
-                <a href="/test-face-api" className="text-green-accent hover:underline">Test Face API</a>
-              </div> */}
             </div>
           )}
 
-
-
-          {/* {!user && (
-            <div className="mb-6 p-4 bg-secondary border border-border text-muted-foreground rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-yellow-accent rounded-full"></div>
-                <span className="font-medium">Sign in to use all features</span>
-              </div>
-              <p className="text-sm">Generate learning plans and quizzes, save your progress, and access your dashboard.</p>
-            </div>
-          )} */}
-          {/* 
-          {user && (
-            <div className="mb-6 p-4 bg-secondary border border-border text-foreground rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 bg-yellow-accent rounded-full"></div>
-                    <span className="font-medium">Signed in as {user.emailAddresses[0]?.emailAddress}</span>
-                  </div>
-                  <p className="text-sm">You can now generate and save learning plans and quizzes.</p>
-                </div>
-                <button
-                  onClick={async () => {
-                    try {
-                      const res = await fetch('/api/test-config');
-                      const data = await res.json();
-                      console.log('Configuration test:', data);
-                      alert(`Config Test:\nOpenRouter: ${data.config.openRouterKey}\nDatabase: ${data.config.databaseUrl}\nOpenRouter Test: ${data.openRouterTest}`);
-                    } catch (error) {
-                      console.error('Test failed:', error);
-                      alert('Test failed. Check console for details.');
-                    }
-                  }}
-                  className="px-3 py-1 bg-secondary text-foreground text-xs rounded hover:bg-yellow-accent hover:text-black active:bg-yellow-accent active:text-black transition-colors"
-                >
-                  Test Config
-                </button>
-                <button
-                  onClick={async () => {
-                    try {
-                      const res = await fetch('/api/health');
-                      const data = await res.json();
-                      console.log('Health check:', data);
-                      alert(`Health Check:\nStatus: ${data.status}\nEnvironment: ${data.environment}\nOpenRouter: ${data.openRouterKey}`);
-                    } catch (error) {
-                      console.error('Health check failed:', error);
-                      alert('Health check failed. Check console for details.');
-                    }
-                  }}
-                  className="px-3 py-1 bg-secondary text-foreground text-xs rounded hover:bg-muted transition-colors ml-2"
-                >
-                  Health Check
-                </button>
-              </div>
-            </div>
-          )} */}
-
-          <div className="space-y-6 mb-8">
+          <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
             <div className="space-y-2">
-              <label htmlFor="topic" className="text-lg font-medium text-foreground">
+              <label htmlFor="topic" className="text-base sm:text-lg font-medium text-foreground">
                 What do you want to learn or test?
               </label>
               <input
@@ -337,7 +327,7 @@ function HomePageContent() {
                 type="text"
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
-                className="input-dark w-full p-4"
+                className="input-dark w-full p-3 sm:p-4 text-sm sm:text-base"
                 placeholder="e.g. Linear Algebra, React, World War II..."
                 required
               />
@@ -345,14 +335,14 @@ function HomePageContent() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={handleSubmit}
-                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={loading || !topic.trim()}
+                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-3"
+                disabled={planLoading || !topic.trim()}
               >
-                {loading ? "Generating..." : "Generate Learning Plan"}
+                {planLoading ? "Generating..." : "Generate Learning Plan"}
               </button>
               <button
                 onClick={handleGenerateQuiz}
-                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base px-4 py-2 sm:px-6 sm:py-3"
                 disabled={quizLoading || !topic.trim()}
               >
                 {quizLoading ? "Generating Quiz..." : "Generate Quiz"}
@@ -360,25 +350,70 @@ function HomePageContent() {
             </div>
           </div>
 
-
-
-          {plan && (
-            <LearningPlanDisplay
-              plan={plan}
-            />
+          {/* Clear All Button - Only show if there's content to clear */}
+          {(planData || quizData) && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 p-3 bg-yellow-accent/10 border border-yellow-accent/20 rounded-lg">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-accent rounded-full animate-pulse"></div>
+                  <span className="text-sm text-yellow-accent font-medium">
+                    Saved content for: <span className="text-white">{planData?.topic || quizData?.topic}</span>
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {planData && `Plan created ${getPlanTimeSinceCreated()}`}
+                  {planData && quizData && ' • '}
+                  {quizData && `Quiz created ${getQuizTimeSinceCreated()}`}
+                </div>
+              </div>
+              <button
+                onClick={handleClearAll}
+                className="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
+                title="Clear all content"
+              >
+                <Trash2 size={14} />
+                Clear All
+              </button>
+            </div>
           )}
 
-          {quiz && quiz.length > 0 && (
-            <QuizDisplay
-              quiz={quiz}
-              userAnswers={userAnswers}
-              quizFeedback={quizFeedback}
-              explanations={explanations}
-              explanationLoading={explanationLoading}
-              onAnswer={handleAnswer}
-              onSubmitQuiz={handleSubmitQuiz}
-              onGetExplanation={handleGetExplanation}
-            />
+          {planData && (
+            <div className="relative mb-6 sm:mb-8">
+              <div className="absolute top-4 right-4 z-10">
+                <button
+                  onClick={handleClearPlan}
+                  className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-lg"
+                  title="Clear learning plan"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <LearningPlanDisplay plan={planData.plan} />
+            </div>
+          )}
+
+          {quizData && quizData.quiz.length > 0 && (
+            <div className="relative mb-6 sm:mb-8">
+              <div className="absolute top-4 right-4 z-10">
+                <button
+                  onClick={handleClearQuiz}
+                  className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-lg"
+                  title="Clear quiz"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <QuizDisplay
+                quiz={quizData.quiz}
+                userAnswers={quizData.userAnswers}
+                quizFeedback={quizData.quizFeedback}
+                explanations={quizData.explanations}
+                explanationLoading={explanationLoading}
+                onAnswer={handleAnswer}
+                onSubmitQuiz={handleSubmitQuiz}
+                onGetExplanation={handleGetExplanation}
+              />
+            </div>
           )}
 
         </div>
