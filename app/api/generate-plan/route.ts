@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const existingPlan = await prisma.learningPlan.findFirst({
       where: {
         topic,
-        user: { clerkId: userId },
+        // user: { clerkId: userId },
       },
     });
 
