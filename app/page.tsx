@@ -9,11 +9,11 @@ import { useAlertContext } from "@/components/AlertProvider";
 import { usePlan } from "@/hooks/usePlan";
 import { useQuiz } from "@/hooks/useQuiz";
 
-interface QuizQuestion {
-  question: string;
-  choices: string[];
-  answer: string;
-}
+// interface QuizQuestion {
+//   question: string;
+//   choices: string[];
+//   answer: string;
+// }
 
 function HomePageContent() {
   const { isSignedIn, user } = useUser();
