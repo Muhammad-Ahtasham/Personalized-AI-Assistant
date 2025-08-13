@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { handleApiError, createErrorResponse } from '../../error-handler';
+import cloudinary from '@/app/lib/cloudinary';
 
 export async function POST(request: NextRequest) {
   try {
     // Get the current Clerk user
     const { userId } = await auth();
-    
+
     if (!userId) {
       return createErrorResponse('Not authenticated', 401);
     }
@@ -23,14 +24,17 @@ export async function POST(request: NextRequest) {
     if (!imageData) {
       return createErrorResponse('No image data provided', 400);
     }
-    console.log("imageData", imageData);
-    // For now, we'll return the base64 data URL directly
-    // In a production environment, you might want to upload to a cloud storage service
-    // like AWS S3, Cloudinary, or similar
-    
+
+    const uploadResult = await cloudinary.uploader.upload(imageData, {
+      folder: `users/${userId}`,
+      overwrite: true,
+      resource_type: 'image'
+    });
+
+
     return NextResponse.json({
       success: true,
-      imageUrl: imageData,
+      imageUrl: uploadResult.secure_url,
       message: 'Image uploaded successfully'
     });
 

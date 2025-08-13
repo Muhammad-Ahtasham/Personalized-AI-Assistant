@@ -16,6 +16,7 @@ model User {
   password     String?
   firstName    String?
   lastName     String?
+  imageUrl     String?
   faceEmbeddings FaceEmbedding[]
   learningPlans LearningPlan[]
   quizResults   QuizResult[]
