@@ -67,7 +67,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
           body: JSON.stringify({
             imageData: uploadedImage,
           }),
-        });
+        });  
 
         if (!uploadResponse.ok) {
           let uploadError;

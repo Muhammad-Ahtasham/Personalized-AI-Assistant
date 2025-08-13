@@ -9,7 +9,7 @@ export async function PUT(request: NextRequest) {
   try {
     // Get the current Clerk user
     const { userId } = await auth();
-    
+
     if (!userId) {
       return createErrorResponse('Not authenticated', 401);
     }
@@ -31,19 +31,26 @@ export async function PUT(request: NextRequest) {
     // Update user in Clerk
     const { clerkClient } = await import('@clerk/nextjs/server');
     const clerk = await clerkClient();
-    
+
     const updateData: Record<string, string> = {};
     if (firstName !== undefined) updateData.firstName = firstName;
     if (lastName !== undefined) updateData.lastName = lastName;
-    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
-
 
     await clerk.users.updateUser(userId, updateData);
+
+    if (imageUrl) {
+      const res = await fetch(imageUrl);
+      const arrayBuffer = await res.arrayBuffer();
+      const blob = new Blob([arrayBuffer], { type: "image/jpeg" });
+
+      await clerk.users.updateUserProfileImage(userId, { file: blob });
+    }
 
     // Update user in database
     const dbUpdateData: Record<string, string> = {};
     if (firstName !== undefined) dbUpdateData.firstName = firstName;
     if (lastName !== undefined) dbUpdateData.lastName = lastName;
+    if (imageUrl !== undefined) dbUpdateData.imageUrl = imageUrl;
 
     const updatedUser = await prisma.user.update({
       where: { clerkId: userId },
