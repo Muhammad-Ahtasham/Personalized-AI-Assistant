@@ -9,20 +9,14 @@ export async function POST(request: NextRequest) {
     const { userId } = await request.json();
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
     // Get the current Clerk user
     const { userId: clerkUserId } = await auth();
-    
+
     if (!clerkUserId) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     // Update the user in database with Clerk ID
@@ -42,12 +36,8 @@ export async function POST(request: NextRequest) {
         clerkId: updatedUser.clerkId,
       },
     });
-
   } catch (error) {
     console.error('Sync user to Clerk error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

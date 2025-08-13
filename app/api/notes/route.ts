@@ -7,14 +7,14 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Get user from database
     const user = await prisma.user.findFirst({
-      where: { clerkId: userId }
+      where: { clerkId: userId },
     });
 
     if (!user) {
@@ -23,7 +23,7 @@ export async function GET() {
 
     const notes = await prisma.note.findMany({
       where: { userId: user.id },
-      orderBy: { updatedAt: 'desc' }
+      orderBy: { updatedAt: 'desc' },
     });
 
     return NextResponse.json({ notes });
@@ -36,7 +36,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Get user from database
     const user = await prisma.user.findFirst({
-      where: { clerkId: userId }
+      where: { clerkId: userId },
     });
 
     if (!user) {
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
         title: title || 'Untitled Note',
         content: content || '',
         tags: tags || [],
-        userId: user.id
-      }
+        userId: user.id,
+      },
     });
 
     return NextResponse.json(note);
@@ -66,4 +66,4 @@ export async function POST(request: NextRequest) {
     console.error('Error creating note:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

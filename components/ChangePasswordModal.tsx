@@ -51,37 +51,48 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
       <div className="bg-card-dark border border-border rounded-xl p-6 w-full max-w-md mx-4">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-white">Change Password</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-white transition-colors">✕</button>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-white transition-colors"
+          >
+            ✕
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Current Password</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Current Password
+            </label>
             <input
               type="password"
               value={currentPassword}
-              onChange={e => setCurrentPassword(e.target.value)}
+              onChange={(e) => setCurrentPassword(e.target.value)}
               className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
               placeholder="Enter current password"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">New Password</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              New Password
+            </label>
             <input
               type="password"
               value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
+              onChange={(e) => setNewPassword(e.target.value)}
               className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
               placeholder="Enter new password"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">Confirm New Password</label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
+              Confirm New Password
+            </label>
             <input
               type="password"
               value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
               placeholder="Confirm new password"
               required
@@ -112,4 +123,4 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClo
   );
 };
 
-export default ChangePasswordModal; 
+export default ChangePasswordModal;

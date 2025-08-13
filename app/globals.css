@@ -30,7 +30,7 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground;
     display: flex;
@@ -39,10 +39,11 @@
     background-color: #000000; /* Ensure pure black background */
   }
 
-  html, body {
+  html,
+  body {
     height: 98%;
   }
-  
+
   main {
     flex: 1; /* Pushes footer to bottom when content is short */
   }
@@ -223,4 +224,4 @@
   .py-responsive {
     @apply py-4 sm:py-6;
   }
-} 
+}

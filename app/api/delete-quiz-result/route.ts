@@ -8,21 +8,15 @@ export async function DELETE(request: NextRequest) {
   try {
     // Check authentication
     const { userId } = await auth();
-    
+
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const { quizId } = await request.json();
 
     if (!quizId) {
-      return NextResponse.json(
-        { error: 'Quiz ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Quiz ID is required' }, { status: 400 });
     }
 
     // Get user from database using Clerk ID
@@ -31,10 +25,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Delete the quiz result
@@ -50,20 +41,16 @@ export async function DELETE(request: NextRequest) {
       message: 'Quiz result deleted successfully',
       deletedQuiz,
     });
-
   } catch (error) {
     console.error('Error deleting quiz result:', error);
-    
+
     if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
       return NextResponse.json(
         { error: 'Quiz result not found or you do not have permission to delete it' },
         { status: 404 }
       );
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to delete quiz result' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: 'Failed to delete quiz result' }, { status: 500 });
   }
-} 
+}

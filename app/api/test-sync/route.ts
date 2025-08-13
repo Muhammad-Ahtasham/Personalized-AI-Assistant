@@ -8,12 +8,9 @@ export async function GET() {
   try {
     // Get the current Clerk user
     const { userId } = await auth();
-    
+
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     // Check if user exists in database
@@ -38,12 +35,8 @@ export async function GET() {
         clerkId: userId,
       });
     }
-
   } catch (error) {
     console.error('Test sync error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

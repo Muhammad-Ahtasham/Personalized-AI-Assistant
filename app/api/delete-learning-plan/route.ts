@@ -8,21 +8,15 @@ export async function DELETE(request: NextRequest) {
   try {
     // Check authentication
     const { userId } = await auth();
-    
+
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const { planId } = await request.json();
 
     if (!planId) {
-      return NextResponse.json(
-        { error: 'Plan ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Plan ID is required' }, { status: 400 });
     }
 
     // Get user from database using Clerk ID
@@ -31,10 +25,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Delete the learning plan
@@ -50,20 +41,16 @@ export async function DELETE(request: NextRequest) {
       message: 'Learning plan deleted successfully',
       deletedPlan,
     });
-
   } catch (error) {
     console.error('Error deleting learning plan:', error);
-    
+
     if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
       return NextResponse.json(
         { error: 'Learning plan not found or you do not have permission to delete it' },
         { status: 404 }
       );
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to delete learning plan' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: 'Failed to delete learning plan' }, { status: 500 });
   }
-} 
+}

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useClerk } from "@clerk/nextjs";
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useClerk } from '@clerk/nextjs';
 
 export function useAuth() {
   const { isSignedIn, user } = useUser();

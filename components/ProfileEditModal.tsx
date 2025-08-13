@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useRef } from "react";
-import { useUser } from "@clerk/nextjs";
-import { X, User, Mail, Upload, Image as ImageIcon } from "lucide-react";
-import Image from "next/image";
+import { useState, useRef } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { X, User, Mail, Upload, Image as ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 
-import { useAlertContext } from "@/components/AlertProvider";
+import { useAlertContext } from '@/components/AlertProvider';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -18,9 +18,9 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
 
   const { showSuccess, showError } = useAlertContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [imageUrl, setImageUrl] = useState(user?.imageUrl || "");
+  const [firstName, setFirstName] = useState(user?.firstName || '');
+  const [lastName, setLastName] = useState(user?.lastName || '');
+  const [imageUrl, setImageUrl] = useState(user?.imageUrl || '');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +32,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
         showError('Please select an image file');
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         showError('Image size must be less than 5MB');
@@ -55,45 +55,44 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
 
     try {
       let finalImageUrl = imageUrl.trim() || undefined;
-      
-            // If there's an uploaded image, process it first
+
+      // If there's an uploaded image, process it first
       if (uploadedImage) {
-        console.log("Uploading image to:", "/api/auth/upload-profile-image");
-        const uploadResponse = await fetch("/api/auth/upload-profile-image", {
-          method: "POST",
+        console.log('Uploading image to:', '/api/auth/upload-profile-image');
+        const uploadResponse = await fetch('/api/auth/upload-profile-image', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             imageData: uploadedImage,
           }),
-        });  
+        });
 
         if (!uploadResponse.ok) {
           let uploadError;
           try {
             uploadError = await uploadResponse.json();
           } catch {
-            throw new Error("Failed to upload image. Please try again.");
+            throw new Error('Failed to upload image. Please try again.');
           }
-          throw new Error(uploadError.error || "Failed to upload image");
+          throw new Error(uploadError.error || 'Failed to upload image');
         }
 
         let uploadData;
         try {
           uploadData = await uploadResponse.json();
         } catch {
-          throw new Error("Failed to process upload response. Please try again.");
+          throw new Error('Failed to process upload response. Please try again.');
         }
         finalImageUrl = uploadData.imageUrl;
       }
 
-
-      console.log("Sending update request to:", "/api/auth/update-user-profile");
-      const response = await fetch("/api/auth/update-user-profile", {
-        method: "PUT",
+      console.log('Sending update request to:', '/api/auth/update-user-profile');
+      const response = await fetch('/api/auth/update-user-profile', {
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           firstName: firstName.trim(),
@@ -107,27 +106,26 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
         data = await response.json();
       } catch {
         // If response is not JSON (e.g., HTML error page), throw a generic error
-        throw new Error("Server returned an invalid response. Please try again.");
+        throw new Error('Server returned an invalid response. Please try again.');
       }
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to update profile");
+        throw new Error(data.error || 'Failed to update profile');
       }
 
-      showSuccess("Profile updated successfully!");
-      
+      showSuccess('Profile updated successfully!');
+
       // Force a page refresh to update all components including navbar
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-      
+
       onUpdate();
-      
+
       // Close modal after a short delay
       setTimeout(() => {
         onClose();
       }, 1500);
-
     } catch (err) {
       const error = err as Error;
       showError(error.message);
@@ -261,9 +259,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
 
           {/* Email (Read-only) */}
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
             <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border border-border rounded-lg text-muted-foreground">
               <Mail className="w-4 h-4" />
               <span>{user?.emailAddresses[0]?.emailAddress}</span>
@@ -272,8 +268,6 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
               Email cannot be changed for security reasons
             </p>
           </div>
-
-
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
@@ -289,11 +283,11 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
               disabled={loading}
               className="flex-1 px-4 py-2 bg-secondary hover:bg-yellow-accent hover:text-black active:bg-yellow-accent active:text-black text-foreground font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Updating..." : "Update Profile"}
+              {loading ? 'Updating...' : 'Update Profile'}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-} 
+}

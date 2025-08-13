@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // Utility to validate and normalize an embedding
 function validateEmbedding(embedding: number[]): { valid: boolean; message?: string } {
   if (!Array.isArray(embedding)) {
-    return { valid: false, message: "Embedding is not an array." };
+    return { valid: false, message: 'Embedding is not an array.' };
   }
 
   if (embedding.length !== 128) {
@@ -30,10 +30,7 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // const { faceEmbedding } = await request.json();
@@ -41,10 +38,7 @@ export async function POST(request: NextRequest) {
     const { faceEmbedding } = body;
 
     if (!faceEmbedding) {
-      return NextResponse.json(
-        { error: 'Face embedding is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Face embedding is required' }, { status: 400 });
     }
 
     // Validate the embedding
@@ -66,10 +60,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Check if user already has face authentication
@@ -92,7 +83,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log("Face Embedding", faceEmbeddingRecord ? "Created" : "Not Created")
+    console.log('Face Embedding', faceEmbeddingRecord ? 'Created' : 'Not Created');
 
     return NextResponse.json({
       success: true,
@@ -105,12 +96,8 @@ export async function POST(request: NextRequest) {
         clerkId: user.clerkId,
       },
     });
-
   } catch (error) {
     console.error('Setup face authentication error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 
 import { useAuth } from '../../hooks/useAuth';
-import { 
-  Plus, 
-  Search, 
-  Pin, 
-  Star, 
-  Tag, 
-  Edit, 
-  Trash2, 
-  Save, 
+import {
+  Plus,
+  Search,
+  Pin,
+  Star,
+  Tag,
+  Edit,
+  Trash2,
+  Save,
   Clock,
   Filter,
   SortAsc,
   SortDesc,
-  NotebookText
+  NotebookText,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 // Dynamically import the rich text editor to avoid SSR issues
 const RichTextEditor = dynamic(() => import('../../components/RichTextEditor'), {
   ssr: false,
-  loading: () => <div className="h-64 bg-muted animate-pulse rounded-lg"></div>
+  loading: () => <div className="h-64 bg-muted animate-pulse rounded-lg"></div>,
 });
 
 interface Note {
@@ -47,7 +47,7 @@ interface NoteVersion {
 
 export default function NotesPage() {
   const { isAuthenticated } = useAuth();
-  
+
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -85,7 +85,9 @@ export default function NotesPage() {
 
   const createNewNote = async () => {
     if (hasUnsavedChanges) {
-      if (confirm('You have unsaved changes. Do you want to save them before creating a new note?')) {
+      if (
+        confirm('You have unsaved changes. Do you want to save them before creating a new note?')
+      ) {
         await saveNote();
       } else {
         setHasUnsavedChanges(false);
@@ -99,13 +101,13 @@ export default function NotesPage() {
         body: JSON.stringify({
           title: 'Untitled Note',
           content: '',
-          tags: []
-        })
+          tags: [],
+        }),
       });
 
       if (response.ok) {
         const newNote = await response.json();
-        setNotes(prev => [newNote, ...prev]);
+        setNotes((prev) => [newNote, ...prev]);
         setSelectedNote(newNote);
         setLocalNote(newNote);
         setIsEditing(true);
@@ -116,39 +118,40 @@ export default function NotesPage() {
     }
   };
 
-  const updateNote = useCallback(async (noteId: string, updates: Partial<Note>) => {
-    try {
-      const response = await fetch(`/api/notes/${noteId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
+  const updateNote = useCallback(
+    async (noteId: string, updates: Partial<Note>) => {
+      try {
+        const response = await fetch(`/api/notes/${noteId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates),
+        });
 
-      if (response.ok) {
-        const updatedNote = await response.json();
-        setNotes(prev => prev.map(note => 
-          note.id === noteId ? updatedNote : note
-        ));
-        if (selectedNote?.id === noteId) {
-          setSelectedNote(updatedNote);
+        if (response.ok) {
+          const updatedNote = await response.json();
+          setNotes((prev) => prev.map((note) => (note.id === noteId ? updatedNote : note)));
+          if (selectedNote?.id === noteId) {
+            setSelectedNote(updatedNote);
+          }
+          return updatedNote;
         }
-        return updatedNote;
+      } catch (error) {
+        console.error('Error updating note:', error);
       }
-    } catch (error) {
-      console.error('Error updating note:', error);
-    }
-  }, [selectedNote]);
+    },
+    [selectedNote]
+  );
 
   const deleteNote = async (noteId: string) => {
     if (!confirm('Are you sure you want to delete this note?')) return;
 
     try {
       const response = await fetch(`/api/notes/${noteId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (response.ok) {
-        setNotes(prev => prev.filter(note => note.id !== noteId));
+        setNotes((prev) => prev.filter((note) => note.id !== noteId));
         if (selectedNote?.id === noteId) {
           setSelectedNote(null);
           setIsEditing(false);
@@ -160,14 +163,14 @@ export default function NotesPage() {
   };
 
   const togglePin = async (noteId: string) => {
-    const note = notes.find(n => n.id === noteId);
+    const note = notes.find((n) => n.id === noteId);
     if (note) {
       await updateNote(noteId, { isPinned: !note.isPinned });
     }
   };
 
   const toggleStar = async (noteId: string) => {
-    const note = notes.find(n => n.id === noteId);
+    const note = notes.find((n) => n.id === noteId);
     if (note) {
       await updateNote(noteId, { isStarred: !note.isStarred });
     }
@@ -189,13 +192,11 @@ export default function NotesPage() {
   const restoreVersion = async (versionId: string) => {
     try {
       const response = await fetch(`/api/notes/versions/${versionId}/restore`, {
-        method: 'POST'
+        method: 'POST',
       });
       if (response.ok) {
         const restoredNote = await response.json();
-        setNotes(prev => prev.map(note => 
-          note.id === restoredNote.id ? restoredNote : note
-        ));
+        setNotes((prev) => prev.map((note) => (note.id === restoredNote.id ? restoredNote : note)));
         setSelectedNote(restoredNote);
         setShowVersions(false);
       }
@@ -205,26 +206,35 @@ export default function NotesPage() {
   };
 
   // Manual save functionality
-  const handleContentChange = useCallback((content: string) => {
-    if (!selectedNote) return;
+  const handleContentChange = useCallback(
+    (content: string) => {
+      if (!selectedNote) return;
 
-    setLocalNote(prev => prev ? { ...prev, content } : null);
-    setHasUnsavedChanges(true);
-  }, [selectedNote]);
+      setLocalNote((prev) => (prev ? { ...prev, content } : null));
+      setHasUnsavedChanges(true);
+    },
+    [selectedNote]
+  );
 
-  const handleTitleChange = useCallback((title: string) => {
-    if (!selectedNote) return;
+  const handleTitleChange = useCallback(
+    (title: string) => {
+      if (!selectedNote) return;
 
-    setLocalNote(prev => prev ? { ...prev, title } : null);
-    setHasUnsavedChanges(true);
-  }, [selectedNote]);
+      setLocalNote((prev) => (prev ? { ...prev, title } : null));
+      setHasUnsavedChanges(true);
+    },
+    [selectedNote]
+  );
 
-  const handleTagsChange = useCallback((tags: string[]) => {
-    if (!selectedNote) return;
+  const handleTagsChange = useCallback(
+    (tags: string[]) => {
+      if (!selectedNote) return;
 
-    setLocalNote(prev => prev ? { ...prev, tags } : null);
-    setHasUnsavedChanges(true);
-  }, [selectedNote]);
+      setLocalNote((prev) => (prev ? { ...prev, tags } : null));
+      setHasUnsavedChanges(true);
+    },
+    [selectedNote]
+  );
 
   const saveNote = async () => {
     if (!selectedNote || !localNote) return;
@@ -233,9 +243,9 @@ export default function NotesPage() {
       const updatedNote = await updateNote(selectedNote.id, {
         title: localNote.title,
         content: localNote.content,
-        tags: localNote.tags
+        tags: localNote.tags,
       });
-      
+
       if (updatedNote) {
         setSelectedNote(updatedNote);
         setLocalNote(updatedNote);
@@ -269,19 +279,20 @@ export default function NotesPage() {
 
   // Filter and sort notes
   const filteredNotes = notes
-    .filter(note => {
-      const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      const matchesTags = selectedTags.length === 0 || 
-                         selectedTags.some(tag => note.tags.includes(tag));
-      
+    .filter((note) => {
+      const matchesSearch =
+        note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        note.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      const matchesTags =
+        selectedTags.length === 0 || selectedTags.some((tag) => note.tags.includes(tag));
+
       return matchesSearch && matchesTags;
     })
     .sort((a, b) => {
       let comparison = 0;
-      
+
       if (sortBy === 'title') {
         comparison = a.title.localeCompare(b.title);
       } else if (sortBy === 'createdAt') {
@@ -289,12 +300,12 @@ export default function NotesPage() {
       } else {
         comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
       }
-      
+
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
   // Get all unique tags
-  const allTags = Array.from(new Set(notes.flatMap(note => note.tags)));
+  const allTags = Array.from(new Set(notes.flatMap((note) => note.tags)));
 
   if (!isAuthenticated) {
     return (
@@ -325,7 +336,10 @@ export default function NotesPage() {
         <div className="lg:col-span-1 space-y-3 sm:space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground sm:w-[18px] sm:h-[18px]" size={16} />
+            <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground sm:w-[18px] sm:h-[18px]"
+              size={16}
+            />
             <input
               type="text"
               placeholder="Search notes..."
@@ -342,16 +356,16 @@ export default function NotesPage() {
               Tags
             </h3>
             <div className="space-y-1">
-              {allTags.map(tag => (
+              {allTags.map((tag) => (
                 <label key={tag} className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={selectedTags.includes(tag)}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedTags(prev => [...prev, tag]);
+                        setSelectedTags((prev) => [...prev, tag]);
                       } else {
-                        setSelectedTags(prev => prev.filter(t => t !== tag));
+                        setSelectedTags((prev) => prev.filter((t) => t !== tag));
                       }
                     }}
                     className="rounded"
@@ -379,10 +393,14 @@ export default function NotesPage() {
                 <option value="title">Title</option>
               </select>
               <button
-                onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
                 className="flex items-center gap-2 w-full p-2 border border-border rounded-lg bg-background hover:bg-muted transition-colors text-sm sm:text-base"
               >
-                {sortOrder === 'asc' ? <SortAsc size={14} className="sm:w-4 sm:h-4" /> : <SortDesc size={14} className="sm:w-4 sm:h-4" />}
+                {sortOrder === 'asc' ? (
+                  <SortAsc size={14} className="sm:w-4 sm:h-4" />
+                ) : (
+                  <SortDesc size={14} className="sm:w-4 sm:h-4" />
+                )}
                 {sortOrder === 'asc' ? 'Ascending' : 'Descending'}
               </button>
             </div>
@@ -391,11 +409,13 @@ export default function NotesPage() {
 
         {/* Notes List */}
         <div className="lg:col-span-1">
-          <h2 className="font-semibold text-foreground mb-3 text-sm sm:text-base">All Notes ({filteredNotes.length})</h2>
+          <h2 className="font-semibold text-foreground mb-3 text-sm sm:text-base">
+            All Notes ({filteredNotes.length})
+          </h2>
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {isLoading ? (
               <div className="space-y-2">
-                {[1, 2, 3].map(i => (
+                {[1, 2, 3].map((i) => (
                   <div key={i} className="h-12 sm:h-16 bg-muted animate-pulse rounded-lg"></div>
                 ))}
               </div>
@@ -405,7 +425,7 @@ export default function NotesPage() {
                 <p className="text-sm sm:text-base text-muted-foreground">No notes found.</p>
               </div>
             ) : (
-              filteredNotes.map(note => (
+              filteredNotes.map((note) => (
                 <div
                   key={note.id}
                   onClick={() => setSelectedNote(note)}
@@ -418,15 +438,26 @@ export default function NotesPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        {note.isPinned && <Pin size={12} className="text-yellow-accent flex-shrink-0" />}
-                        {note.isStarred && <Star size={12} className="text-yellow-accent flex-shrink-0" />}
-                        <h3 className="font-medium text-foreground text-sm sm:text-base truncate">{note.title}</h3>
+                        {note.isPinned && (
+                          <Pin size={12} className="text-yellow-accent flex-shrink-0" />
+                        )}
+                        {note.isStarred && (
+                          <Star size={12} className="text-yellow-accent flex-shrink-0" />
+                        )}
+                        <h3 className="font-medium text-foreground text-sm sm:text-base truncate">
+                          {note.title}
+                        </h3>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{note.content}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                        {note.content}
+                      </p>
                       {note.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {note.tags.slice(0, 3).map(tag => (
-                            <span key={tag} className="px-2 py-1 bg-muted text-xs rounded-full text-muted-foreground">
+                          {note.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2 py-1 bg-muted text-xs rounded-full text-muted-foreground"
+                            >
                               {tag}
                             </span>
                           ))}
@@ -497,7 +528,7 @@ export default function NotesPage() {
                     className="w-full p-3 text-xl font-semibold border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Note title..."
                   />
-                  
+
                   <RichTextEditor
                     content={localNote?.content || ''}
                     onChange={handleContentChange}
@@ -511,7 +542,10 @@ export default function NotesPage() {
                       type="text"
                       value={localNote?.tags.join(', ') || ''}
                       onChange={(e) => {
-                        const tags = e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                        const tags = e.target.value
+                          .split(',')
+                          .map((tag) => tag.trim())
+                          .filter((tag) => tag);
                         handleTagsChange(tags);
                       }}
                       className="w-full p-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
@@ -544,8 +578,8 @@ export default function NotesPage() {
                         onClick={saveNote}
                         disabled={!hasUnsavedChanges}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                          hasUnsavedChanges 
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                          hasUnsavedChanges
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                             : 'bg-muted text-muted-foreground cursor-not-allowed'
                         }`}
                       >
@@ -558,14 +592,17 @@ export default function NotesPage() {
               ) : (
                 <div className="space-y-4">
                   <h2 className="text-2xl font-bold text-foreground">{selectedNote.title}</h2>
-                  <div 
+                  <div
                     className="prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{ __html: selectedNote.content }}
                   />
                   {selectedNote.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {selectedNote.tags.map(tag => (
-                        <span key={tag} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                      {selectedNote.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                        >
                           {tag}
                         </span>
                       ))}
@@ -579,8 +616,11 @@ export default function NotesPage() {
                 <div className="mt-6 p-4 border border-border rounded-lg bg-muted/50">
                   <h3 className="font-semibold text-foreground mb-3">Version History</h3>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {versions.map(version => (
-                      <div key={version.id} className="flex items-center justify-between p-2 bg-background rounded">
+                    {versions.map((version) => (
+                      <div
+                        key={version.id}
+                        className="flex items-center justify-between p-2 bg-background rounded"
+                      >
                         <div>
                           <p className="font-medium text-foreground">{version.title}</p>
                           <p className="text-sm text-muted-foreground">
@@ -604,7 +644,9 @@ export default function NotesPage() {
               <div className="text-muted-foreground mb-4">
                 <NotebookText size={48} className="mx-auto mb-4" />
                 <h3 className="text-lg font-semibold">No note selected</h3>
-                <p className="text-sm">Select a note from the list or create a new one to get started.</p>
+                <p className="text-sm">
+                  Select a note from the list or create a new one to get started.
+                </p>
               </div>
             </div>
           )}
@@ -612,4 +654,4 @@ export default function NotesPage() {
       </div>
     </div>
   );
-} 
+}

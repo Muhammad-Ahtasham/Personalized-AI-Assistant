@@ -1,9 +1,9 @@
-"use client";
-import { useState, useEffect, Suspense } from "react";
-import { useRouter } from "next/navigation";
-import { useSignUp, useUser } from "@clerk/nextjs";
-import FaceAuth from "../../components/FaceAuth";
-import { useAlertContext } from "@/components/AlertProvider";
+'use client';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSignUp, useUser } from '@clerk/nextjs';
+import FaceAuth from '../../components/FaceAuth';
+import { useAlertContext } from '@/components/AlertProvider';
 
 function FaceSignUpContent() {
   const router = useRouter();
@@ -15,28 +15,28 @@ function FaceSignUpContent() {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [faceEmbedding, setFaceEmbedding] = useState<number[] | null>(null);
 
   // Redirect if already signed in
   useEffect(() => {
     if (isSignedIn && user) {
-      router.push("/dashboard");
+      router.push('/dashboard');
     }
   }, [isSignedIn, user, router]);
 
   const handleFaceDetected = (embedding: number[]) => {
     setFaceEmbedding(embedding);
     setShowEmailForm(true);
-    showSuccess("Face captured successfully! Please fill out the registration form.");
+    showSuccess('Face captured successfully! Please fill out the registration form.');
   };
 
   const handleFaceError = (error: string) => {
-    console.error("FaceAuth error:", error);
+    console.error('FaceAuth error:', error);
     showError(error);
   };
 
@@ -45,15 +45,15 @@ function FaceSignUpContent() {
     setIsLoading(true);
 
     try {
-      if (!signUp) throw new Error("Sign up is not available");
+      if (!signUp) throw new Error('Sign up is not available');
 
       await signUp.create({ emailAddress: email, password });
       await signUp.prepareEmailAddressVerification();
 
       setShowVerification(true);
-      showSuccess("Verification code sent to your email!");
+      showSuccess('Verification code sent to your email!');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
       showError(msg);
     } finally {
       setIsLoading(false);
@@ -65,19 +65,19 @@ function FaceSignUpContent() {
     setIsLoading(true);
 
     try {
-      if (!signUp) throw new Error("Sign up is not available");
+      if (!signUp) throw new Error('Sign up is not available');
 
       const result = await signUp.attemptEmailAddressVerification({ code: verificationCode });
 
-      if (result.status === "complete") {
+      if (result.status === 'complete') {
         if (!faceEmbedding) {
-          showError("Face data missing. Please try again.");
+          showError('Face data missing. Please try again.');
           return;
         }
 
-        const registerResponse = await fetch("/api/face-register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const registerResponse = await fetch('/api/face-register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email,
             password,
@@ -90,16 +90,16 @@ function FaceSignUpContent() {
         const registerData = await registerResponse.json();
 
         if (!registerResponse.ok) {
-          throw new Error(registerData.error || "Failed to complete face registration.");
+          throw new Error(registerData.error || 'Failed to complete face registration.');
         }
 
-        showSuccess("Registration complete! Redirecting to dashboard...");
-        setTimeout(() => (window.location.href = "/dashboard"), 2000);
+        showSuccess('Registration complete! Redirecting to dashboard...');
+        setTimeout(() => (window.location.href = '/dashboard'), 2000);
       } else {
-        showError("Verification failed. Please check the code and try again.");
+        showError('Verification failed. Please check the code and try again.');
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Verification failed. Try again.";
+      const msg = err instanceof Error ? err.message : 'Verification failed. Try again.';
       showError(msg);
     } finally {
       setIsLoading(false);
@@ -113,7 +113,7 @@ function FaceSignUpContent() {
 
   const handleBackToEmailForm = () => {
     setShowVerification(false);
-    setVerificationCode("");
+    setVerificationCode('');
   };
 
   if (!isLoaded) {
@@ -150,7 +150,8 @@ function FaceSignUpContent() {
           <>
             <div className="mb-6 text-center">
               <p className="text-sm text-muted-foreground mb-2">
-                A verification code has been sent to <strong className="text-white">{email}</strong>.
+                A verification code has been sent to <strong className="text-white">{email}</strong>
+                .
               </p>
               <p className="text-xs text-muted-foreground">
                 Enter the 6-digit code to complete your registration.
@@ -159,7 +160,10 @@ function FaceSignUpContent() {
 
             <form onSubmit={handleVerification} className="space-y-4">
               <div>
-                <label htmlFor="verificationCode" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="verificationCode"
+                  className="block text-sm font-medium text-white mb-1"
+                >
                   Verification Code
                 </label>
                 <input
@@ -176,11 +180,15 @@ function FaceSignUpContent() {
               </div>
 
               <button type="submit" className="btn-primary w-full" disabled={isLoading}>
-                {isLoading ? "Verifying..." : "Verify Email"}
+                {isLoading ? 'Verifying...' : 'Verify Email'}
               </button>
 
               <div className="text-center">
-                <button type="button" onClick={handleBackToEmailForm} className="text-sm text-yellow-accent hover:text-yellow-500 font-medium">
+                <button
+                  type="button"
+                  onClick={handleBackToEmailForm}
+                  className="text-sm text-yellow-accent hover:text-yellow-500 font-medium"
+                >
                   ← Back
                 </button>
               </div>
@@ -253,7 +261,7 @@ function FaceSignUpContent() {
               disabled={isLoading}
               className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Sending Verification..." : "Continue to Email Verification"}
+              {isLoading ? 'Sending Verification...' : 'Continue to Email Verification'}
             </button>
           </form>
         )}
@@ -262,15 +270,21 @@ function FaceSignUpContent() {
           <p className="text-sm text-muted-foreground">
             {showVerification ? (
               <>
-                Didn&apos;t get the code?{" "}
-                <button onClick={handleSubmit} className="text-yellow-accent hover:text-yellow-500 font-medium">
+                Didn&apos;t get the code?{' '}
+                <button
+                  onClick={handleSubmit}
+                  className="text-yellow-accent hover:text-yellow-500 font-medium"
+                >
                   Resend
                 </button>
               </>
             ) : (
               <>
-                Already have an account?{" "}
-                <a href="/face-sign-in" className="text-yellow-accent hover:text-yellow-500 font-medium">
+                Already have an account?{' '}
+                <a
+                  href="/face-sign-in"
+                  className="text-yellow-accent hover:text-yellow-500 font-medium"
+                >
                   Sign in with face
                 </a>
               </>
@@ -279,7 +293,7 @@ function FaceSignUpContent() {
 
           {!showVerification && (
             <p className="text-sm text-muted-foreground mt-2">
-              Or{" "}
+              Or{' '}
               <a href="/sign-up" className="text-yellow-accent hover:text-yellow-500 font-medium">
                 sign up with email
               </a>
@@ -293,11 +307,13 @@ function FaceSignUpContent() {
 
 export default function FaceSignUpPage() {
   return (
-    <Suspense fallback={
-      <div className="flex justify-center items-center min-h-screen bg-black">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen bg-black">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-accent"></div>
+        </div>
+      }
+    >
       <FaceSignUpContent />
     </Suspense>
   );

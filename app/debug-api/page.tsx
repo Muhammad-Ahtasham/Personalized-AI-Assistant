@@ -1,25 +1,27 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 
 export default function DebugAPI() {
-  const [results, setResults] = useState<Array<{
-    endpoint: string;
-    method: string;
-    status?: number;
-    data?: unknown;
-    error?: string;
-    timestamp: string;
-  }>>([]);
+  const [results, setResults] = useState<
+    Array<{
+      endpoint: string;
+      method: string;
+      status?: number;
+      data?: unknown;
+      error?: string;
+      timestamp: string;
+    }>
+  >([]);
   const [loading, setLoading] = useState(false);
 
-  const testEndpoint = async (endpoint: string, method: string = "GET", body?: unknown) => {
+  const testEndpoint = async (endpoint: string, method: string = 'GET', body?: unknown) => {
     setLoading(true);
     try {
       const response = await fetch(`/api/${endpoint}`, {
         method,
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: body ? JSON.stringify(body) : undefined,
       });
@@ -32,20 +34,26 @@ export default function DebugAPI() {
         data = { rawResponse: text };
       }
 
-      setResults(prev => [...prev, {
-        endpoint,
-        method,
-        status: response.status,
-        data,
-        timestamp: new Date().toISOString(),
-      }]);
+      setResults((prev) => [
+        ...prev,
+        {
+          endpoint,
+          method,
+          status: response.status,
+          data,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } catch (error) {
-      setResults(prev => [...prev, {
-        endpoint,
-        method,
-        error: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
-      }]);
+      setResults((prev) => [
+        ...prev,
+        {
+          endpoint,
+          method,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -58,48 +66,48 @@ export default function DebugAPI() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">API Debug Tool</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <button
-          onClick={() => testEndpoint("health")}
+          onClick={() => testEndpoint('health')}
           disabled={loading}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
         >
           Test Health Endpoint
         </button>
-        
+
         <button
-          onClick={() => testEndpoint("test-deploy")}
+          onClick={() => testEndpoint('test-deploy')}
           disabled={loading}
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:opacity-50"
         >
           Test Deploy Endpoint
         </button>
-        
+
         <button
-          onClick={() => testEndpoint("test-quiz", "POST", { topic: "JavaScript" })}
+          onClick={() => testEndpoint('test-quiz', 'POST', { topic: 'JavaScript' })}
           disabled={loading}
           className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 disabled:opacity-50"
         >
           Test Quiz Endpoint (No Auth)
         </button>
-        
+
         <button
-          onClick={() => testEndpoint("generate-quiz", "POST", { topic: "JavaScript" })}
+          onClick={() => testEndpoint('generate-quiz', 'POST', { topic: 'JavaScript' })}
           disabled={loading}
           className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 disabled:opacity-50"
         >
           Test Generate Quiz (With Auth)
         </button>
-        
+
         <button
-          onClick={() => testEndpoint("generate-plan", "POST", { topic: "JavaScript" })}
+          onClick={() => testEndpoint('generate-plan', 'POST', { topic: 'JavaScript' })}
           disabled={loading}
           className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:opacity-50"
         >
           Test Generate Plan (With Auth)
         </button>
-        
+
         <button
           onClick={clearResults}
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
@@ -122,19 +130,19 @@ export default function DebugAPI() {
               <h3 className="font-semibold">
                 {result.method} /api/{result.endpoint}
               </h3>
-              <span className={`px-2 py-1 rounded text-sm ${
-                (result.status ?? 0) >= 200 && (result.status ?? 0) < 300 
-                  ? "bg-red-100 text-green-800"
-                  : (result.status ?? 0) >= 400 
-                  ? "bg-red-100 text-red-800"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}>
-                {result.status || "Error"}
+              <span
+                className={`px-2 py-1 rounded text-sm ${
+                  (result.status ?? 0) >= 200 && (result.status ?? 0) < 300
+                    ? 'bg-red-100 text-green-800'
+                    : (result.status ?? 0) >= 400
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                }`}
+              >
+                {result.status || 'Error'}
               </span>
             </div>
-            <p className="text-sm text-gray-600 mb-2">
-              {result.timestamp}
-            </p>
+            <p className="text-sm text-gray-600 mb-2">{result.timestamp}</p>
             {result.error ? (
               <div className="bg-red-100 p-3 rounded">
                 <p className="text-red-800 font-mono text-sm">{result.error}</p>
@@ -149,4 +157,4 @@ export default function DebugAPI() {
       </div>
     </div>
   );
-} 
+}

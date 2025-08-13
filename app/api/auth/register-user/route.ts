@@ -10,10 +10,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
     // Check if user already exists in Prisma
@@ -22,10 +19,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'User with this email already exists' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'User with this email already exists' }, { status: 409 });
     }
 
     // Hash the password
@@ -39,7 +33,7 @@ export async function POST(request: NextRequest) {
       const usersResponse = await clerk.users.getUserList({
         emailAddress: [email],
       });
-      
+
       if (usersResponse.data && usersResponse.data.length > 0) {
         clerkUser = usersResponse.data[0];
       }
@@ -124,12 +118,8 @@ export async function POST(request: NextRequest) {
         },
       });
     }
-
   } catch (error) {
     console.error('User registration error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-
 const prisma = new PrismaClient();
 
 // Function to calculate cosine similarity between two embeddings
@@ -35,10 +34,7 @@ export async function POST(request: NextRequest) {
     const { faceEmbedding } = await request.json();
 
     if (!faceEmbedding) {
-      return NextResponse.json(
-        { error: 'Face embedding is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Face embedding is required' }, { status: 400 });
     }
 
     // Get all face embeddings from the database
@@ -93,12 +89,8 @@ export async function POST(request: NextRequest) {
       },
       similarity: highestSimilarity,
     });
-
   } catch (error) {
     console.error('Face login error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

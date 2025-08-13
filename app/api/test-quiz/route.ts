@@ -1,44 +1,48 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
     const { topic } = await req.json();
-    console.log("Test Quiz for topic:", topic);
-    
+    console.log('Test Quiz for topic:', topic);
+
     if (!topic) {
-      return NextResponse.json({ error: "No topic provided." }, { status: 400 });
+      return NextResponse.json({ error: 'No topic provided.' }, { status: 400 });
     }
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      console.error("OpenRouter API key not set in environment variables");
-      return NextResponse.json({ 
-        error: "OpenRouter API key not set. Please check your deployment configuration." 
-      }, { status: 500 });
+      console.error('OpenRouter API key not set in environment variables');
+      return NextResponse.json(
+        {
+          error: 'OpenRouter API key not set. Please check your deployment configuration.',
+        },
+        { status: 500 }
+      );
     }
 
-    console.log("Making request to OpenRouter for test quiz with topic:", topic);
+    console.log('Making request to OpenRouter for test quiz with topic:', topic);
 
     // Add timeout to the fetch request
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     try {
-      const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
+      const openRouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-r1:free",
+          model: 'deepseek/deepseek-r1:free',
           messages: [
             {
-              role: "system",
-              content: "You are an expert study assistant. Given a topic, generate a short interactive quiz (3 - 5 questions) from beginner to advanced level. Return the quiz as a JSON array of objects with 'question', 'choices' (array), and 'answer' (string). Do not include explanations unless asked.",
+              role: 'system',
+              content:
+                "You are an expert study assistant. Given a topic, generate a short interactive quiz (3 - 5 questions) from beginner to advanced level. Return the quiz as a JSON array of objects with 'question', 'choices' (array), and 'answer' (string). Do not include explanations unless asked.",
             },
             {
-              role: "user",
+              role: 'user',
               content: `Generate a quiz for: ${topic}`,
             },
           ],
@@ -50,68 +54,77 @@ export async function POST(req: NextRequest) {
 
       clearTimeout(timeoutId);
 
-      console.log("OpenRouter response status:", openRouterRes.status);
+      console.log('OpenRouter response status:', openRouterRes.status);
 
       if (!openRouterRes.ok) {
         const errorText = await openRouterRes.text();
-        console.error("OpenRouter error response:", errorText);
-        return NextResponse.json({ 
-          error: `OpenRouter API error (${openRouterRes.status}): ${errorText}` 
-        }, { status: 500 });
+        console.error('OpenRouter error response:', errorText);
+        return NextResponse.json(
+          {
+            error: `OpenRouter API error (${openRouterRes.status}): ${errorText}`,
+          },
+          { status: 500 }
+        );
       }
 
       const data = await openRouterRes.json();
-      const aiResponse = data.choices?.[0]?.message?.content || "";
-      console.log("AI Response received, length:", aiResponse.length);
-      
+      const aiResponse = data.choices?.[0]?.message?.content || '';
+      console.log('AI Response received, length:', aiResponse.length);
+
       // Try to parse the quiz from the AI's response
       let quiz = null;
       try {
         // First try to parse as JSON
         quiz = JSON.parse(aiResponse);
-        console.log("Successfully parsed quiz as JSON");
+        console.log('Successfully parsed quiz as JSON');
       } catch {
-        console.log("Failed to parse as JSON, treating as string");
+        console.log('Failed to parse as JSON, treating as string');
         // If parsing fails, try to extract JSON from the response
         const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
         if (jsonMatch) {
           try {
             quiz = JSON.parse(jsonMatch[1]);
-            console.log("Successfully extracted and parsed JSON from markdown");
+            console.log('Successfully extracted and parsed JSON from markdown');
           } catch {
-            console.log("Failed to extract JSON from markdown");
+            console.log('Failed to extract JSON from markdown');
             quiz = [];
           }
         } else {
-          console.log("No JSON found in response");
+          console.log('No JSON found in response');
           quiz = [];
         }
       }
-      
-      console.log("Final quiz:", quiz);
-      
+
+      console.log('Final quiz:', quiz);
+
       // Ensure quiz is an array
       if (!Array.isArray(quiz)) {
-        console.log("Quiz is not an array, setting to empty array");
+        console.log('Quiz is not an array, setting to empty array');
         quiz = [];
       }
-      
+
       return NextResponse.json({ quiz });
     } catch (fetchError) {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        console.error("Request timeout");
-        return NextResponse.json({ 
-          error: "Request timeout. Please try again." 
-        }, { status: 408 });
+        console.error('Request timeout');
+        return NextResponse.json(
+          {
+            error: 'Request timeout. Please try again.',
+          },
+          { status: 408 }
+        );
       }
       throw fetchError;
     }
   } catch (err) {
     const error = err as Error;
-    console.error("Error in test-quiz API:", error);
-    return NextResponse.json({ 
-      error: `Server error: ${error.message || "Failed to fetch from OpenRouter."}` 
-    }, { status: 500 });
+    console.error('Error in test-quiz API:', error);
+    return NextResponse.json(
+      {
+        error: `Server error: ${error.message || 'Failed to fetch from OpenRouter.'}`,
+      },
+      { status: 500 }
+    );
   }
-} 
+}

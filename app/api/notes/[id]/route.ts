@@ -4,19 +4,16 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findFirst({
-      where: { clerkId: userId }
+      where: { clerkId: userId },
     });
 
     if (!user) {
@@ -26,8 +23,8 @@ export async function GET(
     const note = await prisma.note.findFirst({
       where: {
         id: params.id,
-        userId: user.id
-      }
+        userId: user.id,
+      },
     });
 
     if (!note) {
@@ -41,19 +38,16 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findFirst({
-      where: { clerkId: userId }
+      where: { clerkId: userId },
     });
 
     if (!user) {
@@ -66,8 +60,8 @@ export async function PATCH(
     const existingNote = await prisma.note.findFirst({
       where: {
         id: params.id,
-        userId: user.id
-      }
+        userId: user.id,
+      },
     });
 
     if (!existingNote) {
@@ -81,8 +75,8 @@ export async function PATCH(
           noteId: params.id,
           title: existingNote.title,
           content: existingNote.content,
-          tags: existingNote.tags
-        }
+          tags: existingNote.tags,
+        },
       });
     }
 
@@ -94,8 +88,8 @@ export async function PATCH(
         ...(content !== undefined && { content }),
         ...(tags !== undefined && { tags }),
         ...(isPinned !== undefined && { isPinned }),
-        ...(isStarred !== undefined && { isStarred })
-      }
+        ...(isStarred !== undefined && { isStarred }),
+      },
     });
 
     return NextResponse.json(updatedNote);
@@ -105,19 +99,16 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findFirst({
-      where: { clerkId: userId }
+      where: { clerkId: userId },
     });
 
     if (!user) {
@@ -128,8 +119,8 @@ export async function DELETE(
     const existingNote = await prisma.note.findFirst({
       where: {
         id: params.id,
-        userId: user.id
-      }
+        userId: user.id,
+      },
     });
 
     if (!existingNote) {
@@ -138,7 +129,7 @@ export async function DELETE(
 
     // Delete note (versions will be deleted automatically due to cascade)
     await prisma.note.delete({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     return NextResponse.json({ success: true });
@@ -146,4 +137,4 @@ export async function DELETE(
     console.error('Error deleting note:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

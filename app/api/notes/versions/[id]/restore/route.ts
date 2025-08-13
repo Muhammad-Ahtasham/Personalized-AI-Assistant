@@ -4,19 +4,16 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findFirst({
-      where: { clerkId: userId }
+      where: { clerkId: userId },
     });
 
     if (!user) {
@@ -26,7 +23,7 @@ export async function POST(
     // Get the version to restore
     const version = await prisma.noteVersion.findUnique({
       where: { id: params.id },
-      include: { note: true }
+      include: { note: true },
     });
 
     if (!version) {
@@ -44,8 +41,8 @@ export async function POST(
         noteId: version.noteId,
         title: version.note.title,
         content: version.note.content,
-        tags: version.note.tags
-      }
+        tags: version.note.tags,
+      },
     });
 
     // Restore the note to the version state
@@ -54,8 +51,8 @@ export async function POST(
       data: {
         title: version.title,
         content: version.content,
-        tags: version.tags
-      }
+        tags: version.tags,
+      },
     });
 
     return NextResponse.json(restoredNote);
@@ -63,4 +60,4 @@ export async function POST(
     console.error('Error restoring version:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

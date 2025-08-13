@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, Suspense } from "react";
+import { useState, Suspense } from 'react';
 // import { useRouter } from "next/navigation";
-import { useSignIn, useClerk } from "@clerk/nextjs";
-import FaceAuth from "../../components/FaceAuth";
-import { useAlertContext } from "@/components/AlertProvider";
+import { useSignIn, useClerk } from '@clerk/nextjs';
+import FaceAuth from '../../components/FaceAuth';
+import { useAlertContext } from '@/components/AlertProvider';
 
 function FaceSignInContent() {
   // const router = useRouter();
@@ -13,7 +13,7 @@ function FaceSignInContent() {
   const { showSuccess, showError } = useAlertContext();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [faceEmbeddingFromDB, setFaceEmbeddingFromDB] = useState<number[] | null>(null);
   const [emailSubmitted, setEmailSubmitted] = useState(false);
 
@@ -23,27 +23,27 @@ function FaceSignInContent() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/face/get-embedding-by-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/face/get-embedding-by-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "User not found.");
+        throw new Error(data.error || 'User not found.');
       }
 
       if (!data.embedding || !Array.isArray(data.embedding)) {
-        throw new Error("No embedding found for this user.");
+        throw new Error('No embedding found for this user.');
       }
 
       // setFaceEmbeddingFromDB(data.embedding);
       setFaceEmbeddingFromDB(data.embedding?.[0]?.embedding);
       setEmailSubmitted(true);
     } catch (error) {
-      showError(error instanceof Error ? error.message : "Unknown error");
+      showError(error instanceof Error ? error.message : 'Unknown error');
     } finally {
       setIsLoading(false);
     }
@@ -56,9 +56,9 @@ function FaceSignInContent() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/face/compare-embeddings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/face/compare-embeddings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
           liveEmbedding,
@@ -66,24 +66,23 @@ function FaceSignInContent() {
         }),
       });
 
-
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || "Face verification failed.");
+        throw new Error(data.error || 'Face verification failed.');
       }
 
       // Sign in with stored password (fetched from backend)
-      const passwordResult = await fetch("/api/auth/get-user-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const passwordResult = await fetch('/api/auth/get-user-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
 
       const passwordData = await passwordResult.json();
 
       if (!passwordResult.ok || !passwordData.user?.password) {
-        throw new Error("Password not found for user.");
+        throw new Error('Password not found for user.');
       }
 
       const result = await signIn?.create({
@@ -91,17 +90,17 @@ function FaceSignInContent() {
         password: passwordData.user.password,
       });
 
-      if (result?.status === "complete") {
+      if (result?.status === 'complete') {
         if (result.createdSessionId) {
           await setActive({ session: result.createdSessionId });
         }
-        showSuccess("Face authentication successful! Redirecting...");
-        setTimeout(() => (window.location.href = "/dashboard"), 1000);
+        showSuccess('Face authentication successful! Redirecting...');
+        setTimeout(() => (window.location.href = '/dashboard'), 1000);
       } else {
-        throw new Error("Sign-in failed.");
+        throw new Error('Sign-in failed.');
       }
     } catch (error) {
-      showError(error instanceof Error ? error.message : "Authentication error.");
+      showError(error instanceof Error ? error.message : 'Authentication error.');
     } finally {
       setIsLoading(false);
     }
@@ -122,9 +121,7 @@ function FaceSignInContent() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-black">
       <div className="card-dark p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6 text-white">
-          Face Sign In
-        </h1>
+        <h1 className="text-2xl font-bold text-center mb-6 text-white">Face Sign In</h1>
 
         {!emailSubmitted ? (
           <form onSubmit={handleSubmitEmail} className="space-y-4">
@@ -144,7 +141,7 @@ function FaceSignInContent() {
               />
             </div>
             <button type="submit" className="btn-primary w-full" disabled={isLoading}>
-              {isLoading ? "Loading..." : "Continue"}
+              {isLoading ? 'Loading...' : 'Continue'}
             </button>
           </form>
         ) : (
@@ -161,7 +158,7 @@ function FaceSignInContent() {
             />
             <button
               onClick={() => {
-                setEmail("");
+                setEmail('');
                 setEmailSubmitted(false);
                 setFaceEmbeddingFromDB(null);
               }}
@@ -174,13 +171,16 @@ function FaceSignInContent() {
 
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <a href="/face-sign-up" className="text-yellow-accent hover:text-yellow-500 font-medium">
+            Don&apos;t have an account?{' '}
+            <a
+              href="/face-sign-up"
+              className="text-yellow-accent hover:text-yellow-500 font-medium"
+            >
               Sign up with face
             </a>
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Or{" "}
+            Or{' '}
             <a href="/sign-in" className="text-yellow-accent hover:text-yellow-500 font-medium">
               sign in with email
             </a>

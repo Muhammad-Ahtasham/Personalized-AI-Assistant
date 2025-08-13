@@ -8,7 +8,10 @@ export async function POST(request: NextRequest) {
   try {
     const { email, code, newPassword } = await request.json();
     if (!email || !code || !newPassword) {
-      return NextResponse.json({ error: 'Email, code, and new password are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Email, code, and new password are required' },
+        { status: 400 }
+      );
     }
     const entry = codeStore.get(email);
     if (!entry) {
@@ -39,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
     // Update password in database
     // const hashedPassword = await bcrypt.hash(newPassword, 12);
-    const hashedPassword = newPassword
+    const hashedPassword = newPassword;
     await prisma.user.update({
       where: { id: user.id },
       data: { password: hashedPassword },
@@ -50,4 +53,4 @@ export async function POST(request: NextRequest) {
     console.error('Reset password error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

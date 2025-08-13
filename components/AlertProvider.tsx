@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { createContext, useContext, ReactNode } from 'react';
 import { useAlert } from '@/hooks/useAlert';
@@ -31,7 +31,7 @@ export function AlertProvider({ children }: AlertProviderProps) {
   return (
     <AlertContext.Provider value={{ showSuccess, showError, showWarning, showInfo }}>
       {children}
-      
+
       {/* Render alerts */}
       <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
         {alerts.map((alert) => (
@@ -48,4 +48,4 @@ export function AlertProvider({ children }: AlertProviderProps) {
       </div>
     </AlertContext.Provider>
   );
-} 
+}

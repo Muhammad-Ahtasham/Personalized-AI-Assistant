@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 export default function CustomUserButton() {
   const { user, logout } = useAuth();
@@ -13,25 +13,19 @@ export default function CustomUserButton() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   if (!user) return null;
 
-  const userEmail = user.emailAddresses?.[0]?.emailAddress || "";
-  const userName =
-    user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : "";
+  const userEmail = user.emailAddresses?.[0]?.emailAddress || '';
+  const userName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : '';
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -50,30 +44,24 @@ export default function CustomUserButton() {
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
-            <span className="text-sm font-medium">
-              {userName.charAt(0).toUpperCase()}
-            </span>
+            <span className="text-sm font-medium">{userName.charAt(0).toUpperCase()}</span>
           )}
         </button>
-        <div>{userName ? userName : userEmail ? userEmail.slice(0, 8) + "..." : ""}</div>
+        <div>{userName ? userName : userEmail ? userEmail.slice(0, 8) + '...' : ''}</div>
       </div>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-64 bg-black border border-border rounded-xl shadow-lg z-50">
           <div className="py-2">
             <div className="px-4 py-3 border-b border-border">
-              <div className="text-base font-semibold text-foreground truncate">
-                {userName}
-              </div>
-              <div className="text-xs text-muted-foreground truncate">
-                {userEmail}
-              </div>
+              <div className="text-base font-semibold text-foreground truncate">{userName}</div>
+              <div className="text-xs text-muted-foreground truncate">{userEmail}</div>
             </div>
             <div className="py-1">
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  router.push("/profile");
+                  router.push('/profile');
                 }}
                 className="flex items-center w-full px-4 py-2 text-sm text-foreground hover:bg-accent/10 transition-colors rounded-none"
               >

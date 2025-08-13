@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { 
-  Bold, 
-  Italic, 
-  Underline, 
-  List, 
-  ListOrdered, 
-  Heading1, 
-  Heading2, 
+import {
+  Bold,
+  Italic,
+  Underline,
+  List,
+  ListOrdered,
+  Heading1,
+  Heading2,
   Quote,
-  Code
+  Code,
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -51,15 +51,15 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     }
   };
 
-  const ToolbarButton = ({ 
-    icon: Icon, 
-    onClick, 
-    title, 
-    isActive = false 
-  }: { 
-    icon: React.ComponentType<{ size: number }>; 
-    onClick: () => void; 
-    title: string; 
+  const ToolbarButton = ({
+    icon: Icon,
+    onClick,
+    title,
+    isActive = false,
+  }: {
+    icon: React.ComponentType<{ size: number }>;
+    onClick: () => void;
+    title: string;
     isActive?: boolean;
   }) => (
     <button
@@ -77,24 +77,16 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     <div className="border border-border rounded-lg overflow-hidden">
       {/* Toolbar */}
       <div className="flex items-center gap-1 p-2 border-b border-border bg-muted/50">
-        <ToolbarButton
-          icon={Bold}
-          onClick={() => execCommand('bold')}
-          title="Bold"
-        />
-        <ToolbarButton
-          icon={Italic}
-          onClick={() => execCommand('italic')}
-          title="Italic"
-        />
+        <ToolbarButton icon={Bold} onClick={() => execCommand('bold')} title="Bold" />
+        <ToolbarButton icon={Italic} onClick={() => execCommand('italic')} title="Italic" />
         <ToolbarButton
           icon={Underline}
           onClick={() => execCommand('underline')}
           title="Underline"
         />
-        
+
         <div className="w-px h-6 bg-border mx-2"></div>
-        
+
         <ToolbarButton
           icon={Heading1}
           onClick={() => execCommand('formatBlock', '<h1>')}
@@ -105,9 +97,9 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
           onClick={() => execCommand('formatBlock', '<h2>')}
           title="Heading 2"
         />
-        
+
         <div className="w-px h-6 bg-border mx-2"></div>
-        
+
         <ToolbarButton
           icon={List}
           onClick={() => execCommand('insertUnorderedList')}
@@ -118,19 +110,15 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
           onClick={() => execCommand('insertOrderedList')}
           title="Numbered List"
         />
-        
+
         <div className="w-px h-6 bg-border mx-2"></div>
-        
+
         <ToolbarButton
           icon={Quote}
           onClick={() => execCommand('formatBlock', '<blockquote>')}
           title="Quote"
         />
-        <ToolbarButton
-          icon={Code}
-          onClick={() => insertText('`code`')}
-          title="Code"
-        />
+        <ToolbarButton icon={Code} onClick={() => insertText('`code`')} title="Code" />
       </div>
 
       {/* Editor */}
@@ -143,13 +131,13 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         className={`min-h-64 p-4 focus:outline-none ${
           isFocused ? 'bg-background' : 'bg-background'
         }`}
-        style={{ 
+        style={{
           minHeight: '16rem',
-          lineHeight: '1.6'
+          lineHeight: '1.6',
         }}
         data-placeholder={placeholder}
       />
-      
+
       <style jsx>{`
         [contenteditable]:empty:before {
           content: attr(data-placeholder);
@@ -159,4 +147,4 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
       `}</style>
     </div>
   );
-} 
+}

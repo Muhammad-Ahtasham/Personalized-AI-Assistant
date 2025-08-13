@@ -1,11 +1,11 @@
-"use client";
-export const dynamic = "force-dynamic";
+'use client';
+export const dynamic = 'force-dynamic';
 
-import { useEffect, useState, useRef } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useAlertContext } from "@/components/AlertProvider";
+import { useEffect, useState, useRef } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAlertContext } from '@/components/AlertProvider';
 import {
   BookOpenIcon,
   AcademicCapIcon,
@@ -18,8 +18,8 @@ import {
   StarIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  TrashIcon
-} from "@heroicons/react/24/outline";
+  TrashIcon,
+} from '@heroicons/react/24/outline';
 
 interface LearningPlan {
   id: string;
@@ -74,7 +74,7 @@ export default function DashboardPage() {
           element.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
-            inline: 'nearest'
+            inline: 'nearest',
           });
         }, 100);
       }
@@ -82,7 +82,9 @@ export default function DashboardPage() {
   }, [expandedPlan]);
 
   const handleDeletePlan = async (planId: string) => {
-    if (!confirm('Are you sure you want to delete this learning plan? This action cannot be undone.')) {
+    if (
+      !confirm('Are you sure you want to delete this learning plan? This action cannot be undone.')
+    ) {
       return;
     }
 
@@ -100,7 +102,7 @@ export default function DashboardPage() {
 
       if (response.ok) {
         // Remove the plan from the state
-        setPlans(plans.filter(plan => plan.id !== planId));
+        setPlans(plans.filter((plan) => plan.id !== planId));
         // Remove from expanded plans if it was expanded
         if (expandedPlan === planId) {
           setExpandedPlan(null);
@@ -117,7 +119,9 @@ export default function DashboardPage() {
   };
 
   const handleDeleteQuiz = async (quizId: string) => {
-    if (!confirm('Are you sure you want to delete this quiz result? This action cannot be undone.')) {
+    if (
+      !confirm('Are you sure you want to delete this quiz result? This action cannot be undone.')
+    ) {
       return;
     }
 
@@ -135,7 +139,7 @@ export default function DashboardPage() {
 
       if (response.ok) {
         // Remove the quiz from the state
-        setQuizzes(quizzes.filter(quiz => quiz.id !== quizId));
+        setQuizzes(quizzes.filter((quiz) => quiz.id !== quizId));
       } else {
         showError(data.error || 'Failed to delete quiz result');
       }
@@ -148,16 +152,16 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    console.log("isSignedIn", isSignedIn);
-    console.log("user", user);
-    console.log("isLoaded", isLoaded);
+    console.log('isSignedIn', isSignedIn);
+    console.log('user', user);
+    console.log('isLoaded', isLoaded);
 
     // Wait for Clerk to load before making decisions
     if (!isLoaded) return;
 
     // If not signed in, redirect to sign-in
     if (!isSignedIn) {
-      router.push("/sign-in");
+      router.push('/sign-in');
       return;
     }
 
@@ -168,45 +172,45 @@ export default function DashboardPage() {
       setLoading(true);
       try {
         // First, sync user to database
-        const syncResponse = await fetch("/api/auth/sync-user-to-database", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const syncResponse = await fetch('/api/auth/sync-user-to-database', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
         });
 
         if (!syncResponse.ok) {
-          console.error("Failed to sync user to database");
+          console.error('Failed to sync user to database');
         }
 
         // Clean up any failed plans
         try {
-          await fetch("/api/cleanup-failed-plans", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+          await fetch('/api/cleanup-failed-plans', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
           });
         } catch (cleanupError) {
-          console.error("Failed to cleanup failed plans:", cleanupError);
+          console.error('Failed to cleanup failed plans:', cleanupError);
         }
 
         // Then fetch user history
         const clerkId = user.id;
 
         if (!clerkId) {
-          console.log("No clerkId found for user history");
+          console.log('No clerkId found for user history');
           return;
         }
 
-        const res = await fetch("/api/user-history", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/api/user-history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ clerkId }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch history");
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch history');
         setPlans(data.plans || []);
         setQuizzes(data.quizzes || []);
       } catch (err) {
         const error = err as Error;
-        showError(error.message || "Failed to fetch history");
+        showError(error.message || 'Failed to fetch history');
       } finally {
         setLoading(false);
       }
@@ -229,10 +233,8 @@ export default function DashboardPage() {
     );
   }
 
-
-
   const parseLearningPlan = (content: string) => {
-    const lines = content.split('\n').filter(line => line.trim());
+    const lines = content.split('\n').filter((line) => line.trim());
     const sections: { title: string; items: string[] }[] = [];
     let currentSection = { title: 'Overview', items: [] as string[] };
 
@@ -248,9 +250,14 @@ export default function DashboardPage() {
         .replace(/##\s*/g, '')
         .replace(/#\s*/g, '');
 
-      if (cleanHeader.includes('Level') || cleanHeader.includes('Objective') ||
-        cleanHeader.includes('Beginner') || cleanHeader.includes('Intermediate') ||
-        cleanHeader.includes('Advanced') || cleanHeader.includes('Stage')) {
+      if (
+        cleanHeader.includes('Level') ||
+        cleanHeader.includes('Objective') ||
+        cleanHeader.includes('Beginner') ||
+        cleanHeader.includes('Intermediate') ||
+        cleanHeader.includes('Advanced') ||
+        cleanHeader.includes('Stage')
+      ) {
         if (currentSection.items.length > 0) {
           sections.push(currentSection);
         }
@@ -269,12 +276,14 @@ export default function DashboardPage() {
           .replace(/\*\*(.*?)\*\*/g, '$1')
           .replace(/\*(.*?)\*/g, '$1');
         currentSection.items.push(cleanItem);
-      } else if (cleanLine.includes('Resource:') || cleanLine.includes('Tip:') ||
-        cleanLine.includes('Resource') || cleanLine.includes('Tip')) {
+      } else if (
+        cleanLine.includes('Resource:') ||
+        cleanLine.includes('Tip:') ||
+        cleanLine.includes('Resource') ||
+        cleanLine.includes('Tip')
+      ) {
         // Resources and tips - clean up the content
-        const cleanItem = cleanLine
-          .replace(/\*\*(.*?)\*\*/g, '$1')
-          .replace(/\*(.*?)\*/g, '$1');
+        const cleanItem = cleanLine.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
         currentSection.items.push(cleanItem);
       } else if (cleanLine.length > 0 && !cleanLine.includes('Personalized Learning Plan')) {
         // Regular content - clean up the content
@@ -307,9 +316,12 @@ export default function DashboardPage() {
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-                  Welcome back, {user?.firstName || user?.emailAddresses[0]?.emailAddress || 'User'}!
+                  Welcome back, {user?.firstName || user?.emailAddresses[0]?.emailAddress || 'User'}
+                  !
                 </h1>
-                <p className="text-sm sm:text-base text-muted-foreground mt-1">Track your learning progress and achievements</p>
+                <p className="text-sm sm:text-base text-muted-foreground mt-1">
+                  Track your learning progress and achievements
+                </p>
               </div>
             </div>
             <Link
@@ -330,7 +342,9 @@ export default function DashboardPage() {
                 <BookOpenIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Learning Plans</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Learning Plans
+                </p>
                 <p className="text-xl sm:text-2xl font-bold text-white">{plans.length}</p>
               </div>
             </div>
@@ -342,7 +356,9 @@ export default function DashboardPage() {
                 <AcademicCapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Quizzes Taken</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Quizzes Taken
+                </p>
                 <p className="text-xl sm:text-2xl font-bold text-white">{quizzes.length}</p>
               </div>
             </div>
@@ -354,11 +370,18 @@ export default function DashboardPage() {
                 <ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-muted-foreground">Average Score</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Average Score
+                </p>
                 <p className="text-xl sm:text-2xl font-bold text-white">
                   {quizzes.length > 0
-                    ? Math.round((quizzes.reduce((sum, quiz) => sum + quiz.score, 0) / (quizzes.length * 5)) * 100)
-                    : 0}%
+                    ? Math.round(
+                        (quizzes.reduce((sum, quiz) => sum + quiz.score, 0) /
+                          (quizzes.length * 5)) *
+                          100
+                      )
+                    : 0}
+                  %
                 </p>
               </div>
             </div>
@@ -379,15 +402,21 @@ export default function DashboardPage() {
               <div className="flex justify-center items-center py-4 sm:py-8">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-yellow-accent mx-auto mb-2 sm:mb-4"></div>
-                  <p className="text-sm sm:text-base text-muted-foreground">Loading your learning plans...</p>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Loading your learning plans...
+                  </p>
                 </div>
               </div>
             </div>
           ) : plans.length === 0 ? (
             <div className="card-dark p-4 sm:p-8 text-center">
               <BookOpenIcon className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-2 sm:mb-4" />
-              <h3 className="text-base sm:text-lg font-medium text-white mb-1 sm:mb-2">No learning plans yet</h3>
-              <p className="text-sm sm:text-base text-muted-foreground">Start your learning journey by creating your first personalized plan!</p>
+              <h3 className="text-base sm:text-lg font-medium text-white mb-1 sm:mb-2">
+                No learning plans yet
+              </h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Start your learning journey by creating your first personalized plan!
+              </p>
             </div>
           ) : (
             <div className="space-y-3 sm:space-y-4">
@@ -398,7 +427,9 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={plan.id}
-                    ref={(el) => { planRefs.current[plan.id] = el; }}
+                    ref={(el) => {
+                      planRefs.current[plan.id] = el;
+                    }}
                     className="card-dark overflow-hidden"
                   >
                     <button
@@ -459,7 +490,9 @@ export default function DashboardPage() {
                         <div className="space-y-4">
                           {sections.map((section, sectionIndex) => (
                             <div key={sectionIndex} className="card-dark p-4">
-                              <h4 className="font-semibold text-white mb-3 text-lg">{section.title}</h4>
+                              <h4 className="font-semibold text-white mb-3 text-lg">
+                                {section.title}
+                              </h4>
                               <div className="space-y-2">
                                 {section.items.map((item, itemIndex) => (
                                   <div key={itemIndex} className="flex items-start gap-3">
@@ -502,7 +535,9 @@ export default function DashboardPage() {
             <div className="card-dark p-8 text-center">
               <AcademicCapIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium text-white mb-2">No quiz results yet</h3>
-              <p className="text-muted-foreground">Take your first quiz to see your results here!</p>
+              <p className="text-muted-foreground">
+                Take your first quiz to see your results here!
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -522,10 +557,15 @@ export default function DashboardPage() {
 
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-white">{quiz.topic}</h3>
-                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${(quiz.score / 5) * 100 >= 80 ? 'bg-yellow-accent/20 text-yellow-accent' :
-                        (quiz.score / 5) * 100 >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-red-500/20 text-red-400'
-                      }`}>
+                    <div
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        (quiz.score / 5) * 100 >= 80
+                          ? 'bg-yellow-accent/20 text-yellow-accent'
+                          : (quiz.score / 5) * 100 >= 60
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-red-500/20 text-red-400'
+                      }`}
+                    >
                       {(quiz.score / 5) * 100}%
                     </div>
                   </div>
@@ -551,8 +591,11 @@ export default function DashboardPage() {
                         <LightBulbIcon className="w-4 h-4 text-blue-400" />
                       )}
                       <span className="text-sm text-muted-foreground">
-                        {(quiz.score / 5) * 100 >= 80 ? 'Excellent!' :
-                          (quiz.score / 5) * 100 >= 60 ? 'Good job!' : 'Keep learning!'}
+                        {(quiz.score / 5) * 100 >= 80
+                          ? 'Excellent!'
+                          : (quiz.score / 5) * 100 >= 60
+                            ? 'Good job!'
+                            : 'Keep learning!'}
                       </span>
                     </div>
                   </div>
@@ -564,4 +607,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-} 
+}

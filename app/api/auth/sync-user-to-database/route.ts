@@ -8,12 +8,9 @@ export async function POST() {
   try {
     // Get the current Clerk user
     const { userId } = await auth();
-    
+
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     // Check if user already exists in database
@@ -39,22 +36,16 @@ export async function POST() {
     const clerkUser = await clerk.users.getUser(userId);
 
     if (!clerkUser) {
-      return NextResponse.json(
-        { error: 'User not found in Clerk' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found in Clerk' }, { status: 404 });
     }
 
     // Get primary email
     const primaryEmail = clerkUser.emailAddresses.find(
-      email => email.id === clerkUser.primaryEmailAddressId
+      (email) => email.id === clerkUser.primaryEmailAddressId
     );
 
     if (!primaryEmail) {
-      return NextResponse.json(
-        { error: 'No primary email found' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No primary email found' }, { status: 400 });
     }
 
     // Create user in database
@@ -78,12 +69,8 @@ export async function POST() {
         clerkId: newUser.clerkId,
       },
     });
-
   } catch (error) {
     console.error('Sync user to database error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

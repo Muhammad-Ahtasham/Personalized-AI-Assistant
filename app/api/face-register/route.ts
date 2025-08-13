@@ -10,7 +10,7 @@ const tempFaceEmbeddings = new Map<string, number[]>();
 // Utility to validate and normalize an embedding
 function validateEmbedding(embedding: number[]): { valid: boolean; message?: string } {
   if (!Array.isArray(embedding)) {
-    return { valid: false, message: "Embedding is not an array." };
+    return { valid: false, message: 'Embedding is not an array.' };
   }
 
   if (embedding.length !== 128) {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         tempId,
-        message: "Face captured successfully",
+        message: 'Face captured successfully',
       });
     }
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
-        return NextResponse.json({ error: "User with this email already exists" }, { status: 409 });
+        return NextResponse.json({ error: 'User with this email already exists' }, { status: 409 });
       }
 
       // const hashedPassword = await bcrypt.hash(password, 12);
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           clerkUser = result.data[0];
         }
       } catch (err) {
-        console.error("Error checking Clerk user:", err);
+        console.error('Error checking Clerk user:', err);
       }
 
       // Transaction to store user + face embedding
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
 
           return NextResponse.json({
             success: true,
-            message: "User registered with face and Clerk",
+            message: 'User registered with face and Clerk',
             user: {
               id: result.user.id,
               email: result.user.email,
@@ -127,14 +127,14 @@ export async function POST(request: NextRequest) {
             },
           });
         } catch (err) {
-          console.error("Clerk user creation failed:", err);
+          console.error('Clerk user creation failed:', err);
         }
       }
 
       // If Clerk already existed, just return
       return NextResponse.json({
         success: true,
-        message: "User registered successfully with face",
+        message: 'User registered successfully with face',
         user: {
           id: result.user.id,
           email: result.user.email,
@@ -152,12 +152,12 @@ export async function POST(request: NextRequest) {
         tempFaceEmbeddings.delete(tempId);
         return NextResponse.json({ success: true, faceEmbedding: stored });
       }
-      return NextResponse.json({ error: "Face embedding not found or expired" }, { status: 404 });
+      return NextResponse.json({ error: 'Face embedding not found or expired' }, { status: 404 });
     }
 
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   } catch (error) {
-    console.error("Face register error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error('Face register error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

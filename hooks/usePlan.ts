@@ -35,7 +35,7 @@ export const usePlan = () => {
     const planData: PlanData = {
       topic,
       plan,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
     setPlanData(planData);
     localStorage.setItem('studymate_current_plan', JSON.stringify(planData));
@@ -51,7 +51,7 @@ export const usePlan = () => {
       const updatedPlanData = {
         ...planData,
         plan: newPlan,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       setPlanData(updatedPlanData);
       localStorage.setItem('studymate_current_plan', JSON.stringify(updatedPlanData));
@@ -64,7 +64,7 @@ export const usePlan = () => {
     const diff = now - planData.timestamp;
     const minutes = Math.floor(diff / (1000 * 60));
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    
+
     if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
     if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
@@ -78,6 +78,6 @@ export const usePlan = () => {
     updatePlan,
     loading,
     setLoading,
-    getTimeSinceCreated
+    getTimeSinceCreated,
   };
-}; 
+};

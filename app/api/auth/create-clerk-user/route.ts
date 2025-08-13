@@ -2,19 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { clerkClient } from '@clerk/nextjs/server';
 
-
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
     const { email, firstName, lastName } = await request.json();
-    console.log("Create Clerk user request:", { email, firstName, lastName });
+    console.log('Create Clerk user request:', { email, firstName, lastName });
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     // Check if user exists in database
@@ -22,25 +18,20 @@ export async function POST(request: NextRequest) {
       where: { email },
     });
 
-    console.log("Existing user found:", existingUser);
+    console.log('Existing user found:', existingUser);
 
     if (!existingUser) {
-      return NextResponse.json(
-        { error: 'User not found in database' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
     }
 
     if (existingUser.clerkId) {
-      return NextResponse.json(
-        { error: 'User already has a Clerk ID' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'User already has a Clerk ID' }, { status: 409 });
     }
 
     // Generate a temporary password for Clerk user
-    const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
-    console.log("Generated temp password:", tempPassword);
+    const tempPassword =
+      Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+    console.log('Generated temp password:', tempPassword);
 
     // Create Clerk user with temporary password
     const clerk = await clerkClient();
@@ -51,7 +42,7 @@ export async function POST(request: NextRequest) {
       lastName: lastName || undefined,
     });
 
-    console.log("Clerk user created:", clerkUser);
+    console.log('Clerk user created:', clerkUser);
 
     // Update user in database with Clerk ID and temporary password
     const updatedUser = await prisma.user.update({
@@ -62,7 +53,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log("User updated in database:", updatedUser);
+    console.log('User updated in database:', updatedUser);
 
     return NextResponse.json({
       success: true,
@@ -74,12 +65,8 @@ export async function POST(request: NextRequest) {
         password: tempPassword, // Return temporary password for authentication
       },
     });
-
   } catch (error) {
     console.error('Create Clerk user error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

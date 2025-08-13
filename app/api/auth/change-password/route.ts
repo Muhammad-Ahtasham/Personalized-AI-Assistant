@@ -66,9 +66,12 @@ export async function PUT(request: NextRequest) {
       data: { password: hashedPassword },
     });
 
-    return NextResponse.json({ success: true, message: user.password ? 'Password changed successfully' : 'Password set successfully' });
+    return NextResponse.json({
+      success: true,
+      message: user.password ? 'Password changed successfully' : 'Password set successfully',
+    });
   } catch (error) {
     console.error('Change password error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

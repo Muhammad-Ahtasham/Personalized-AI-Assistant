@@ -5,7 +5,7 @@ import { handleApiError, createErrorResponse } from '../error-handler';
 export async function GET() {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return createErrorResponse('Not authenticated', 401);
     }
@@ -15,9 +15,8 @@ export async function GET() {
       message: 'Profile API is working',
       userId,
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV
+      environment: process.env.NODE_ENV,
     });
-
   } catch (error) {
     return handleApiError(error, 'Test profile API');
   }
@@ -26,7 +25,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return createErrorResponse('Not authenticated', 401);
     }
@@ -43,10 +42,9 @@ export async function POST(request: NextRequest) {
       message: 'Profile API POST is working',
       receivedData: requestBody,
       userId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     return handleApiError(error, 'Test profile API POST');
   }
-} 
+}

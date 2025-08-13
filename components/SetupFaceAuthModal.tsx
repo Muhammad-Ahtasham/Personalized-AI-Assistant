@@ -1,8 +1,8 @@
-"use client";
-import { useState } from "react";
-import { X, Camera, CheckCircle, AlertCircle } from "lucide-react";
-import FaceAuth from "./FaceAuth";
-import { useAlertContext } from "./AlertProvider";
+'use client';
+import { useState } from 'react';
+import { X, Camera, CheckCircle, AlertCircle } from 'lucide-react';
+import FaceAuth from './FaceAuth';
+import { useAlertContext } from './AlertProvider';
 
 interface SetupFaceAuthModalProps {
   isOpen: boolean;
@@ -10,11 +10,7 @@ interface SetupFaceAuthModalProps {
   onSuccess?: () => void;
 }
 
-const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
-  isOpen,
-  onClose,
-  onSuccess,
-}) => {
+const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [step, setStep] = useState<'capture' | 'success' | 'error'>('capture');
   const [faceEmbedding, setFaceEmbedding] = useState<number[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,19 +21,19 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
     setFaceEmbedding(embedding);
     setIsLoading(true);
 
-    console.log("Face Embeddings ", faceEmbedding ? " + " : " -")
+    console.log('Face Embeddings ', faceEmbedding ? ' + ' : ' -');
 
     // Call the API to set up face authentication
-    await fetch("/api/auth/setup-face-authentication", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    await fetch('/api/auth/setup-face-authentication', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ faceEmbedding: embedding }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
           setStep('success');
-          showSuccess("Face authentication set up successfully!");
+          showSuccess('Face authentication set up successfully!');
           if (onSuccess) {
             onSuccess();
           }
@@ -49,7 +45,8 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
         // }
       })
       .catch((err) => {
-        const errorMessage = err instanceof Error ? err.message : "Failed to set up face authentication";
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to set up face authentication';
         setError(errorMessage);
         setStep('error');
         showError(errorMessage);
@@ -101,8 +98,8 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
         {step === 'capture' && (
           <div className="space-y-4">
             <p className="text-gray-300 text-sm">
-              Position your face in front of the camera to set up face authentication.
-              This will allow you to sign in using your face in the future.
+              Position your face in front of the camera to set up face authentication. This will
+              allow you to sign in using your face in the future.
             </p>
 
             <FaceAuth
@@ -128,12 +125,10 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
             </div>
             <h3 className="text-lg font-semibold text-white">Success!</h3>
             <p className="text-gray-300 text-sm">
-              Face authentication has been set up successfully. You can now use your face to sign in.
+              Face authentication has been set up successfully. You can now use your face to sign
+              in.
             </p>
-            <button
-              onClick={handleClose}
-              className="btn-primary w-full"
-            >
+            <button onClick={handleClose} className="btn-primary w-full">
               Done
             </button>
           </div>
@@ -146,19 +141,13 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
             </div>
             <h3 className="text-lg font-semibold text-white">Setup Failed</h3>
             <p className="text-gray-300 text-sm">
-              {error || "An error occurred while setting up face authentication."}
+              {error || 'An error occurred while setting up face authentication.'}
             </p>
             <div className="flex gap-3">
-              <button
-                onClick={handleRetry}
-                className="btn-primary flex-1"
-              >
+              <button onClick={handleRetry} className="btn-primary flex-1">
                 Try Again
               </button>
-              <button
-                onClick={handleClose}
-                className="btn-secondary flex-1"
-              >
+              <button onClick={handleClose} className="btn-secondary flex-1">
                 Cancel
               </button>
             </div>
@@ -169,4 +158,4 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
   );
 };
 
-export default SetupFaceAuthModal; 
+export default SetupFaceAuthModal;

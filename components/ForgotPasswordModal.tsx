@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSignIn } from '@clerk/nextjs';
-import { useAlertContext } from "@/components/AlertProvider";
+import { useAlertContext } from '@/components/AlertProvider';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -78,16 +78,23 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
       <div className="bg-card-dark border border-border rounded-xl p-6 w-full max-w-md mx-4">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-white">Forgot Password</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-white transition-colors">✕</button>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-white transition-colors"
+          >
+            ✕
+          </button>
         </div>
         {step === 1 && (
           <form onSubmit={handleSendCode} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-2">Registered Email</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Registered Email
+              </label>
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
                 placeholder="Enter your registered email"
                 required
@@ -117,33 +124,39 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
         {step === 2 && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-2">Verification Code</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Verification Code
+              </label>
               <input
                 type="text"
                 value={code}
-                onChange={e => setCode(e.target.value)}
+                onChange={(e) => setCode(e.target.value)}
                 className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
                 placeholder="Enter the code sent to your email"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-2">New Password</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                New Password
+              </label>
               <input
                 type="password"
                 value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
+                onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
                 placeholder="Enter new password"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-2">Confirm New Password</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Confirm New Password
+              </label>
               <input
                 type="password"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-accent"
                 placeholder="Confirm new password"
                 required
@@ -175,4 +188,4 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
   );
 };
 
-export default ForgotPasswordModal; 
+export default ForgotPasswordModal;

@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json();
-    console.log("Authenticate face user request for:", email);
+    console.log('Authenticate face user request for:', email);
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     // Find user in database
@@ -29,23 +25,24 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log("Found user in database:", user ? { id: user.id, email: user.email, hasClerkId: !!user.clerkId } : "Not found");
+    console.log(
+      'Found user in database:',
+      user ? { id: user.id, email: user.email, hasClerkId: !!user.clerkId } : 'Not found'
+    );
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // If user has a Clerk ID, we need to create a session
     if (user.clerkId) {
-      console.log("User has Clerk ID, but we need to provide a password for authentication");
-      
+      console.log('User has Clerk ID, but we need to provide a password for authentication');
+
       // For users with existing Clerk ID, we need to create a temporary password
       // since the stored password is hashed and can't be used with Clerk
-      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
-      
+      const tempPassword =
+        Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+
       try {
         // Import clerkClient dynamically
         const { clerkClient } = await import('@clerk/nextjs/server');
@@ -64,7 +61,7 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        console.log("Updated existing user with temp password");
+        console.log('Updated existing user with temp password');
 
         return NextResponse.json({
           success: true,
@@ -90,8 +87,9 @@ export async function POST(request: NextRequest) {
     // If user doesn't have a Clerk ID, we need to create one
     // But we can't use the hashed password directly with Clerk
     // So we'll create a temporary password
-    const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
-    console.log("Creating Clerk user with temp password for:", email);
+    const tempPassword =
+      Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+    console.log('Creating Clerk user with temp password for:', email);
 
     try {
       // Import clerkClient dynamically
@@ -106,7 +104,7 @@ export async function POST(request: NextRequest) {
         lastName: user.lastName || undefined,
       });
 
-      console.log("Clerk user created:", clerkUser.id);
+      console.log('Clerk user created:', clerkUser.id);
 
       // Update user in database with Clerk ID and temporary password
       const updatedUser = await prisma.user.update({
@@ -117,7 +115,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log("User updated in database with Clerk ID");
+      console.log('User updated in database with Clerk ID');
 
       return NextResponse.json({
         success: true,
@@ -131,20 +129,12 @@ export async function POST(request: NextRequest) {
           lastName: updatedUser.lastName,
         },
       });
-
     } catch (clerkError) {
       console.error('Failed to create Clerk user:', clerkError);
-      return NextResponse.json(
-        { error: 'Failed to create Clerk user' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to create Clerk user' }, { status: 500 });
     }
-
   } catch (error) {
     console.error('Authenticate face user error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

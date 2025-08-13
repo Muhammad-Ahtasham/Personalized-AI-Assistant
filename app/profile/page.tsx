@@ -1,10 +1,10 @@
-"use client";
-export const dynamic = "force-dynamic";
+'use client';
+export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   User,
   Mail,
@@ -16,9 +16,9 @@ import {
   Edit3,
   Camera,
   Shield,
-  Activity
-} from "lucide-react";
-import ProfileEditModal from "@/components/ProfileEditModal";
+  Activity,
+} from 'lucide-react';
+import ProfileEditModal from '@/components/ProfileEditModal';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
 import SetupFaceAuthModal from '@/components/SetupFaceAuthModal';
 
@@ -91,13 +91,13 @@ export default function ProfilePage() {
 
   const fetchFaceAuthStatus = async () => {
     try {
-      const response = await fetch("/api/auth/check-face-auth-status");
+      const response = await fetch('/api/auth/check-face-auth-status');
       const data = await response.json();
       if (response.ok) {
         setFaceAuthStatus(data);
       }
     } catch (err) {
-      console.error("Failed to fetch face auth status:", err);
+      console.error('Failed to fetch face auth status:', err);
     }
   };
 
@@ -105,7 +105,7 @@ export default function ProfilePage() {
     if (!isLoaded) return;
 
     if (!isSignedIn) {
-      router.push("/sign-in");
+      router.push('/sign-in');
       return;
     }
 
@@ -116,25 +116,25 @@ export default function ProfilePage() {
       setError(null);
       try {
         // Sync user to database first
-        const syncResponse = await fetch("/api/auth/sync-user-to-database", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const syncResponse = await fetch('/api/auth/sync-user-to-database', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
         });
 
         if (!syncResponse.ok) {
-          console.error("Failed to sync user to database");
+          console.error('Failed to sync user to database');
         }
 
         // Fetch user history and stats
         const clerkId = user.id;
-        const res = await fetch("/api/user-history", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/api/user-history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ clerkId }),
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch user data");
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch user data');
 
         const plans = data.plans || [];
         const quizzes = data.quizzes || [];
@@ -144,24 +144,32 @@ export default function ProfilePage() {
         const totalPlans = plans.length;
         const totalQuizzes = quizzes.length;
         const totalNotes = notes.length;
-        const averageQuizScore = quizzes.length > 0
-          ? Math.round((quizzes.reduce((sum: number, quiz: QuizResult) => sum + quiz.score, 0) / (quizzes.length * 5)) * 100)
-          : 0;
+        const averageQuizScore =
+          quizzes.length > 0
+            ? Math.round(
+                (quizzes.reduce((sum: number, quiz: QuizResult) => sum + quiz.score, 0) /
+                  (quizzes.length * 5)) *
+                  100
+              )
+            : 0;
 
-        const lastActive = plans.length > 0 || quizzes.length > 0 || notes.length > 0
-          ? new Date(Math.max(
-            ...plans.map((p: LearningPlan) => new Date(p.createdAt).getTime()),
-            ...quizzes.map((q: QuizResult) => new Date(q.createdAt).getTime()),
-            ...notes.map((n: Note) => new Date(n.updatedAt).getTime())
-          )).toLocaleDateString()
-          : "Never";
+        const lastActive =
+          plans.length > 0 || quizzes.length > 0 || notes.length > 0
+            ? new Date(
+                Math.max(
+                  ...plans.map((p: LearningPlan) => new Date(p.createdAt).getTime()),
+                  ...quizzes.map((q: QuizResult) => new Date(q.createdAt).getTime()),
+                  ...notes.map((n: Note) => new Date(n.updatedAt).getTime())
+                )
+              ).toLocaleDateString()
+            : 'Never';
 
         setStats({
           totalPlans,
           totalQuizzes,
           totalNotes,
           averageQuizScore,
-          lastActive
+          lastActive,
         });
 
         setRecentPlans(plans.slice(0, 3));
@@ -170,10 +178,9 @@ export default function ProfilePage() {
 
         // Fetch face authentication status
         await fetchFaceAuthStatus();
-
       } catch (err) {
         const error = err as Error;
-        setError(error.message || "Failed to fetch user data");
+        setError(error.message || 'Failed to fetch user data');
       } finally {
         setLoading(false);
       }
@@ -244,28 +251,31 @@ export default function ProfilePage() {
             <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'overview'
-                  ? 'border-yellow-accent text-yellow-accent'
-                  : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
-                  }`}
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeTab === 'overview'
+                    ? 'border-yellow-accent text-yellow-accent'
+                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                }`}
               >
                 Overview
               </button>
               <button
                 onClick={() => setActiveTab('activity')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'activity'
-                  ? 'border-yellow-accent text-yellow-accent'
-                  : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
-                  }`}
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeTab === 'activity'
+                    ? 'border-yellow-accent text-yellow-accent'
+                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                }`}
               >
                 Recent Activity
               </button>
               <button
                 onClick={() => setActiveTab('settings')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'settings'
-                  ? 'border-yellow-accent text-yellow-accent'
-                  : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
-                  }`}
+                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeTab === 'settings'
+                    ? 'border-yellow-accent text-yellow-accent'
+                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                }`}
               >
                 Settings
               </button>
@@ -297,7 +307,9 @@ export default function ProfilePage() {
                     <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
                   </div>
                   <div className="ml-3 sm:ml-4">
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Learning Plans</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Learning Plans
+                    </p>
                     <p className="text-xl sm:text-2xl font-bold text-white">{stats.totalPlans}</p>
                   </div>
                 </div>
@@ -309,7 +321,9 @@ export default function ProfilePage() {
                     <Award className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
                   </div>
                   <div className="ml-3 sm:ml-4">
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Quizzes Taken</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Quizzes Taken
+                    </p>
                     <p className="text-xl sm:text-2xl font-bold text-white">{stats.totalQuizzes}</p>
                   </div>
                 </div>
@@ -321,7 +335,9 @@ export default function ProfilePage() {
                     <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
                   </div>
                   <div className="ml-3 sm:ml-4">
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Notes Created</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Notes Created
+                    </p>
                     <p className="text-xl sm:text-2xl font-bold text-white">{stats.totalNotes}</p>
                   </div>
                 </div>
@@ -333,8 +349,12 @@ export default function ProfilePage() {
                     <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-accent" />
                   </div>
                   <div className="ml-3 sm:ml-4">
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Avg Quiz Score</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{stats.averageQuizScore}%</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                      Avg Quiz Score
+                    </p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">
+                      {stats.averageQuizScore}%
+                    </p>
                   </div>
                 </div>
               </div>
@@ -354,10 +374,15 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground text-sm">No learning plans yet.</p>
                 ) : (
                   <div className="space-y-3">
-                    {recentPlans.map(plan => (
-                      <div key={plan.id} className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20">
+                    {recentPlans.map((plan) => (
+                      <div
+                        key={plan.id}
+                        className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20"
+                      >
                         <h4 className="font-medium text-yellow-accent">{plan.topic}</h4>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{plan.content}</p>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                          {plan.content}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-2">
                           {new Date(plan.createdAt).toLocaleDateString()}
                         </p>
@@ -377,10 +402,15 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground text-sm">No quiz results yet.</p>
                 ) : (
                   <div className="space-y-3">
-                    {recentQuizzes.map(quiz => (
-                      <div key={quiz.id} className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20">
+                    {recentQuizzes.map((quiz) => (
+                      <div
+                        key={quiz.id}
+                        className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20"
+                      >
                         <h4 className="font-medium text-yellow-accent">{quiz.topic}</h4>
-                        <p className="text-sm text-muted-foreground mt-1">Score: {(quiz.score / 5) * 100}%</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Score: {(quiz.score / 5) * 100}%
+                        </p>
                         <p className="text-xs text-muted-foreground mt-2">
                           {new Date(quiz.createdAt).toLocaleDateString()}
                         </p>
@@ -400,10 +430,15 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground text-sm">No notes yet.</p>
                 ) : (
                   <div className="space-y-3">
-                    {recentNotes.map(note => (
-                      <div key={note.id} className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20">
+                    {recentNotes.map((note) => (
+                      <div
+                        key={note.id}
+                        className="p-3 bg-yellow-accent/10 rounded-lg border border-yellow-accent/20"
+                      >
                         <h4 className="font-medium text-yellow-accent">{note.title}</h4>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{note.content}</p>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                          {note.content}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-2">
                           {new Date(note.updatedAt).toLocaleDateString()}
                         </p>
@@ -429,19 +464,27 @@ export default function ProfilePage() {
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-muted-foreground mb-1">First Name</label>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">
+                        First Name
+                      </label>
                       <p className="text-white">{user?.firstName || 'Not set'}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-muted-foreground mb-1">Last Name</label>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">
+                        Last Name
+                      </label>
                       <p className="text-white">{user?.lastName || 'Not set'}</p>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">
+                        Email
+                      </label>
                       <p className="text-white">{user?.emailAddresses[0]?.emailAddress}</p>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-muted-foreground mb-1">Profile Image</label>
+                      <label className="block text-sm font-medium text-muted-foreground mb-1">
+                        Profile Image
+                      </label>
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-yellow-accent to-yellow-500 rounded-full flex items-center justify-center overflow-hidden">
                           {user?.imageUrl ? (
@@ -456,7 +499,9 @@ export default function ProfilePage() {
                             <User className="w-6 h-6 text-black" />
                           )}
                         </div>
-                        <p className="text-white">{user?.imageUrl ? 'Image set' : 'No image set'}</p>
+                        <p className="text-white">
+                          {user?.imageUrl ? 'Image set' : 'No image set'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -474,17 +519,22 @@ export default function ProfilePage() {
                         <Mail className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-white">Email & Password</span>
                       </div>
-                      <span className="text-xs bg-yellow-accent/20 text-yellow-accent px-2 py-1 rounded-full">Active</span>
+                      <span className="text-xs bg-yellow-accent/20 text-yellow-accent px-2 py-1 rounded-full">
+                        Active
+                      </span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                       <div className="flex items-center gap-3">
                         <Camera className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-white">Face Authentication</span>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${faceAuthStatus?.hasFaceAuth
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-blue-500/20 text-blue-400'
-                        }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          faceAuthStatus?.hasFaceAuth
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-blue-500/20 text-blue-400'
+                        }`}
+                      >
                         {faceAuthStatus?.hasFaceAuth ? 'Active' : 'Available'}
                       </span>
                     </div>
@@ -505,9 +555,13 @@ export default function ProfilePage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Edit3 className="w-4 h-4 text-muted-foreground group-hover:text-yellow-accent" />
-                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">Edit Profile</span>
+                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">
+                            Edit Profile
+                          </span>
                         </div>
-                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
+                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">
+                          →
+                        </span>
                       </div>
                     </button>
                     <button
@@ -517,24 +571,31 @@ export default function ProfilePage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Shield className="w-4 h-4 text-muted-foreground group-hover:text-yellow-accent" />
-                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">Change Password</span>
+                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">
+                            Change Password
+                          </span>
                         </div>
-                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
+                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">
+                          →
+                        </span>
                       </div>
                     </button>
                     <button
                       onClick={() => setIsSetupFaceAuthModalOpen(true)}
                       disabled={faceAuthStatus?.hasFaceAuth}
-                      className={`group w-full text-left p-3 bg-secondary transition-colors border border-border ${faceAuthStatus?.hasFaceAuth
-                        ? 'opacity-50 cursor-not-allowed'
-                        : 'hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent hover:border-yellow-accent/20'
-                        }`}
+                      className={`group w-full text-left p-3 bg-secondary transition-colors border border-border ${
+                        faceAuthStatus?.hasFaceAuth
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent hover:border-yellow-accent/20'
+                      }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Camera className="w-4 h-4 text-muted-foreground group-hover:text-yellow-accent" />
                           <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">
-                            {faceAuthStatus?.hasFaceAuth ? 'Face Authentication Active' : 'Setup Face Authentication'}
+                            {faceAuthStatus?.hasFaceAuth
+                              ? 'Face Authentication Active'
+                              : 'Setup Face Authentication'}
                           </span>
                         </div>
                         <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">
@@ -570,4 +631,4 @@ export default function ProfilePage() {
       />
     </div>
   );
-} 
+}

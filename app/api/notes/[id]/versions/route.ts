@@ -4,19 +4,16 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findFirst({
-      where: { clerkId: userId }
+      where: { clerkId: userId },
     });
 
     if (!user) {
@@ -27,8 +24,8 @@ export async function GET(
     const note = await prisma.note.findFirst({
       where: {
         id: params.id,
-        userId: user.id
-      }
+        userId: user.id,
+      },
     });
 
     if (!note) {
@@ -37,7 +34,7 @@ export async function GET(
 
     const versions = await prisma.noteVersion.findMany({
       where: { noteId: params.id },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json({ versions });
@@ -45,4 +42,4 @@ export async function GET(
     console.error('Error fetching versions:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

@@ -6,13 +6,10 @@ const prisma = new PrismaClient();
 export async function POST(request: NextRequest) {
   try {
     const { email, userId } = await request.json();
-    console.log("Setting up password for face user:", email, "userId:", userId);
+    console.log('Setting up password for face user:', email, 'userId:', userId);
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     // Find user in database
@@ -30,23 +27,20 @@ export async function POST(request: NextRequest) {
 
     // SECURITY: Verify that the userId matches the email (if provided)
     if (userId && user && user.id !== userId) {
-      console.error("Security violation: userId mismatch", { providedUserId: userId, actualUserId: user.id });
-      return NextResponse.json(
-        { error: 'Security validation failed' },
-        { status: 403 }
-      );
+      console.error('Security violation: userId mismatch', {
+        providedUserId: userId,
+        actualUserId: user.id,
+      });
+      return NextResponse.json({ error: 'Security validation failed' }, { status: 403 });
     }
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Generate a consistent password for face users
     // In production, you might want to use a more secure method
-    const facePassword = "FaceAuth2024!";
+    const facePassword = 'FaceAuth2024!';
 
     try {
       // Import clerkClient dynamically
@@ -58,7 +52,7 @@ export async function POST(request: NextRequest) {
         await clerk.users.updateUser(user.clerkId, {
           password: facePassword,
         });
-        console.log("Updated existing Clerk user password");
+        console.log('Updated existing Clerk user password');
       } else {
         // Create new Clerk user
         const clerkUser = await clerk.users.createUser({
@@ -75,7 +69,7 @@ export async function POST(request: NextRequest) {
             clerkId: clerkUser.id,
           },
         });
-        console.log("Created new Clerk user");
+        console.log('Created new Clerk user');
       }
 
       return NextResponse.json({
@@ -83,20 +77,12 @@ export async function POST(request: NextRequest) {
         message: 'Password set up successfully',
         password: facePassword,
       });
-
     } catch (clerkError) {
       console.error('Failed to set up password:', clerkError);
-      return NextResponse.json(
-        { error: 'Failed to set up password' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to set up password' }, { status: 500 });
     }
-
   } catch (error) {
     console.error('Setup face user password error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

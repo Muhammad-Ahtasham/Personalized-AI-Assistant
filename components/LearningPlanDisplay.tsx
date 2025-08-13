@@ -1,6 +1,14 @@
-"use client";
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { ChevronDownIcon, ChevronRightIcon, BookOpenIcon, CheckCircleIcon, AcademicCapIcon, LightBulbIcon, LinkIcon } from "@heroicons/react/24/outline";
+'use client';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  BookOpenIcon,
+  CheckCircleIcon,
+  AcademicCapIcon,
+  LightBulbIcon,
+  LinkIcon,
+} from '@heroicons/react/24/outline';
 
 interface LearningPlanSection {
   title: string;
@@ -26,112 +34,122 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
   };
 
   // Parse the plan and set the first section as expanded by default
-  const parsePlan = useCallback((planText: string): { title: string; sections: LearningPlanSection[] } => {
-    const lines = planText.split('\n').filter(line => line.trim());
-    
-    // Extract title (usually the first line with ** or after "Personalized Learning Plan:")
-    const titleMatch = planText.match(/\*\*(.*?)\*\*/);
-    const planTitleMatch = planText.match(/Personalized Learning Plan:\s*(.*?)(?:\n|$)/i);
-    const title = titleMatch ? titleMatch[1] : 
-                 planTitleMatch ? planTitleMatch[1] : "Learning Plan";
-    
-    const sections: LearningPlanSection[] = [];
-    let currentSection: LearningPlanSection | null = null;
-    
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      
-      // Skip empty lines and title
-      if (!trimmedLine || trimmedLine.includes('Personalized Learning Plan:')) continue;
-      
-      // Check for section headers (### or **) - clean them up
-      if (trimmedLine.startsWith('###') || (trimmedLine.startsWith('**') && trimmedLine.endsWith('**'))) {
-        if (currentSection) {
-          sections.push(currentSection);
+  const parsePlan = useCallback(
+    (planText: string): { title: string; sections: LearningPlanSection[] } => {
+      const lines = planText.split('\n').filter((line) => line.trim());
+
+      // Extract title (usually the first line with ** or after "Personalized Learning Plan:")
+      const titleMatch = planText.match(/\*\*(.*?)\*\*/);
+      const planTitleMatch = planText.match(/Personalized Learning Plan:\s*(.*?)(?:\n|$)/i);
+      const title = titleMatch
+        ? titleMatch[1]
+        : planTitleMatch
+          ? planTitleMatch[1]
+          : 'Learning Plan';
+
+      const sections: LearningPlanSection[] = [];
+      let currentSection: LearningPlanSection | null = null;
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+
+        // Skip empty lines and title
+        if (!trimmedLine || trimmedLine.includes('Personalized Learning Plan:')) continue;
+
+        // Check for section headers (### or **) - clean them up
+        if (
+          trimmedLine.startsWith('###') ||
+          (trimmedLine.startsWith('**') && trimmedLine.endsWith('**'))
+        ) {
+          if (currentSection) {
+            sections.push(currentSection);
+          }
+
+          const sectionTitle = trimmedLine
+            .replace(/^###\s*/, '')
+            .replace(/\*\*/g, '')
+            .trim();
+          currentSection = {
+            title: sectionTitle,
+            content: [],
+            type: getSectionType(sectionTitle),
+          };
+        } else if (currentSection && trimmedLine) {
+          // Handle numbered lists, bullet points, and regular content - clean up markdown
+          const cleanContent = trimmedLine
+            .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+            .replace(/\*(.*?)\*/g, '$1') // Remove italic
+            .replace(/###\s*/g, '') // Remove headers
+            .replace(/##\s*/g, '') // Remove subheaders
+            .replace(/#\s*/g, '') // Remove single headers
+            .replace(/---/g, '') // Remove separators
+            .trim();
+
+          if (cleanContent.match(/^\d+\./)) {
+            // Numbered list item
+            currentSection.content.push(cleanContent);
+          } else if (cleanContent.startsWith('-') || cleanContent.startsWith('*')) {
+            // Bullet point
+            currentSection.content.push(cleanContent);
+          } else if (cleanContent.startsWith('*Resource*:') || cleanContent.startsWith('*Tip*:')) {
+            // Resource or tip
+            currentSection.content.push(cleanContent);
+          } else if (cleanContent.includes('---')) {
+            // Separator, skip
+            continue;
+          } else if (cleanContent.length > 0) {
+            // Regular content
+            currentSection.content.push(cleanContent);
+          }
+        } else if (!currentSection && trimmedLine) {
+          // If no section is created yet, create a default one
+          const cleanContent = trimmedLine
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/\*(.*?)\*/g, '$1')
+            .replace(/###\s*/g, '')
+            .replace(/##\s*/g, '')
+            .replace(/#\s*/g, '')
+            .replace(/---/g, '')
+            .trim();
+
+          currentSection = {
+            title: 'Overview',
+            content: [cleanContent],
+            type: 'general',
+          };
         }
-        
-        const sectionTitle = trimmedLine
-          .replace(/^###\s*/, '')
-          .replace(/\*\*/g, '')
-          .trim();
-        currentSection = {
-          title: sectionTitle,
-          content: [],
-          type: getSectionType(sectionTitle)
-        };
-      } else if (currentSection && trimmedLine) {
-        // Handle numbered lists, bullet points, and regular content - clean up markdown
-        const cleanContent = trimmedLine
-          .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-          .replace(/\*(.*?)\*/g, '$1') // Remove italic
-          .replace(/###\s*/g, '') // Remove headers
-          .replace(/##\s*/g, '') // Remove subheaders
-          .replace(/#\s*/g, '') // Remove single headers
-          .replace(/---/g, '') // Remove separators
-          .trim();
-        
-        if (cleanContent.match(/^\d+\./)) {
-          // Numbered list item
-          currentSection.content.push(cleanContent);
-        } else if (cleanContent.startsWith('-') || cleanContent.startsWith('*')) {
-          // Bullet point
-          currentSection.content.push(cleanContent);
-        } else if (cleanContent.startsWith('*Resource*:') || cleanContent.startsWith('*Tip*:')) {
-          // Resource or tip
-          currentSection.content.push(cleanContent);
-        } else if (cleanContent.includes('---')) {
-          // Separator, skip
-          continue;
-        } else if (cleanContent.length > 0) {
-          // Regular content
-          currentSection.content.push(cleanContent);
-        }
-      } else if (!currentSection && trimmedLine) {
-        // If no section is created yet, create a default one
-        const cleanContent = trimmedLine
-          .replace(/\*\*(.*?)\*\*/g, '$1')
-          .replace(/\*(.*?)\*/g, '$1')
-          .replace(/###\s*/g, '')
-          .replace(/##\s*/g, '')
-          .replace(/#\s*/g, '')
-          .replace(/---/g, '')
-          .trim();
-        
-        currentSection = {
-          title: "Overview",
-          content: [cleanContent],
-          type: 'general'
-        };
       }
-    }
-    
-    if (currentSection) {
-      sections.push(currentSection);
-    }
-    
-    // If no sections were found, create a default section with all content
-    if (sections.length === 0) {
-      const cleanLines = lines
-        .filter(line => line.trim() && !line.includes('Personalized Learning Plan:'))
-        .map(line => line
-          .replace(/\*\*(.*?)\*\*/g, '$1')
-          .replace(/\*(.*?)\*/g, '$1')
-          .replace(/###\s*/g, '')
-          .replace(/##\s*/g, '')
-          .replace(/#\s*/g, '')
-          .replace(/---/g, '')
-          .trim()
-        );
-      
-      sections.push({
-        title: "Learning Plan",
-        content: cleanLines,
-        type: 'general'
-      });
-    }
-    
-    return { title, sections };
-  }, []);
+
+      if (currentSection) {
+        sections.push(currentSection);
+      }
+
+      // If no sections were found, create a default section with all content
+      if (sections.length === 0) {
+        const cleanLines = lines
+          .filter((line) => line.trim() && !line.includes('Personalized Learning Plan:'))
+          .map((line) =>
+            line
+              .replace(/\*\*(.*?)\*\*/g, '$1')
+              .replace(/\*(.*?)\*/g, '$1')
+              .replace(/###\s*/g, '')
+              .replace(/##\s*/g, '')
+              .replace(/#\s*/g, '')
+              .replace(/---/g, '')
+              .trim()
+          );
+
+        sections.push({
+          title: 'Learning Plan',
+          content: cleanLines,
+          type: 'general',
+        });
+      }
+
+      return { title, sections };
+    },
+    []
+  );
 
   // Set the first section as expanded by default when plan changes
   useEffect(() => {
@@ -154,7 +172,7 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
           element.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
-            inline: 'nearest'
+            inline: 'nearest',
           });
         }, 100);
       }
@@ -220,7 +238,9 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
       {/* Fallback for unstructured content */}
       {sections.length === 0 && (
         <div className="card-dark p-4 sm:p-6">
-          <div className="whitespace-pre-line text-foreground leading-relaxed text-sm sm:text-base">{plan}</div>
+          <div className="whitespace-pre-line text-foreground leading-relaxed text-sm sm:text-base">
+            {plan}
+          </div>
         </div>
       )}
 
@@ -228,72 +248,77 @@ const LearningPlanDisplay: React.FC<LearningPlanDisplayProps> = ({ plan }) => {
       {sections.length > 0 && (
         <div className="space-y-3 sm:space-y-4">
           {sections.map((section, index) => (
-          <div
-            key={index}
-            ref={(el) => { sectionRefs.current[section.title] = el; }}
-            className={`border rounded-xl shadow-sm transition-all duration-200 hover:shadow-md ${getSectionColor(section.type)}`}
-          >
-            <button
-              onClick={() => toggleSection(section.title)}
-              className="w-full p-3 sm:p-4 flex items-center justify-between text-left hover:bg-muted transition-colors rounded-xl"
+            <div
+              key={index}
+              ref={(el) => {
+                sectionRefs.current[section.title] = el;
+              }}
+              className={`border rounded-xl shadow-sm transition-all duration-200 hover:shadow-md ${getSectionColor(section.type)}`}
             >
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-1 sm:p-1.5 bg-muted rounded-lg">
-                  {getSectionIcon(section.type)}
+              <button
+                onClick={() => toggleSection(section.title)}
+                className="w-full p-3 sm:p-4 flex items-center justify-between text-left hover:bg-muted transition-colors rounded-xl"
+              >
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1 sm:p-1.5 bg-muted rounded-lg">
+                    {getSectionIcon(section.type)}
+                  </div>
+                  <h3 className="font-semibold text-base sm:text-lg text-white">{section.title}</h3>
                 </div>
-                <h3 className="font-semibold text-base sm:text-lg text-white">{section.title}</h3>
-              </div>
-              {expandedSection === section.title ? (
-                <ChevronDownIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
-              ) : (
-                <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
-              )}
-            </button>
-            
-            {expandedSection === section.title && (
-              <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-border/50">
-                <div className="pt-3 sm:pt-4 space-y-2 sm:space-y-3">
-                  {section.content.map((item, itemIndex) => (
-                    <div key={itemIndex} className="text-foreground leading-relaxed text-sm sm:text-base">
-                      {item.startsWith('*Resource*:') || item.startsWith('*Tip*:') ? (
-                        <div className="bg-muted rounded-lg p-2 sm:p-3 border border-border/50 shadow-sm">
-                          <div className="flex items-center gap-2 mb-1">
-                            {item.startsWith('*Resource*:') ? (
-                              <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
-                            ) : (
-                              <LightBulbIcon className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
-                            )}
-                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">
-                              {item.startsWith('*Resource*:') ? 'Resource' : 'Tip'}:
+                {expandedSection === section.title ? (
+                  <ChevronDownIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                ) : (
+                  <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                )}
+              </button>
+
+              {expandedSection === section.title && (
+                <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-border/50">
+                  <div className="pt-3 sm:pt-4 space-y-2 sm:space-y-3">
+                    {section.content.map((item, itemIndex) => (
+                      <div
+                        key={itemIndex}
+                        className="text-foreground leading-relaxed text-sm sm:text-base"
+                      >
+                        {item.startsWith('*Resource*:') || item.startsWith('*Tip*:') ? (
+                          <div className="bg-muted rounded-lg p-2 sm:p-3 border border-border/50 shadow-sm">
+                            <div className="flex items-center gap-2 mb-1">
+                              {item.startsWith('*Resource*:') ? (
+                                <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
+                              ) : (
+                                <LightBulbIcon className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400" />
+                              )}
+                              <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+                                {item.startsWith('*Resource*:') ? 'Resource' : 'Tip'}:
+                              </span>
+                            </div>
+                            <span className="text-foreground">
+                              {item.replace(/^\*(Resource|Tip)\*:\s*/, '')}
                             </span>
                           </div>
-                          <span className="text-foreground">{item.replace(/^\*(Resource|Tip)\*:\s*/, '')}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-2 sm:gap-3">
-                          {item.match(/^\d+\./) ? (
-                            <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-yellow-accent/20 text-yellow-accent text-xs sm:text-sm font-medium rounded-full flex items-center justify-center mt-0.5">
-                              {item.match(/^\d+\./)?.[0]?.replace('.', '')}
-                            </span>
-                          ) : item.startsWith('-') || item.startsWith('*') ? (
-                            <span className="flex-shrink-0 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-accent rounded-full mt-1.5 sm:mt-2" />
-                          ) : null}
-                          <span className="flex-1">{item.replace(/^[\d\-*\.\s]+/, '')}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        ) : (
+                          <div className="flex items-start gap-2 sm:gap-3">
+                            {item.match(/^\d+\./) ? (
+                              <span className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-yellow-accent/20 text-yellow-accent text-xs sm:text-sm font-medium rounded-full flex items-center justify-center mt-0.5">
+                                {item.match(/^\d+\./)?.[0]?.replace('.', '')}
+                              </span>
+                            ) : item.startsWith('-') || item.startsWith('*') ? (
+                              <span className="flex-shrink-0 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-accent rounded-full mt-1.5 sm:mt-2" />
+                            ) : null}
+                            <span className="flex-1">{item.replace(/^[\d\-*\.\s]+/, '')}</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          ))}
         </div>
       )}
-
-
     </div>
   );
 };
 
-export default LearningPlanDisplay; 
+export default LearningPlanDisplay;

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
@@ -41,13 +41,13 @@ const alertStyles = {
   },
 };
 
-export default function Alert({ 
-  type, 
-  message, 
-  onDismiss, 
-  autoDismiss = true, 
+export default function Alert({
+  type,
+  message,
+  onDismiss,
+  autoDismiss = true,
   dismissDelay = 4000,
-  className = ''
+  className = '',
 }: AlertProps) {
   const [isVisible, setIsVisible] = useState(true);
   const styles = alertStyles[type];
@@ -76,13 +76,17 @@ export default function Alert({
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 ${className}`}>
-      <div className={`
+    <div
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 ${className}`}
+    >
+      <div
+        className={`
         ${styles.bg} ${styles.border} ${styles.text}
         rounded-lg p-4 shadow-lg border backdrop-blur-sm
         transition-all duration-300 ease-in-out
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}
-      `}>
+      `}
+      >
         <div className="flex items-start gap-3">
           <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
@@ -99,4 +103,4 @@ export default function Alert({
       </div>
     </div>
   );
-} 
+}

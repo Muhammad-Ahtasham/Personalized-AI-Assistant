@@ -9,10 +9,7 @@ export async function GET() {
     const { userId } = await auth();
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Find the user by Clerk ID
@@ -31,10 +28,7 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const hasFaceAuth = user.faceEmbeddings.length > 0;
@@ -45,12 +39,8 @@ export async function GET() {
       faceAuthCount: user.faceEmbeddings.length,
       lastSetupDate: hasFaceAuth ? user.faceEmbeddings[0].createdAt : null,
     });
-
   } catch (error) {
     console.error('Check face auth status error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

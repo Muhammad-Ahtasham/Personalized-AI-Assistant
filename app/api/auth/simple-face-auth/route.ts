@@ -6,13 +6,10 @@ const prisma = new PrismaClient();
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json();
-    console.log("Simple face auth for:", email);
+    console.log('Simple face auth for:', email);
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     // Find user in database
@@ -29,17 +26,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    console.log("User found:", {
+    console.log('User found:', {
       id: user.id,
       email: user.email,
       hasClerkId: !!user.clerkId,
-      passwordType: user.password ? (user.password.startsWith('$2b$') ? 'hashed' : 'plain') : 'none'
+      passwordType: user.password
+        ? user.password.startsWith('$2b$')
+          ? 'hashed'
+          : 'plain'
+        : 'none',
     });
 
     // For now, let's just return the user info and let the frontend handle Clerk
@@ -54,12 +52,8 @@ export async function POST(request: NextRequest) {
         needsClerkSetup: !user.clerkId,
       },
     });
-
   } catch (error) {
     console.error('Simple face auth error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

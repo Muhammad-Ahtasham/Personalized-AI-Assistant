@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest) {
     if (imageUrl) {
       const res = await fetch(imageUrl);
       const arrayBuffer = await res.arrayBuffer();
-      const blob = new Blob([arrayBuffer], { type: "image/jpeg" });
+      const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
 
       await clerk.users.updateUserProfileImage(userId, { file: blob });
     }
@@ -70,8 +70,7 @@ export async function PUT(request: NextRequest) {
         lastName: updatedUser.lastName,
       },
     });
-
   } catch (error) {
     return handleApiError(error, 'Update user profile');
   }
-} 
+}

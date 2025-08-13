@@ -1,7 +1,7 @@
 // File: /app/api/face/get-embedding-by-email/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const { email } = await request.json();
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !user.faceEmbeddings) {
-      return NextResponse.json({ error: "Face embedding not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Face embedding not found' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       embedding: user.faceEmbeddings,
     });
   } catch (error) {
-    console.error("Get embedding error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error('Get embedding error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -8,12 +8,9 @@ export async function POST() {
   try {
     // Check authentication
     const { userId } = await auth();
-    
+
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     // Get user from database using Clerk ID
@@ -22,10 +19,7 @@ export async function POST() {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Delete failed plans
@@ -47,12 +41,8 @@ export async function POST() {
       message: `Cleaned up ${failedPlans.count} failed learning plans`,
       deletedCount: failedPlans.count,
     });
-
   } catch (error) {
     console.error('Error cleaning up failed plans:', error);
-    return NextResponse.json(
-      { error: 'Failed to clean up failed plans' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to clean up failed plans' }, { status: 500 });
   }
-} 
+}

@@ -1,6 +1,11 @@
-"use client";
-import React from "react";
-import { AcademicCapIcon, CheckCircleIcon, XCircleIcon, LightBulbIcon } from "@heroicons/react/24/outline";
+'use client';
+import React from 'react';
+import {
+  AcademicCapIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  LightBulbIcon,
+} from '@heroicons/react/24/outline';
 
 interface QuizQuestion {
   question: string;
@@ -38,9 +43,9 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
   };
 
   const getScoreColor = (percentage: number) => {
-    if (percentage >= 80) return "text-green-600";
-    if (percentage >= 60) return "text-yellow-600";
-    return "text-red-600";
+    if (percentage >= 80) return 'text-green-600';
+    if (percentage >= 60) return 'text-yellow-600';
+    return 'text-red-600';
   };
 
   return (
@@ -55,7 +60,9 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-muted-foreground">Score:</span>
-              <span className={`text-base sm:text-lg font-bold ${getScoreColor(getScorePercentage())}`}>
+              <span
+                className={`text-base sm:text-lg font-bold ${getScoreColor(getScorePercentage())}`}
+              >
                 {getScore()}/{quiz.length} ({getScorePercentage()}%)
               </span>
             </div>
@@ -70,9 +77,18 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
       </div>
 
       {/* Quiz Questions */}
-      <form onSubmit={e => { e.preventDefault(); onSubmitQuiz(); }} className="space-y-4 sm:space-y-6">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmitQuiz();
+        }}
+        className="space-y-4 sm:space-y-6"
+      >
         {quiz.map((question, qIdx) => (
-          <div key={qIdx} className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+          <div
+            key={qIdx}
+            className="bg-card border border-border rounded-xl shadow-sm overflow-hidden"
+          >
             {/* Question Header */}
             <div className="p-4 sm:p-6 border-b border-border/50">
               <div className="flex items-start gap-2 sm:gap-3">
@@ -93,13 +109,13 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
                 const isSelected = userAnswers[qIdx] === choice;
                 const isCorrect = choice === question.answer;
                 const showFeedback = quizFeedback.length > 0;
-                
-                let choiceStyle = "border-border hover:bg-muted/50";
+
+                let choiceStyle = 'border-border hover:bg-muted/50';
                 if (showFeedback) {
                   if (isCorrect) {
-                    choiceStyle = "border-green-200 bg-green-50/50";
+                    choiceStyle = 'border-green-200 bg-green-50/50';
                   } else if (isSelected && !isCorrect) {
-                    choiceStyle = "border-red-200 bg-red-50/50";
+                    choiceStyle = 'border-red-200 bg-red-50/50';
                   }
                 }
 
@@ -119,7 +135,9 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
                       disabled={showFeedback}
                       className="text-primary focus:ring-primary"
                     />
-                    <span className="flex-1 text-foreground leading-relaxed text-sm sm:text-base">{choice}</span>
+                    <span className="flex-1 text-foreground leading-relaxed text-sm sm:text-base">
+                      {choice}
+                    </span>
                     {showFeedback && isCorrect && (
                       <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                     )}
@@ -136,22 +154,23 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
               <div className="px-4 sm:px-6 pb-4 sm:pb-6">
                 <div className="bg-muted/30 border border-border/50 rounded-lg p-3 sm:p-4">
                   <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                    {quizFeedback[qIdx].startsWith("✅") ? (
+                    {quizFeedback[qIdx].startsWith('✅') ? (
                       <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     ) : (
                       <XCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
                     )}
                     <span className="font-medium text-sm">
-                      {quizFeedback[qIdx].startsWith("✅") ? "Correct!" : "Incorrect"}
+                      {quizFeedback[qIdx].startsWith('✅') ? 'Correct!' : 'Incorrect'}
                     </span>
                   </div>
-                  
-                  {quizFeedback[qIdx].startsWith("❌") && (
+
+                  {quizFeedback[qIdx].startsWith('❌') && (
                     <div className="space-y-2 sm:space-y-3">
                       <p className="text-sm text-muted-foreground">
-                        Correct answer: <span className="font-medium text-foreground">{question.answer}</span>
+                        Correct answer:{' '}
+                        <span className="font-medium text-foreground">{question.answer}</span>
                       </p>
-                      
+
                       <button
                         type="button"
                         className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors text-sm disabled:opacity-50"
@@ -175,7 +194,7 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
                           </>
                         )}
                       </button>
-                      
+
                       {explanations[qIdx] && (
                         <div className="bg-accent/10 border border-accent/20 rounded-lg p-3 sm:p-4">
                           <div className="flex items-center gap-2 mb-2">
@@ -212,4 +231,4 @@ const QuizDisplay: React.FC<QuizDisplayProps> = ({
   );
 };
 
-export default QuizDisplay; 
+export default QuizDisplay;

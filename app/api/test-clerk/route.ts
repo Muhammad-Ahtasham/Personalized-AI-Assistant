@@ -17,12 +17,12 @@ export async function GET() {
   } catch (error) {
     console.error('Clerk test error:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Clerk client error',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
   }
-} 
+}

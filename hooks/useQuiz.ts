@@ -48,7 +48,7 @@ export const useQuiz = () => {
       userAnswers: [],
       quizFeedback: [],
       explanations: Array(quiz.length).fill(null),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
     setQuizData(quizData);
     localStorage.setItem('studymate_current_quiz', JSON.stringify(quizData));
@@ -63,11 +63,11 @@ export const useQuiz = () => {
     if (quizData) {
       const newUserAnswers = [...quizData.userAnswers];
       newUserAnswers[questionIndex] = answer;
-      
+
       const updatedQuizData = {
         ...quizData,
         userAnswers: newUserAnswers,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       setQuizData(updatedQuizData);
       localStorage.setItem('studymate_current_quiz', JSON.stringify(updatedQuizData));
@@ -79,7 +79,7 @@ export const useQuiz = () => {
       const updatedQuizData = {
         ...quizData,
         quizFeedback: feedback,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       setQuizData(updatedQuizData);
       localStorage.setItem('studymate_current_quiz', JSON.stringify(updatedQuizData));
@@ -90,11 +90,11 @@ export const useQuiz = () => {
     if (quizData) {
       const newExplanations = [...quizData.explanations];
       newExplanations[questionIndex] = explanation;
-      
+
       const updatedQuizData = {
         ...quizData,
         explanations: newExplanations,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       setQuizData(updatedQuizData);
       localStorage.setItem('studymate_current_quiz', JSON.stringify(updatedQuizData));
@@ -107,7 +107,7 @@ export const useQuiz = () => {
     const diff = now - quizData.timestamp;
     const minutes = Math.floor(diff / (1000 * 60));
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    
+
     if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
     if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
@@ -125,6 +125,6 @@ export const useQuiz = () => {
     setLoading,
     explanationLoading,
     setExplanationLoading,
-    getTimeSinceCreated
+    getTimeSinceCreated,
   };
-}; 
+};

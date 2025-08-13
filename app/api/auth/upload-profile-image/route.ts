@@ -28,17 +28,15 @@ export async function POST(request: NextRequest) {
     const uploadResult = await cloudinary.uploader.upload(imageData, {
       folder: `users/${userId}`,
       overwrite: true,
-      resource_type: 'image'
+      resource_type: 'image',
     });
-
 
     return NextResponse.json({
       success: true,
       imageUrl: uploadResult.secure_url,
-      message: 'Image uploaded successfully'
+      message: 'Image uploaded successfully',
     });
-
   } catch (error) {
     return handleApiError(error, 'Upload profile image');
   }
-} 
+}
