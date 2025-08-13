@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import ProfileEditModal from "@/components/ProfileEditModal";
 import ChangePasswordModal from '@/components/ChangePasswordModal';
+import SetupFaceAuthModal from '@/components/SetupFaceAuthModal';
 
 interface UserStats {
   totalPlans: number;
@@ -27,6 +28,12 @@ interface UserStats {
   totalNotes: number;
   averageQuizScore: number;
   lastActive: string;
+}
+
+interface FaceAuthStatus {
+  hasFaceAuth: boolean;
+  faceAuthCount: number;
+  lastSetupDate: string | null;
 }
 
 interface LearningPlan {
@@ -65,6 +72,8 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'settings'>('overview');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isSetupFaceAuthModalOpen, setIsSetupFaceAuthModalOpen] = useState(false);
+  const [faceAuthStatus, setFaceAuthStatus] = useState<FaceAuthStatus | null>(null);
 
   const router = useRouter();
 
@@ -78,6 +87,18 @@ export default function ProfilePage() {
       // Force a re-render by updating a state
       setActiveTab(activeTab);
     }, 1000);
+  };
+
+  const fetchFaceAuthStatus = async () => {
+    try {
+      const response = await fetch("/api/auth/check-face-auth-status");
+      const data = await response.json();
+      if (response.ok) {
+        setFaceAuthStatus(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch face auth status:", err);
+    }
   };
 
   useEffect(() => {
@@ -146,6 +167,9 @@ export default function ProfilePage() {
         setRecentPlans(plans.slice(0, 3));
         setRecentQuizzes(quizzes.slice(0, 3));
         setRecentNotes(notes.slice(0, 3));
+
+        // Fetch face authentication status
+        await fetchFaceAuthStatus();
 
       } catch (err) {
         const error = err as Error;
@@ -457,7 +481,13 @@ export default function ProfilePage() {
                         <Camera className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-white">Face Authentication</span>
                       </div>
-                      <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">Available</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        faceAuthStatus?.hasFaceAuth 
+                          ? 'bg-green-500/20 text-green-400' 
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {faceAuthStatus?.hasFaceAuth ? 'Active' : 'Available'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -493,13 +523,25 @@ export default function ProfilePage() {
                         <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
                       </div>
                     </button>
-                    <button className="group w-full text-left p-3 bg-secondary hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent rounded-lg transition-colors border border-border hover:border-yellow-accent/20">
+                    <button 
+                      onClick={() => setIsSetupFaceAuthModalOpen(true)}
+                      disabled={faceAuthStatus?.hasFaceAuth}
+                      className={`group w-full text-left p-3 bg-secondary transition-colors border border-border ${
+                        faceAuthStatus?.hasFaceAuth
+                          ? 'opacity-50 cursor-not-allowed'
+                          : 'hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent hover:border-yellow-accent/20'
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Camera className="w-4 h-4 text-muted-foreground group-hover:text-yellow-accent" />
-                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">Setup Face Authentication</span>
+                          <span className="text-sm font-medium text-foreground group-hover:text-yellow-accent">
+                            {faceAuthStatus?.hasFaceAuth ? 'Face Authentication Active' : 'Setup Face Authentication'}
+                          </span>
                         </div>
-                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
+                        <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">
+                          {faceAuthStatus?.hasFaceAuth ? '✓' : '→'}
+                        </span>
                       </div>
                     </button>
                   </div>
@@ -519,6 +561,14 @@ export default function ProfilePage() {
       <ChangePasswordModal
         isOpen={isChangePasswordModalOpen}
         onClose={() => setIsChangePasswordModalOpen(false)}
+      />
+      <SetupFaceAuthModal
+        isOpen={isSetupFaceAuthModalOpen}
+        onClose={() => setIsSetupFaceAuthModalOpen(false)}
+        onSuccess={() => {
+          handleProfileUpdate();
+          fetchFaceAuthStatus();
+        }}
       />
     </div>
   );
