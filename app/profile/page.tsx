@@ -245,8 +245,8 @@ export default function ProfilePage() {
               <button
                 onClick={() => setActiveTab('overview')}
                 className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'overview'
-                    ? 'border-yellow-accent text-yellow-accent'
-                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                  ? 'border-yellow-accent text-yellow-accent'
+                  : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
                   }`}
               >
                 Overview
@@ -254,8 +254,8 @@ export default function ProfilePage() {
               <button
                 onClick={() => setActiveTab('activity')}
                 className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'activity'
-                    ? 'border-yellow-accent text-yellow-accent'
-                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                  ? 'border-yellow-accent text-yellow-accent'
+                  : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
                   }`}
               >
                 Recent Activity
@@ -263,8 +263,8 @@ export default function ProfilePage() {
               <button
                 onClick={() => setActiveTab('settings')}
                 className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'settings'
-                    ? 'border-yellow-accent text-yellow-accent'
-                    : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
+                  ? 'border-yellow-accent text-yellow-accent'
+                  : 'border-transparent text-muted-foreground hover:text-white hover:border-border'
                   }`}
               >
                 Settings
@@ -289,7 +289,7 @@ export default function ProfilePage() {
         {/* Content Area */}
         <div className="w-full">
           {/* Overview Tab */}
-          {activeTab === 'overview' && stats && (
+          {activeTab === 'overview' && stats && loading === false && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
               <div className="card-dark">
                 <div className="flex items-center">
@@ -342,7 +342,7 @@ export default function ProfilePage() {
           )}
 
           {/* Activity Tab */}
-          {activeTab === 'activity' && (
+          {activeTab === 'activity' && loading === false && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Learning Plans */}
               <div className="card-dark">
@@ -416,7 +416,7 @@ export default function ProfilePage() {
           )}
 
           {/* Settings Tab */}
-          {activeTab === 'settings' && (
+          {activeTab === 'settings' && loading === false && (
             <div className="card-dark">
               <h3 className="text-lg font-semibold text-white mb-6">Account Settings</h3>
 
@@ -481,11 +481,10 @@ export default function ProfilePage() {
                         <Camera className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-white">Face Authentication</span>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        faceAuthStatus?.hasFaceAuth 
-                          ? 'bg-green-500/20 text-green-400' 
-                          : 'bg-blue-500/20 text-blue-400'
-                      }`}>
+                      <span className={`text-xs px-2 py-1 rounded-full ${faceAuthStatus?.hasFaceAuth
+                        ? 'bg-green-500/20 text-green-400'
+                        : 'bg-blue-500/20 text-blue-400'
+                        }`}>
                         {faceAuthStatus?.hasFaceAuth ? 'Active' : 'Available'}
                       </span>
                     </div>
@@ -523,14 +522,13 @@ export default function ProfilePage() {
                         <span className="text-xs text-muted-foreground group-hover:text-yellow-accent">→</span>
                       </div>
                     </button>
-                    <button 
+                    <button
                       onClick={() => setIsSetupFaceAuthModalOpen(true)}
                       disabled={faceAuthStatus?.hasFaceAuth}
-                      className={`group w-full text-left p-3 bg-secondary transition-colors border border-border ${
-                        faceAuthStatus?.hasFaceAuth
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent hover:border-yellow-accent/20'
-                      }`}
+                      className={`group w-full text-left p-3 bg-secondary transition-colors border border-border ${faceAuthStatus?.hasFaceAuth
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-yellow-accent/20 hover:text-yellow-accent active:bg-yellow-accent/20 active:text-yellow-accent hover:border-yellow-accent/20'
+                        }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

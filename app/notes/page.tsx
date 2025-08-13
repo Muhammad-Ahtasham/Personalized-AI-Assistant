@@ -325,7 +325,7 @@ export default function NotesPage() {
         <div className="lg:col-span-1 space-y-3 sm:space-y-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground sm:w-[18px] sm:h-[18px]" size={16} />
             <input
               type="text"
               placeholder="Search notes..."

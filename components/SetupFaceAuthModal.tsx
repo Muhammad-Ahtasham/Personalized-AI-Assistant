@@ -21,12 +21,14 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const { showSuccess, showError } = useAlertContext();
 
-  const handleFaceDetected = (embedding: number[]) => {
+  const handleFaceDetected = async (embedding: number[]) => {
     setFaceEmbedding(embedding);
     setIsLoading(true);
-    
+
+    console.log("Face Embeddings ", faceEmbedding ? " + " : " -")
+
     // Call the API to set up face authentication
-    fetch("/api/auth/setup-face-authentication", {
+    await fetch("/api/auth/setup-face-authentication", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ faceEmbedding: embedding }),
@@ -39,11 +41,12 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
           if (onSuccess) {
             onSuccess();
           }
-        } else {
-          setError(data.error || "Failed to set up face authentication");
-          setStep('error');
-          showError(data.error || "Failed to set up face authentication");
         }
+        // } else {
+        //   setError(data.error || "Failed to set up face authentication");
+        //   setStep('error');
+        //   showError(data.error || "Failed to set up face authentication");
+        // }
       })
       .catch((err) => {
         const errorMessage = err instanceof Error ? err.message : "Failed to set up face authentication";
@@ -98,10 +101,10 @@ const SetupFaceAuthModal: React.FC<SetupFaceAuthModalProps> = ({
         {step === 'capture' && (
           <div className="space-y-4">
             <p className="text-gray-300 text-sm">
-              Position your face in front of the camera to set up face authentication. 
+              Position your face in front of the camera to set up face authentication.
               This will allow you to sign in using your face in the future.
             </p>
-            
+
             <FaceAuth
               mode="register"
               onFaceDetected={handleFaceDetected}

@@ -28,7 +28,7 @@ function validateEmbedding(embedding: number[]): { valid: boolean; message?: str
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // const { faceEmbedding } = await request.json();
     const body = await request.json();
     const { faceEmbedding } = body;
 
@@ -90,6 +91,8 @@ export async function POST(request: NextRequest) {
         embedding: faceEmbedding,
       },
     });
+
+    console.log("Face Embedding", faceEmbeddingRecord ? "Created" : "Not Created")
 
     return NextResponse.json({
       success: true,
