@@ -2,7 +2,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
-import { Trash2, X } from 'lucide-react';
+// import { Trash2, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import LearningPlanDisplay from '@/components/LearningPlanDisplay';
 import QuizDisplay from '@/components/QuizDisplay';
 import { useAlertContext } from '@/components/AlertProvider';
@@ -78,6 +79,7 @@ function HomePageContent() {
 
     try {
       console.log('Sending request to generate plan for topic:', topic);
+      console.log(getPlanTimeSinceCreated, getQuizTimeSinceCreated, handleClearAll);
       const res = await fetch('/api/generate-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
