@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
       }
 
       console.log('Plan validation passed, returning plan');
-      return NextResponse.json({ plan, fromCache: true });
+      return NextResponse.json({ plan, fromCache: false });
     } catch (fetchError) {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {

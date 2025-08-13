@@ -20,7 +20,6 @@ function HomePageContent() {
   const searchParams = useSearchParams();
   const { showSuccess, showError } = useAlertContext();
   const [topic, setTopic] = useState('');
-
   // Use custom hooks for plan and quiz management
   const {
     planData,
@@ -166,20 +165,20 @@ function HomePageContent() {
       showSuccess('Quiz generated successfully!');
 
       // Save quiz result if user is signed in
-      if (user) {
-        const saveRes = await fetch('/api/save-quiz-result', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            topic,
-            questions: data.quiz,
-            answers: [],
-            score: 0,
-            clerkId: user.id,
-          }),
-        });
-        if (saveRes.ok) showSuccess('Quiz saved to your dashboard!');
-      }
+      // if (user) {
+      //   const saveRes = await fetch('/api/save-quiz-result', {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({
+      //       topic,
+      //       questions: data.quiz,
+      //       answers: [],
+      //       score: 0,
+      //       clerkId: user.id,
+      //     }),
+      //   });
+      //   if (saveRes.ok) showSuccess('Quiz saved to your dashboard!');
+      // }
     } catch (err) {
       const error = err as Error;
       console.error('Error generating quiz:', error);
@@ -366,7 +365,7 @@ function HomePageContent() {
           </div>
 
           {/* Clear All Button - Only show if there's content to clear */}
-          {(planData || quizData) && (
+          {/* {(planData || quizData) && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 p-3 bg-yellow-accent/10 border border-yellow-accent/20 rounded-lg">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                 <div className="flex items-center gap-2">
@@ -391,7 +390,7 @@ function HomePageContent() {
                 Clear All
               </button>
             </div>
-          )}
+          )} */}
 
           {planData && (
             <div className="relative mb-6 sm:mb-8">
