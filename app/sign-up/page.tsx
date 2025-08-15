@@ -16,6 +16,7 @@ export default function SignUpPage() {
   const [verificationCode, setVerificationCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   console.log('User from Sign-up Page --> ', isSignedIn);
 
@@ -271,7 +272,7 @@ export default function SignUpPage() {
                   placeholder="john@example.com"
                 />
               </div>
-              <div>
+              {/* <div>
                 <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
                   Password
                 </label>
@@ -284,6 +285,30 @@ export default function SignUpPage() {
                   className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-border rounded-lg bg-background text-white focus:outline-none focus:ring-2 focus:ring-yellow-accent focus:border-transparent text-sm sm:text-base"
                   placeholder="••••••••"
                 />
+              </div> */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full pr-10 px-3 sm:px-4 py-2 sm:py-3 border border-border rounded-lg bg-background text-white focus:outline-none focus:ring-2 focus:ring-yellow-accent focus:border-transparent text-sm sm:text-base"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-3 flex items-center text-yellow-accent hover:text-yellow-500 text-xl"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? '🙈' : '👁️'}
+                  </button>
+                </div>
               </div>
               <button
                 type="submit"

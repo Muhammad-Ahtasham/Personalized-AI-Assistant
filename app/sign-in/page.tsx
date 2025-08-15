@@ -14,6 +14,7 @@ export default function SignInPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   console.log('User from Sign-in Page --> ', user);
 
@@ -213,19 +214,51 @@ export default function SignInPage() {
               placeholder="Enter your email"
             />
           </div>
-          <div>
+          {/* <div>
             <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
               Password
             </label>
             <input
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-border rounded-lg bg-background text-white focus:outline-none focus:ring-2 focus:ring-yellow-accent focus:border-transparent text-sm sm:text-base"
               placeholder="Enter your password"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="relative inset-y-0 flex items-center text-sm text-yellow-accent hover:text-yellow-500"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? '🙈' : '👁️'} showPassword
+            </button>
+          </div> */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full pr-10 px-3 sm:px-4 py-2 sm:py-3 border border-border rounded-lg bg-background text-white focus:outline-none focus:ring-2 focus:ring-yellow-accent focus:border-transparent text-sm sm:text-base"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-3 flex items-center text-xl text-yellow-accent hover:text-yellow-500"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
           <div className="flex items-center justify-between">
             <button
