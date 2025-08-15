@@ -79,7 +79,7 @@ function HomePageContent() {
 
     try {
       console.log('Sending request to generate plan for topic:', topic);
-      console.log(getPlanTimeSinceCreated, getQuizTimeSinceCreated, handleClearAll);
+      // console.log(getPlanTimeSinceCreated, getQuizTimeSinceCreated, handleClearAll);
       const res = await fetch('/api/generate-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -93,6 +93,7 @@ function HomePageContent() {
       if (!res.ok) {
         console.error('API error:', data);
         throw new Error(data.error || 'Failed to generate plan');
+        console.log(getPlanTimeSinceCreated, getQuizTimeSinceCreated, handleClearAll);
       }
 
       // Validate the generated plan
@@ -163,6 +164,7 @@ function HomePageContent() {
         throw new Error('No quiz questions were generated. Please try again.');
       }
 
+      clearPlan();
       setQuiz(topic, data.quiz);
       showSuccess('Quiz generated successfully!');
 
